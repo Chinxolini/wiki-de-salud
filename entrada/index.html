@@ -50,6 +50,15 @@
   .poder p{margin:0 0 9px}
   .check{display:flex;gap:11px;align-items:flex-start;margin-top:14px;font-size:.9rem}
   .check input{margin-top:4px;flex:none}
+  .via{border:1px solid var(--line);border-radius:10px;padding:14px}
+  .via:has(input[type=checkbox]:checked){border-color:var(--accent);background:var(--accent-soft)}
+  .drop{border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;
+        cursor:pointer;display:grid;gap:5px;background:var(--bg)}
+  .drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+  .arch{display:flex;justify-content:space-between;gap:10px;align-items:center;
+        padding:8px 11px;border:1px solid var(--line);border-radius:7px;margin-top:7px;
+        font-size:.85rem;background:var(--bg)}
+  .arch .x{color:var(--muted);cursor:pointer;font-weight:700;flex:none}
   .aviso{background:var(--warn-soft);border-left:3px solid var(--warn);border-radius:0 8px 8px 0;
          padding:13px 15px;font-size:.85rem;line-height:1.5}
   .aviso strong{color:var(--warn)}
@@ -105,20 +114,59 @@
 
   <!-- 2 -->
   <div class="card">
-    <div class="step"><b>2</b> Dónde te has atendido</div>
-    <p class="hint" style="margin:0 0 12px">
-      Marca solo los centros donde efectivamente te atendiste. No mandamos solicitudes a ciegas:
-      saturaría a los prestadores y no serviría de nada.
+    <div class="step"><b>2</b> Qué quieres hacer</div>
+    <p class="hint" style="margin:0 0 14px">
+      Las dos vías llegan al mismo lugar: tu expediente ordenado, con cada dato enlazado a su
+      documento original. Puedes usar las dos a la vez.
     </p>
-    <div id="prestadores"></div>
-    <label>Otro centro <span class="hint">(opcional)</span></label>
-    <input type="text" name="otro" placeholder="Nombre del centro">
-    <label>Período aproximado</label>
-    <input type="text" name="periodo" placeholder="Ej.: 2020 a hoy" value="Últimos 5 años">
+
+    <div class="via">
+      <label class="check" style="margin:0">
+        <input type="checkbox" name="via" value="solicitar" checked id="viaSolicitar">
+        <span><b>A. No tengo mis documentos — consíguelos por mí</b>
+        <span class="hint" style="display:block">Pedimos tu ficha a cada centro por ti, con tu
+        poder firmado. Demora lo que demore cada prestador: días o semanas.</span></span>
+      </label>
+
+      <div id="bloqueSolicitar" style="margin-top:14px">
+        <p class="hint" style="margin:0 0 10px">
+          Marca solo los centros donde efectivamente te atendiste. No mandamos solicitudes a ciegas:
+          saturaría a los prestadores y no serviría de nada.
+        </p>
+        <div id="prestadores"></div>
+        <label>Otro centro <span class="hint">(opcional)</span></label>
+        <input type="text" name="otro" placeholder="Nombre del centro">
+        <label>Período aproximado</label>
+        <input type="text" name="periodo" placeholder="Ej.: 2020 a hoy" value="Últimos 5 años">
+      </div>
+    </div>
+
+    <div class="via" style="margin-top:14px">
+      <label class="check" style="margin:0">
+        <input type="checkbox" name="via" value="cargar" id="viaCargar">
+        <span><b>B. Ya tengo documentos — ordénalos ahora</b>
+        <span class="hint" style="display:block">Si ya tienes exámenes, epicrisis o tu ficha en PDF
+        o foto, súbelos y los procesamos de inmediato. Sin esperar a nadie.</span></span>
+      </label>
+
+      <div id="bloqueCargar" style="margin-top:14px;display:none">
+        <div class="drop" id="drop">
+          <b>Arrastra tus archivos aquí</b>
+          <span class="hint">PDF, JPG o PNG. También sirven los escaneos y las fotos del papel.</span>
+          <input type="file" id="archivos" name="archivos" multiple
+                 accept=".pdf,.jpg,.jpeg,.png" style="display:none">
+        </div>
+        <div id="listaArchivos"></div>
+        <p class="hint" style="margin:10px 0 0">
+          Los documentos se procesan y se te devuelven en el paquete. No los conservamos: se borran
+          igual que todo lo demás, con la misma constancia.
+        </p>
+      </div>
+    </div>
   </div>
 
   <!-- 3 -->
-  <div class="card">
+  <div class="card" id="cardPoder">
     <div class="step"><b>3</b> Tu autorización</div>
     <p class="hint" style="margin:0 0 12px">
       Para pedir tu ficha en tu nombre la ley exige un poder simple, firmado ante notario
@@ -162,6 +210,21 @@
       Al enviar te llega un código de un solo uso a tu correo. Validarlo es lo que convierte esto en
       firma electrónica: acredita que quien firma controla esa casilla.
     </p>
+  </div>
+
+  <!-- 3b: solo vía B -->
+  <div class="card" id="cardSoloCarga" style="display:none">
+    <div class="step"><b>3</b> Tu autorización</div>
+    <p class="hint" style="margin:0 0 6px">
+      Como solo vas a subir documentos que ya tienes, <b>no hace falta ningún poder</b>: no vamos a
+      pedirle nada a nadie en tu nombre. Lo único que necesitamos es tu permiso para procesar los
+      archivos que subas.
+    </p>
+    <label class="check">
+      <input type="checkbox" name="consentimiento_carga">
+      <span>Autorizo a procesar los documentos que suba, <b>con la única finalidad</b> de ordenarlos
+      y devolvérmelos, y entiendo que se suprimen al terminar.</span>
+    </label>
   </div>
 
   <!-- 4 -->
@@ -235,11 +298,71 @@ document.getElementById("prestadores").innerHTML = PRESTADORES.map(p=>`
     </span>
   </label>`).join("");
 
+// --- Las dos vías de entrada -------------------------------------------------
+// A (solicitar) es el diferenciador: conseguimos la ficha por mandato.
+// B (cargar) da valor inmediato a quien ya tiene sus papeles y no quiere esperar.
+// Las dos desembocan en el mismo pipeline de extraccion y entrega.
+const vA = document.getElementById("viaSolicitar");
+const vB = document.getElementById("viaCargar");
+const cardPoder = document.getElementById("cardPoder");
+const cardSoloCarga = document.getElementById("cardSoloCarga");
+const inputArchivos = document.getElementById("archivos");
+const drop = document.getElementById("drop");
+let archivos = [];
+
+function sincronizar(){
+  document.getElementById("bloqueSolicitar").style.display = vA.checked ? "" : "none";
+  document.getElementById("bloqueCargar").style.display    = vB.checked ? "" : "none";
+  // El poder solo se exige si vamos a actuar en nombre de la persona. Si solo
+  // sube sus propios documentos, pedirle un mandato seria pedirle que autorice
+  // algo que no va a ocurrir.
+  const soloCarga = vB.checked && !vA.checked;
+  cardPoder.style.display = soloCarga ? "none" : "";
+  cardSoloCarga.style.display = soloCarga ? "" : "none";
+  cardPoder.querySelectorAll("input[type=checkbox]").forEach(c => c.required = !soloCarga);
+  document.querySelector("[name=consentimiento_carga]").required = soloCarga;
+}
+vA.addEventListener("change", sincronizar);
+vB.addEventListener("change", sincronizar);
+sincronizar();
+
+function pintarArchivos(){
+  document.getElementById("listaArchivos").innerHTML = archivos.map((a,i)=>`
+    <div class="arch"><span>${a.name} <span class="hint">(${(a.size/1024).toFixed(0)} KB)</span></span>
+    <span class="x" data-i="${i}">quitar</span></div>`).join("");
+  document.querySelectorAll(".arch .x").forEach(x=>x.onclick=()=>{
+    archivos.splice(+x.dataset.i,1); pintarArchivos();
+  });
+}
+function agregar(lista){
+  archivos = archivos.concat(Array.from(lista));
+  pintarArchivos();
+}
+drop.addEventListener("click", ()=>inputArchivos.click());
+inputArchivos.addEventListener("change", e=>agregar(e.target.files));
+["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev, e=>{
+  e.preventDefault(); drop.classList.add("over");
+}));
+["dragleave","drop"].forEach(ev=>drop.addEventListener(ev, e=>{
+  e.preventDefault(); drop.classList.remove("over");
+}));
+drop.addEventListener("drop", e=>agregar(e.dataTransfer.files));
+
 document.getElementById("f").addEventListener("submit", e=>{
   e.preventDefault();
   const d = new FormData(e.target);
-  const sel = PRESTADORES.filter(p=>d.getAll("prestador").includes(p.id));
-  if(!sel.length){ alert("Marca al menos un centro donde te hayas atendido."); return; }
+
+  if(!vA.checked && !vB.checked){
+    alert("Elige al menos una de las dos vías: que consigamos tus documentos, o subirlos tú.");
+    return;
+  }
+  const sel = vA.checked ? PRESTADORES.filter(p=>d.getAll("prestador").includes(p.id)) : [];
+  if(vA.checked && !sel.length){
+    alert("Marca al menos un centro donde te hayas atendido."); return;
+  }
+  if(vB.checked && !archivos.length){
+    alert("Sube al menos un documento, o desmarca la vía B."); return;
+  }
 
   const nombre = (d.get("nombre")||"").trim();
   const casilla = nombre.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
@@ -248,24 +371,38 @@ document.getElementById("f").addEventListener("submit", e=>{
 
   const auto = sel.filter(p=>p.canal==="correo");
   const asist = sel.filter(p=>p.canal!=="correo");
+  const pasos = [];
+  let n = 0;
+  const paso = t => pasos.push([String(++n), t]);
 
-  const pasos = [
-    ["1","Se te envió un <b>código de un solo uso</b> a <code>"+d.get("correo")+"</code>. "+
-        "Al validarlo queda firmado el poder, con su anexo de autenticidad (hash del documento, "+
-        "sello de tiempo y constancia de control del correo)."],
-    ["2","Se creó tu <b>casilla espejo</b> <code>"+casilla+"</code>. Es la dirección que se declara "+
-        "ante cada centro, y todo lo que llegue ahí se te reenvía íntegro."],
-    ["3","<b>"+sel.length+" solicitud"+(sel.length>1?"es":"")+"</b> preparada"+(sel.length>1?"s":"")+
-        ", una por centro, con el texto legal invocando el art. 13 de la Ley 20.584 y exigiendo "+
-        "<b>formato digital legible</b>."+
-        (auto.length? " <b>"+auto.length+"</b> se envía"+(auto.length>1?"n":"")+" automáticamente por correo.":"")+
-        (asist.length? " <b>"+asist.length+"</b> requiere"+(asist.length>1?"n":"")+" acción asistida ("+
-          asist.map(p=>p.nombre+" — "+ETIQUETA[p.canal]).join("; ")+
-          "): ningún prestador levantado recibe por correo. La ida es formulario o mostrador; "+
-          "la vuelta siempre es correo, a tu casilla espejo.":"")],
-    ["4","El agente queda <b>escuchando la casilla</b>. Cuando llegue una respuesta, lee, clasifica "+
-        "y extrae; lo que venga dudoso escala a un modelo mayor antes de entrar al expediente."]
-  ];
+  if(vB.checked){
+    paso("<b>"+archivos.length+" documento"+(archivos.length>1?"s":"")+"</b> en proceso ahora mismo: "+
+         archivos.map(a=>"<code>"+a.name+"</code>").join(", ")+". "+
+         "Se leen, se transcriben y se normalizan nombres y unidades al mismo esquema. "+
+         "<b>No hay que esperar a nadie</b>: esta parte de tu expediente está lista en minutos.");
+  }
+  if(vA.checked){
+    paso("Se te envió un <b>código de un solo uso</b> a <code>"+d.get("correo")+"</code>. "+
+         "Al validarlo queda firmado el poder, con su anexo de autenticidad (hash del documento, "+
+         "sello de tiempo y constancia de control del correo).");
+    paso("Se creó tu <b>casilla espejo</b> <code>"+casilla+"</code>. Es la dirección que se declara "+
+         "ante cada centro, y todo lo que llegue ahí se te reenvía íntegro.");
+    paso("<b>"+sel.length+" solicitud"+(sel.length>1?"es":"")+"</b> preparada"+(sel.length>1?"s":"")+
+         ", una por centro, con el texto legal invocando el art. 13 de la Ley 20.584 y exigiendo "+
+         "<b>formato digital legible</b>."+
+         (auto.length? " <b>"+auto.length+"</b> se envía"+(auto.length>1?"n":"")+" automáticamente por correo.":"")+
+         (asist.length? " <b>"+asist.length+"</b> requiere"+(asist.length>1?"n":"")+" acción asistida ("+
+           asist.map(p=>p.nombre+" — "+ETIQUETA[p.canal]).join("; ")+
+           "): ningún prestador levantado recibe por correo. La ida es formulario o mostrador; "+
+           "la vuelta siempre es correo, a tu casilla espejo.":""));
+    paso("El agente queda <b>escuchando la casilla</b>. Cuando llegue una respuesta, lee, clasifica "+
+         "y extrae; lo que venga dudoso escala a un modelo mayor antes de entrar al expediente.");
+  }
+  if(vA.checked && vB.checked){
+    paso("Todo converge en <b>un solo expediente</b>: lo que subiste y lo que vayan mandando los "+
+         "centros se normalizan al mismo esquema, así que tus exámenes quedan comparables entre sí "+
+         "aunque cada laboratorio los nombre distinto.");
+  }
   document.getElementById("pasos").innerHTML =
     pasos.map(([n,t])=>`<div class="ok"><span class="ic">${n}</span><span>${t}</span></div>`).join("");
   document.getElementById("f").style.display="none";

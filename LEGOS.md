@@ -20,13 +20,16 @@ Cada pieza se cambia sin tocar las otras. Si algo se discute con el equipo, se d
 | L14 | **Protocolo por prestador** | `prestadores/protocolos.json` | **El canal es atributo del prestador, no constante del sistema.** El orquestador lo consulta antes de actuar. 4 prestadores levantados | ✅ |
 | L15 | **Supresión del caso** | `borrar_caso.py` | Borra casilla + documentos + datos, emite constancia, conserva solo el protocolo agregado sin PII. Cláusula QUINTA del poder | ✅ |
 | L16 | **Detección y reclamo** | `denuncia/denunciar.py` | Entrada: el registro de L15 · Salida: hallazgos + borrador de reclamo. La ruta depende de la fecha (Superintendencia hasta 30-nov-2026; Agencia desde el 1-dic). Detecta y propone: **no denuncia solo** | ✅ |
+| L17 | **Carga directa de documentos** | `entrada/index.html` (vía B) | **Segunda puerta de entrada**: la persona que ya tiene su PDF lo sube y entra al mismo pipeline (L4→L11) sin esperar al prestador. Implementación alternativa de `descargar_adjunto` de L7 | ✅ |
 
-## Piezas bloqueadas (decisión de Ignacio, no se discuten hoy)
+## Piezas reactivadas y bloqueadas
 
-- **Carga manual de PDF** como camino de entrada — queda fuera. No afecta a ningún otro lego: si se
-  reactiva, entra como una implementación alternativa de `descargar_adjunto` (L7) y nada más cambia.
-- **API de interoperabilidad** (propuesta de Mauro) — fuera del MVP. Choca con C7 (datos en el
-  dispositivo). Queda en la visión.
+- ✅ **Carga manual de PDF — DESBLOQUEADA (decisión de Ignacio, 5-ago tarde).** Entra como
+  **L17**, segunda vía de entrada, no reemplazo de la primera. Es exactamente lo que se había
+  previsto: una implementación alternativa de `descargar_adjunto` (L7); ningún otro lego cambia.
+- ⬜ **API de interoperabilidad** (propuesta de Mauro) — fuera del MVP de hoy, **pero se evalúa
+  como roadmap declarable**, no descartada. La tensión con C7 es real y está analizada en
+  `PENDIENTES.md` §Backlog. No prometerla como capacidad actual.
 
 ## Regla
 
