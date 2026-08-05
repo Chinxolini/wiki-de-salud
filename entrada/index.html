@@ -384,11 +384,21 @@
 
   <div class="card" id="cardDemoVivo" hidden>
     <h2 class="h2" style="font-size:1.1rem">▶ Míralo funcionar ahora</h2>
-    <p class="por">No es una maqueta. El botón manda una ficha de laboratorio de demostración a
-    Claude y abajo aparece lo que leyó y normalizó, en vivo, con el consumo real de tokens.</p>
-    <button type="button" id="btnDemo" style="width:100%">Procesar una ficha con Claude</button>
+    <p class="por">No es una maqueta. El botón manda las fichas clínicas de los tres centros a
+    Claude, que las lee y las unifica en un solo expediente a tu nombre. Con el consumo real de
+    tokens a la vista.</p>
+    <button type="button" id="btnDemo" style="width:100%">Reunir mi expediente con Claude</button>
     <div id="demoEstado" class="hint" style="margin-top:12px"></div>
-    <div id="demoResultado" style="overflow-x:auto"></div>
+    <div id="demoResultado"></div>
+    <div id="descargas" hidden style="margin-top:18px">
+      <p class="por" style="margin-bottom:10px"><b>Tu paquete está listo.</b> Se armó aquí, en tu
+      navegador: tu nombre y tu RUT nunca salieron de este dispositivo.</p>
+      <div class="duo" style="flex-direction:column">
+        <button type="button" id="dlWiki" style="width:100%">⬇ Descargar mi expediente de salud</button>
+        <button type="button" class="atras" id="dlFichas" style="width:100%;flex:1">
+          ⬇ Descargar las fichas originales de cada centro</button>
+      </div>
+    </div>
   </div>
   <p class="foot"><button type="button" class="link" onclick="location.reload()">← Empezar de nuevo</button></p>
 </section>
@@ -685,30 +695,198 @@ function mostrarResultado(){
   window.scrollTo({top:0});
 }
 
-// ---------- demo en vivo ----------
+// ---------- demo en vivo: los tres centros -> un expediente ----------
+const CENTROS_DEMO = ["centro_a","centro_b","centro_c"];
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c =>
+  ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+let registros = [];   // lo que devolvio Claude por cada centro
+let originales = {};  // el HTML crudo de cada ficha, para la descarga
+
 $("#btnDemo").addEventListener("click", async ()=>{
   const btn = $("#btnDemo"), est = $("#demoEstado"), out = $("#demoResultado");
-  btn.disabled = true; out.innerHTML = "";
-  est.textContent = "Claude está leyendo la ficha y normalizando los resultados…";
+  btn.disabled = true; out.innerHTML = ""; $("#descargas").hidden = true;
+  registros = []; originales = {};
+  let tokIn = 0, tokOut = 0;
   try{
-    const r = await fetch("/api/extraer", {method:"POST",
-      headers:{"content-type":"application/json"}, body: JSON.stringify({ficha:"centro_a"})});
-    const data = await r.json();
-    if(!r.ok) throw new Error(data.error || "Error del servidor.");
-    const reg = data.registro;
-    out.innerHTML = `<table><thead><tr>
-        <th>Como lo dice el centro</th><th>Valor original</th>
-        <th>Nombre canónico</th><th>Valor canónico</th><th>Confianza</th>
-      </tr></thead><tbody>${(reg.resultados||[]).map(x=>
-        `<tr><td>${x.analito_original}</td><td>${x.valor_original} ${x.unidad_original}</td>
-         <td><b>${x.analito_canonico}</b></td>
-         <td><b>${x.valor_canonico} ${x.unidad_canonica}</b></td><td>${x.confianza}</td></tr>`
-      ).join("")}</tbody></table>`;
-    est.textContent = `Listo — ${reg.resultados?.length ?? 0} analitos · ${data.uso.modelo} · `+
-      `${data.uso.tokens_entrada} tokens de entrada, ${data.uso.tokens_salida} de salida.`;
+    for(let i = 0; i < CENTROS_DEMO.length; i++){
+      const id = CENTROS_DEMO[i];
+      est.textContent = `Claude está leyendo la ficha ${i+1} de ${CENTROS_DEMO.length}…`;
+      const r = await fetch("/api/extraer", {method:"POST",
+        headers:{"content-type":"application/json"}, body: JSON.stringify({ficha:id})});
+      const data = await r.json();
+      if(!r.ok) throw new Error(data.error || "Error del servidor.");
+      registros.push(data.registro);
+      tokIn += data.uso.tokens_entrada || 0;
+      tokOut += data.uso.tokens_salida || 0;
+      // El original se guarda para que la persona se lo lleve junto al expediente.
+      originales[id] = await (await fetch(`/demo/ficha-${id}.html`)).text();
+      out.innerHTML = resumen(registros);
+    }
+    est.textContent = `Listo — ${registros.length} centros unificados · claude-haiku-4-5 · `+
+      `${tokIn.toLocaleString("es-CL")} tokens de entrada, ${tokOut.toLocaleString("es-CL")} de salida.`;
+    $("#descargas").hidden = false;
   }catch(err){
     est.textContent = "⚠ " + err.message;
   }finally{ btn.disabled = false; }
+});
+
+const junta = k => registros.flatMap(r => (r[k] || []).map(x => ({...x, _centro: r.centro})));
+
+function resumen(regs){
+  const n = k => regs.reduce((a,r)=>a + (r[k]?.length || 0), 0);
+  const chips = [["diagnosticos","diagnósticos"],["alergias","alergias"],
+    ["medicamentos","medicamentos"],["atenciones","atenciones"],
+    ["procedimientos","procedimientos"],["imagenes","imágenes"],["examenes","exámenes"]]
+    .filter(([k])=>n(k)).map(([k,rot])=>
+      `<div class="fila"><span class="ic">${n(k)}</span><span>${rot}</span></div>`).join("");
+  return `<div style="margin-top:12px">${chips}</div>`;
+}
+
+// ---------- el expediente, armado en el navegador ----------
+// Se construye aca y no en el servidor a proposito: el nombre y el RUT que la
+// persona escribio nunca viajan. Es la misma promesa del producto, cumplida en
+// el unico lugar donde se puede comprobar.
+function construirWiki(){
+  const hoy = new Date().toLocaleDateString("es-CL");
+  const rut = $("#rut").value.trim();
+  const nombre = $("#nombre").value.trim();
+  const fuentes = registros.map(r=>r.centro);
+
+  const tabla = (titulo, filas, cabeceras) => filas.length ? `
+    <h2>${titulo}</h2>
+    <table><thead><tr>${cabeceras.map(c=>`<th>${c}</th>`).join("")}</tr></thead>
+    <tbody>${filas.join("")}</tbody></table>` : "";
+
+  const dg = junta("diagnosticos").map(d=>`<tr><td>${esc(d.fecha)||"—"}</td>
+    <td><b>${esc(d.nombre_canonico)}</b><br><span class="orig">consignado como
+    “${esc(d.nombre_original)}”</span></td><td>${esc(d.estado)}</td>
+    <td class="src">${esc(d._centro)}</td></tr>`);
+
+  const al = junta("alergias").map(a=>`<tr><td><b>${esc(a.sustancia)}</b></td>
+    <td>${esc(a.reaccion)||"—"}</td><td>${esc(a.severidad)}</td>
+    <td class="src">${esc(a._centro)}</td></tr>`);
+
+  const md = junta("medicamentos").map(m=>`<tr><td><b>${esc(m.principio_activo)}</b><br>
+    <span class="orig">registrado como “${esc(m.nombre_original)}”</span></td>
+    <td>${esc(m.dosis)||"—"}</td><td>${esc(m.frecuencia)||"—"}</td>
+    <td class="src">${esc(m._centro)}</td></tr>`);
+
+  const at = junta("atenciones")
+    .sort((a,b)=>String(b.fecha||"").localeCompare(String(a.fecha||"")))
+    .map(a=>`<tr><td>${esc(a.fecha)||"—"}</td><td>${esc(a.especialidad)||esc(a.tipo)}</td>
+    <td>${esc(a.motivo_consulta)}${a.hallazgos?`<br><span class="orig">${esc(a.hallazgos)}</span>`:""}</td>
+    <td class="src">${esc(a._centro)}</td></tr>`);
+
+  const pr = junta("procedimientos").map(p=>`<tr><td>${esc(p.fecha)||"—"}</td>
+    <td><b>${esc(p.nombre_canonico)}</b><br><span class="orig">“${esc(p.nombre_original)}”</span></td>
+    <td class="src">${esc(p._centro)}</td></tr>`);
+
+  const im = junta("imagenes").map(i=>`<tr><td>${esc(i.fecha)||"—"}</td>
+    <td><b>${esc(i.tipo_canonico)}</b>${i.region?` · ${esc(i.region)}`:""}</td>
+    <td>${esc(i.conclusion_informe)}</td><td class="src">${esc(i._centro)}</td></tr>`);
+
+  const ex = junta("examenes").map(e=>`<tr><td>${esc(e.fecha)||"—"}</td>
+    <td><b>${esc(e.analito_canonico)}</b><br><span class="orig">“${esc(e.analito_original)}”</span></td>
+    <td><b>${esc(e.valor_canonico)} ${esc(e.unidad_canonica)}</b><br>
+    <span class="orig">original: ${esc(e.valor_original)} ${esc(e.unidad_original)}</span></td>
+    <td>${esc(e.rango_referencia)||"—"}</td><td class="src">${esc(e._centro)}</td></tr>`);
+
+  const ileg = registros.flatMap(r=>(r.campos_ilegibles||[]).map(c=>`${esc(c)} (${esc(r.centro)})`));
+
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8">
+<title>Expediente de salud — ${esc(nombre)}</title>
+<style>
+ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+   max-width:880px;margin:0 auto;padding:32px 22px 70px;color:#17201d;line-height:1.55}
+ .cab{border-bottom:3px solid #0f5c46;padding-bottom:18px;margin-bottom:8px}
+ h1{font-size:1.7rem;margin:0 0 6px;color:#0f5c46}
+ .id{background:#e9f2ee;border-radius:10px;padding:14px 18px;margin:18px 0;font-size:.92rem;
+   display:grid;grid-template-columns:1fr 1fr;gap:5px 24px}
+ h2{font-size:1rem;color:#0f5c46;text-transform:uppercase;letter-spacing:.06em;
+   border-bottom:1px solid #e4e0d7;padding-bottom:6px;margin:34px 0 4px}
+ table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.86rem}
+ th{text-align:left;padding:8px 9px;background:#f4f2ec;border-bottom:2px solid #e4e0d7;
+   font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:#6b7570}
+ td{padding:9px;border-bottom:1px solid #eeece5;vertical-align:top}
+ .orig{color:#6b7570;font-size:.8rem}
+ .src{color:#6b7570;font-size:.78rem;white-space:nowrap}
+ .nota{background:#fdf4e3;border-left:3px solid #8a5a00;padding:14px 17px;margin:24px 0;
+   font-size:.86rem;border-radius:0 8px 8px 0}
+ .pie{margin-top:44px;padding-top:16px;border-top:1px solid #e4e0d7;color:#6b7570;font-size:.8rem}
+ @media print{body{padding:0}.nota{break-inside:avoid}}
+</style></head><body>
+<div class="cab">
+  <h1>Expediente de salud</h1>
+  <p style="margin:0;color:#6b7570">Historial reunido desde ${fuentes.length} centro${fuentes.length>1?"s":""}
+  y normalizado a un vocabulario común.</p>
+</div>
+<div class="id">
+  <div><b>Titular:</b> ${esc(nombre)}</div><div><b>RUT:</b> ${esc(rut)}</div>
+  <div><b>Emitido:</b> ${hoy}</div><div><b>Centros:</b> ${esc(fuentes.join(" · "))}</div>
+</div>
+
+<div class="nota"><b>Esto no es un diagnóstico ni una indicación médica.</b> Es tu propia
+información, transcrita y ordenada por un sistema automatizado con inteligencia artificial.
+No interpreta resultados ni recomienda tratamientos. Cada dato indica de qué centro proviene, y
+las fichas originales van en el mismo paquete para que tú o tu médico puedan contrastarlas.
+Cualquier decisión sobre tu salud es tuya y de los profesionales que te atienden.</div>
+
+${tabla("Diagnósticos y antecedentes", dg, ["Fecha","Diagnóstico","Estado","Fuente"])}
+${tabla("Alergias", al, ["Sustancia","Reacción","Severidad","Fuente"])}
+${tabla("Medicamentos", md, ["Fármaco","Dosis","Frecuencia","Fuente"])}
+${tabla("Cirugías y procedimientos", pr, ["Fecha","Procedimiento","Fuente"])}
+${tabla("Imagenología", im, ["Fecha","Estudio","Conclusión del informe","Fuente"])}
+${tabla("Exámenes de laboratorio", ex, ["Fecha","Analito","Resultado","Referencia","Fuente"])}
+${tabla("Atenciones", at, ["Fecha","Especialidad","Motivo y hallazgos","Fuente"])}
+
+${ileg.length ? `<h2>No se pudo leer</h2><div class="nota" style="background:#fdf4e3">
+  Estos campos venían ilegibles en el documento original y <b>no se rellenaron</b>:
+  ${ileg.join("; ")}. Revísalos directamente en la ficha original.</div>` : ""}
+
+<div class="pie">
+  Generado el ${hoy} por Wiki de Salud · Claude Impact Lab Longevidad 2026 · Equipo LOS INMORTALES.<br>
+  Este documento se armó en tu navegador. Tu nombre y tu RUT nunca salieron de tu dispositivo.<br>
+  <b>Contenido clínico 100% sintético</b>, con fines de demostración.
+</div>
+</body></html>`;
+}
+
+function bajar(nombreArchivo, contenido, tipo="text/html;charset=utf-8"){
+  const url = URL.createObjectURL(new Blob([contenido], {type:tipo}));
+  const a = document.createElement("a");
+  a.href = url; a.download = nombreArchivo;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+}
+const slug = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+  .replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "titular";
+
+$("#dlWiki").addEventListener("click", ()=>
+  bajar(`expediente-${slug($("#nombre").value)}.html`, construirWiki()));
+
+$("#dlFichas").addEventListener("click", ()=>{
+  // Un indice mas las tres fichas tal como las mando cada centro: el original
+  // siempre viaja con el expediente, si no la trazabilidad es una promesa vacia.
+  const nombres = {centro_a:"Centro Médico San Rafael",
+    centro_b:"Hospital Regional de Ñuble", centro_c:"Red de Salud Cordillera"};
+  Object.entries(originales).forEach(([id, html], i)=>
+    setTimeout(()=>bajar(`ficha-original-${id}.html`, html), i * 400));
+  setTimeout(()=>bajar("indice-de-mis-documentos.html", `<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><title>Índice de mis documentos</title>
+<style>body{font-family:system-ui,sans-serif;max-width:640px;margin:40px auto;padding:0 20px;
+line-height:1.6}h1{color:#0f5c46}li{margin:8px 0}</style></head><body>
+<h1>Índice de mis documentos</h1>
+<p>Tu expediente y las fichas tal como las entregó cada centro. Cada dato del expediente
+proviene de uno de estos documentos: siempre puedes contrastarlo.</p>
+<ul>
+  <li><b>expediente-${slug($("#nombre").value)}.html</b> — tu historial unificado</li>
+  ${Object.keys(originales).map(id=>
+    `<li><b>ficha-original-${id}.html</b> — ${nombres[id]}, como la entregaron</li>`).join("")}
+</ul>
+<p style="color:#6b7570;font-size:.85rem">Contenido clínico sintético, con fines de
+demostración. Generado el ${new Date().toLocaleDateString("es-CL")}.</p>
+</body></html>`), Object.keys(originales).length * 400 + 200);
 });
 </script>
 </body>
