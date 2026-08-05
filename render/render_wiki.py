@@ -41,6 +41,18 @@ def _marca_confianza(confianza):
     return ""
 
 
+def _link_doc(m):
+    """Link al documento original dentro del paquete (carpeta originales/).
+
+    Hace auditable cada valor: el profesional ve "glucosa 132" y puede abrir el
+    documento del que salió. Si no hay referencia, no se muestra nada.
+    """
+    ref = m.get("documento_ref") or ""
+    if not ref:
+        return ""
+    return f' · <a class="link-doc" href="originales/{_esc(ref)}" title="Abrir el documento original del que se extrajo este valor">ver documento</a>'
+
+
 def _consolidar_analitos(registros):
     """
     Agrupa todas las mediciones de todos los registros/exámenes por nombre_canonico.
@@ -50,6 +62,7 @@ def _consolidar_analitos(registros):
     consolidado = {}
     for reg in registros:
         centro = reg.get("centro_origen", "")
+        doc_ref = reg.get("documento_ref", "")
         for ex in reg.get("examenes", []):
             fecha = ex.get("fecha")
             for an in ex.get("analitos", []):
@@ -57,6 +70,7 @@ def _consolidar_analitos(registros):
                 consolidado.setdefault(nombre_can, []).append({
                     "fecha": fecha,
                     "centro": centro,
+                    "documento_ref": doc_ref,
                     "nombre_original": an.get("nombre_original", ""),
                     "valor": an.get("valor"),
                     "unidad": an.get("unidad"),
@@ -234,14 +248,14 @@ def render_wiki(registros: list, sintetico: bool = False) -> str:
                 # Valor comparable disponible: es el principal; el original queda en la traza.
                 valor_can_txt = _fmt_valor(valor_can, unidad_can)
                 bloque_principal = f'<div class="medicion-valor" title="Nombre original: {original}">{_esc(valor_can_txt)} {marca}</div>'
-                bloque_traza = f'<div class="medicion-original">{original}: {_esc(valor_orig_txt)} · {_esc(m["centro"])}</div>'
+                bloque_traza = f'<div class="medicion-original">{original}: {_esc(valor_orig_txt)} · {_esc(m["centro"])}{_link_doc(m)}</div>'
             else:
                 # Sin conversión posible: se muestra el valor original tal cual, sin inventar nada.
                 bloque_principal = (
                     f'<div class="medicion-valor" title="Nombre original: {original}">{_esc(valor_orig_txt)} {marca}</div>'
                     f'<div class="sin-unidad-comun">sin unidad común</div>'
                 )
-                bloque_traza = f'<div class="medicion-original">{original} · {_esc(m["centro"])}</div>'
+                bloque_traza = f'<div class="medicion-original">{original} · {_esc(m["centro"])}{_link_doc(m)}</div>'
 
             celdas.append(f"""
             <td class="celda-medicion{clase_fuera}">
