@@ -1,6 +1,8 @@
 __pycache__/
 *.pyc
 .env
+.vercel/
+node_modules/
 cohorte.json
 demo/*.html
 demo/wiki.json
