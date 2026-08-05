@@ -84,6 +84,8 @@
   .opt input{margin-top:3px;flex:none;width:18px;height:18px;accent-color:var(--accent)}
   .opt .nm{font-weight:650;font-size:.93rem;display:block}
   .opt .ch{font-size:.81rem;color:var(--muted)}
+  .fuente{display:inline-block;font-size:.68rem;padding:1px 7px;border-radius:99px;
+    border:1px solid var(--line);color:var(--muted);margin-left:4px;white-space:nowrap}
 
   .duo{display:flex;gap:9px;flex-wrap:wrap}
   .duo label{display:flex;align-items:center;gap:8px;margin:0;padding:11px 18px;
@@ -155,8 +157,9 @@
 
 <div class="wrap">
   <div class="hero" id="hero">
-    <span class="kicker">◆ Tu ficha clínica, por ley, es tuya</span>
-    <h1>Tu historia de salud está <em>repartida</em> en cinco lugares que no se hablan entre sí.</h1>
+    <span class="kicker">◆ Por ley tienes derecho a una copia íntegra y gratuita</span>
+    <h1>Cada centro donde te has atendido guarda un <em>pedazo</em> de tu historia. Ninguno la
+    tiene completa. Tú tampoco.</h1>
     <p class="lede">Nosotros la pedimos por ti en cada uno, la ordenamos en un solo expediente y te
     la entregamos. Después la borramos de nuestro sistema.</p>
     <div class="disperso">
@@ -469,15 +472,19 @@
 // Catalogo de prestadores. El canal (formulario web / presencial) vive en
 // prestadores/protocolos.json y lo usa el orquestador; al usuario no le importa
 // el canal, le importa el plazo. La jerga se queda en el sistema.
+// Cada plazo dice de donde sale. No son datos del mismo tipo: uno es medicion
+// propia de un solo caso, dos son lo que declara el centro y uno esta estimado
+// porque nadie lo publica. Presentarlos como equivalentes seria justamente la
+// opacidad que el producto denuncia.
 const PRESTADORES = [
   {id:"chp", nombre:"Clínica Hospital del Profesor", canal:"formulario_web",
-   demora:"Suele contestar el mismo día"},
+   demora:"Nos respondió el mismo día", fuente:"nuestra medición, 1 caso"},
   {id:"hcuch", nombre:"Hospital Clínico Universidad de Chile", canal:"formulario_web",
-   demora:"Hasta 20 días hábiles"},
+   demora:"Hasta 20 días hábiles", fuente:"según el centro"},
   {id:"integramedica", nombre:"IntegraMédica (Bupa)", canal:"formulario_web",
-   demora:"Unos 5 días hábiles · cubre los 30+ centros de la red"},
+   demora:"5 días hábiles · cubre los 30+ centros de la red", fuente:"según el centro"},
   {id:"redsalud", nombre:"RedSalud", canal:"presencial",
-   demora:"Entre 10 y 20 días hábiles · hay que pedirlo en cada sede"}
+   demora:"10 a 20 días hábiles · hay que pedirlo en cada sede", fuente:"estimado, no publicado"}
 ];
 const $ = s => document.querySelector(s);
 const TOTAL = 4;
@@ -485,7 +492,8 @@ const TOTAL = 4;
 $("#prestadores").innerHTML = PRESTADORES.map(p=>`
   <label class="opt">
     <input type="checkbox" name="prestador" value="${p.id}">
-    <span><span class="nm">${p.nombre}</span><span class="ch">${p.demora}</span></span>
+    <span><span class="nm">${p.nombre}</span>
+      <span class="ch">${p.demora} <span class="fuente">${p.fuente}</span></span></span>
   </label>`).join("");
 
 // ---------- progreso ----------
@@ -685,7 +693,8 @@ function mostrarResultado(){
     (archivos.length ? `<div class="fila"><span class="ic">✓</span><span><b>Tus documentos</b><br>
       <span class="hint">Listos en minutos: ya están en el expediente.</span></span></div>` : "") +
     sel.map(p=>`<div class="fila"><span class="ic">◷</span><span><b>${p.nombre}</b><br>
-      <span class="hint">${p.demora}. Te avisamos por correo apenas conteste.</span></span></div>`).join("") +
+      <span class="hint">${p.demora} (${p.fuente}). Te avisamos por correo apenas conteste.</span>
+      </span></div>`).join("") +
     `<p class="hint" style="margin:16px 0 0">Si quieres detener el proceso, respondes cualquiera de
      esos correos con “revoco” y borramos todo el mismo día.</p>`;
 
