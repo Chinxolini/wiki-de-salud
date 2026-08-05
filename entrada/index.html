@@ -632,8 +632,11 @@ $("#f").addEventListener("submit", e=>{
   if(!validarPaso(4)) return;
   const sel = PRESTADORES.filter(p=>
     [...document.querySelectorAll("[name=prestador]:checked")].map(c=>c.value).includes(p.id));
+  const periodoSel = document.querySelector("[name=periodo]:checked")?.value;
+  const periodo = periodoSel === "acotar" ? ($("#periodoTexto").value.trim() || "acotado") : "toda la historia";
+  const mandatoTexto = $(".paso[data-paso=\"3\"] .legal")?.textContent?.trim().replace(/\s+/g," ") || "";
   datos = { correo:$("#correo").value.trim(), nombre:$("#nombre").value.trim(),
-            sel, archivos:getArchivos() };
+            sel, archivos:getArchivos(), periodo, mandatoTexto };
   codigoEsperado = String(Math.floor(100000 + Math.random()*900000));
   $("#correoEco").textContent = datos.correo;
   $("#codigoDemo").textContent = codigoEsperado;
@@ -660,10 +663,35 @@ $("#btnFirmar").addEventListener("click",()=>{
   mostrarResultado();
 });
 
-function mostrarResultado(){
-  const {correo, nombre, sel, archivos} = datos;
-  const casilla = nombre.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+
+async function mostrarResultado(){
+  const {correo, nombre, sel, archivos, periodo, mandatoTexto} = datos;
+  let casilla = nombre.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
                     .replace(/[^a-z\s]/g,"").trim().split(/\s+/).slice(0,2).join(".") + "@chiledao.cl";
+  let casillaEsDemo = true;
+  // Se intenta provisionar una casilla real vía el servicio de Mauro. Si no responde, si viene
+  // desactivado, o si algo no calza, seguimos con el cálculo sintético de siempre: el flujo
+  // visible nunca se bloquea por esto.
+  try{
+    if(!sel.length) throw new Error("sin centros marcados: no hay para qué provisionar casilla");
+    const r = await fetch("/api/casilla", {method:"POST",
+      headers:{"content-type":"application/json"},
+      body: JSON.stringify({
+        accion: "crear-y-provisionar",
+        email: correo,
+        nombre,
+        centros: sel.map(p=>p.nombre),
+        periodo: periodo || "toda la historia",
+        mandato_texto: mandatoTexto || "",
+        firma: nombre,
+      })});
+    const data = await r.json().catch(()=>null);
+    if(r.ok && data && !data.fallback && data.direccion){
+      casilla = data.direccion;
+      casillaEsDemo = false;
+      datos.guid = data.guid;
+    }
+  }catch{ /* sin conexión al servicio de casillas: seguimos con la sintética */ }
   const auto = sel.filter(p=>p.canal === "correo");
   const asist = sel.filter(p=>p.canal !== "correo");
   const pasos = [];
@@ -677,8 +705,10 @@ function mostrarResultado(){
          "leyéndose ahora: "+archivos.map(a=>"<code>"+a.name+"</code>").join(", ")+".");
   }
   if(sel.length){
-    paso("Se creó tu <b>casilla espejo</b> <code>"+casilla+"</code>. Es la dirección que se declara "+
-         "ante cada centro, y todo lo que llegue ahí se te reenvía íntegro.");
+    paso("Se creó tu <b>casilla espejo</b> <code>"+casilla+"</code>"+
+         (casillaEsDemo ? " <span class=\"hint\">(casilla de demostración)</span>" : "")+
+         ". Es la dirección que se declara ante cada centro, y todo lo que llegue ahí se te "+
+         "reenvía íntegro.");
     paso("<b>"+sel.length+" solicitud"+(sel.length>1?"es":"")+"</b> preparada"+(sel.length>1?"s":"")+
          ", invocando el art. 13 de la Ley 20.584 y exigiendo <b>formato digital legible</b>."+
          (auto.length?" <b>"+auto.length+"</b> sale por correo ahora mismo.":"")+

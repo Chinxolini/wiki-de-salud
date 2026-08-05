@@ -42,6 +42,30 @@ Cada click del demo ≈ 3.500 tokens de entrada + ~600 de salida en Haiku ≈ **
 dólar**. Con los ~$4.85 restantes alcanza para ~1.000 clicks. Aun así: la URL no se publica en
 ningún lado masivo; es para la demo y el video.
 
+## Integración casillas (cPanel)
+
+`api/casilla.js` llama al servicio PHP de Mauro (dominio `chiledao.cl`) para provisionar la
+casilla espejo real. Por defecto está **desactivada**: sin `PROVISION_ACTIVA=1` responde 503
+con `fallback: true` y el formulario sigue con el cálculo sintético de siempre.
+
+Variables nuevas (Vercel → Settings → Environment Variables, o por CLI):
+
+| Name | Value |
+|---|---|
+| `CASILLAS_API_URL` | `https://chiledao.cl/api_agente.php` |
+| `CASILLAS_API_KEY` | la key del servicio de Mauro |
+| `PROVISION_ACTIVA` | `1` para activar; cualquier otro valor (u omitirla) la deja apagada |
+
+Agregarlas por CLI (PowerShell, sin `&&`, con `;`):
+
+```powershell
+vercel env add CASILLAS_API_URL production
+vercel env add CASILLAS_API_KEY production
+vercel env add PROVISION_ACTIVA production
+```
+
+Y luego `vercel --prod` (o Redeploy desde el dashboard) para que tomen efecto.
+
 ## Después del Lab
 
 - Rotar la API key (ya está en PENDIENTES).
