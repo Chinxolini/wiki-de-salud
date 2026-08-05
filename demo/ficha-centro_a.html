@@ -2,142 +2,84 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Informe de Laboratorio — PAC-0006</title>
+<title>Ficha Clínica — Centro Médico San Rafael</title>
 <style>
-    body {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 13px;
-        color: #1a1a1a;
-        max-width: 720px;
-        margin: 20px auto;
-        padding: 0 16px;
-    }
-    .encabezado {
-        border-bottom: 2px solid #2c3e50;
-        padding-bottom: 10px;
-        margin-bottom: 16px;
-    }
-    .encabezado h1 {
-        font-size: 18px;
-        margin: 0 0 2px 0;
-        color: #2c3e50;
-    }
-    .encabezado p {
-        margin: 0;
-        font-size: 11px;
-        color: #555;
-    }
-    .datos-paciente {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 4px 20px;
-        margin-bottom: 18px;
-        background: #f5f6f7;
-        padding: 10px 14px;
-        border-radius: 4px;
-    }
-    .datos-paciente div {
-        font-size: 12px;
-    }
-    .datos-paciente strong {
-        color: #2c3e50;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 6px;
-    }
-    th, td {
-        border: 1px solid #d0d4d8;
-        padding: 6px 8px;
-        font-size: 12px;
-    }
-    th {
-        background: #2c3e50;
-        color: white;
-        text-align: left;
-    }
-    .pie {
-        margin-top: 24px;
-        font-size: 10px;
-        color: #888;
-        border-top: 1px solid #d0d4d8;
-        padding-top: 8px;
-    }
-    .sintetico {
-        margin-top: 4px;
-        font-size: 10px;
-        color: #b03030;
-        font-weight: bold;
-    }
+  body{font-family:Arial, Helvetica, sans-serif;font-size:13px;color:#1a1a1a;max-width:760px;margin:20px auto;padding:0 18px}
+  .cab{border-bottom:3px solid #2c3e50;padding-bottom:10px;margin-bottom:16px}
+  .cab h1{font-size:17px;margin:0 0 3px;color:#2c3e50}
+  .cab p{margin:0;font-size:11px;color:#555}
+  .datos{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-bottom:18px;
+    background:#f5f6f7;padding:11px 14px;border-radius:4px;font-size:12px}
+  h2{font-size:13px;color:#2c3e50;border-bottom:1px solid #d0d4d8;padding-bottom:4px;
+    margin:22px 0 8px;text-transform:uppercase;letter-spacing:.04em}
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th,td{border:1px solid #d0d4d8;padding:5px 8px;font-size:12px;vertical-align:top}
+  th{background:#2c3e50;color:#fff;text-align:left}
+  ul{margin:6px 0;padding-left:20px;font-size:12px}
+  li{margin-bottom:3px}
+  .prosa{font-size:12px;line-height:1.55;margin:6px 0}
+  .pie{margin-top:26px;font-size:10px;color:#888;border-top:1px solid #d0d4d8;padding-top:8px}
+  .sint{margin-top:4px;font-size:10px;color:#b03030;font-weight:bold}
 </style>
 </head>
 <body>
 
-<div class="encabezado">
-    <h1>Centro Médico San Rafael</h1>
-    <p>Av. Providencia 1234, Providencia, Santiago</p>
-    <p>INFORME DE LABORATORIO CLÍNICO</p>
+<div class="cab">
+  <h1>Centro Médico San Rafael</h1>
+  <p>Av. Providencia 1234, Providencia, Santiago</p>
+  <p>RESUMEN DE FICHA CLÍNICA — Solicitud Art. 13 Ley 20.584</p>
+</div>
+<div class="datos">
+  <div><b>Paciente (ref.):</b> PAC-0006</div>
+  <div><b>Emisión:</b> 2026-08-05</div>
+  <div><b>Sexo:</b> M</div>
+  <div><b>Edad:</b> 76 años</div>
+  <div><b>Previsión:</b> FONASA C</div>
+  <div><b>Ficha N°:</b> SR-118342</div>
 </div>
 
-<div class="datos-paciente">
-    <div><strong>Paciente (ref.):</strong> PAC-0006</div>
-    <div><strong>Fecha de informe:</strong> 2026-08-05</div>
-    <div><strong>Sexo:</strong> M</div>
-    <div><strong>Edad:</strong> 76 años</div>
-    <div><strong>Tramo FONASA:</strong> C</div>
-    <div><strong>Servicio de Salud:</strong> Ñuble</div>
-</div>
-
+<h2>Antecedentes mórbidos</h2>
 <table>
-    <thead>
-        <tr>
-            <th>Analito</th>
-            <th style="text-align:center">Valor</th>
-            <th style="text-align:center">Unidad</th>
-            <th style="text-align:center">Rango de referencia</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Glicemia en ayunas</td>
-            <td style="text-align:center">132</td>
-            <td style="text-align:center">mg/dL</td>
-            <td style="text-align:center">70 – 100</td>
-        </tr>
-        <tr>
-            <td>Hemoglobina</td>
-            <td style="text-align:center">13.1</td>
-            <td style="text-align:center">g/dL</td>
-            <td style="text-align:center">12.0 – 16.0</td>
-        </tr>
-        <tr>
-            <td>Colesterol total</td>
-            <td style="text-align:center">177</td>
-            <td style="text-align:center">mg/dL</td>
-            <td style="text-align:center">< 200</td>
-        </tr>
-        <tr>
-            <td>Creatinina sérica</td>
-            <td style="text-align:center">1.1</td>
-            <td style="text-align:center">mg/dL</td>
-            <td style="text-align:center">0.6 – 1.3</td>
-        </tr>
-        <tr>
-            <td>Recuento de leucocitos</td>
-            <td style="text-align:center">7705</td>
-            <td style="text-align:center">/mm³</td>
-            <td style="text-align:center">4.500 – 11.000</td>
-        </tr>
-    </tbody>
+  <tr><th>Fecha dg.</th><th>Diagnóstico</th><th>Estado</th></tr>
+  <tr><td>2014-03</td><td>DM2</td><td>Activo</td></tr>
+  <tr><td>2016-11</td><td>HTA esencial</td><td>Activo</td></tr>
+  <tr><td>2019-07</td><td>Dislipidemia mixta</td><td>Activo</td></tr>
+  <tr><td>2021-02</td><td>Artrosis rodilla derecha</td><td>Activo</td></tr>
 </table>
 
-<div class="pie">
-    Informe generado electrónicamente. Los valores no requieren firma manuscrita.
-</div>
-<div class="sintetico">
-    DATO SINTÉTICO — generado por IMPACTLAB con fines de demostración. No corresponde a un paciente real.
-</div>
+<h2>Alergias</h2>
+<ul>
+  <li><b>Penicilina</b> — exantema generalizado. Reacción moderada, consignada 2009.</li>
+  <li>AINEs: no refiere.</li>
+</ul>
 
+<h2>Fármacos en uso</h2>
+<table>
+  <tr><th>Producto</th><th>Dosis</th><th>Posología</th></tr>
+  <tr><td>METFORMINA LCH 850 mg</td><td>850 mg</td><td>1 comp. c/12 h</td></tr>
+  <tr><td>COZAAR 50 mg</td><td>50 mg</td><td>1 comp. al día</td></tr>
+  <tr><td>Atorvastatina 20 mg</td><td>20 mg</td><td>1 comp. en la noche</td></tr>
+</table>
+
+<h2>Laboratorio — 2026-07-28</h2>
+<table>
+  <tr><th>Analito</th><th>Valor</th><th>Unidad</th><th>Referencia</th></tr>
+  <tr><td>Glicemia en ayunas</td><td>132</td><td>mg/dL</td><td>70 – 100</td></tr>
+  <tr><td>Hemoglobina glicosilada</td><td>7.4</td><td>%</td><td>&lt; 5.7</td></tr>
+  <tr><td>Hemoglobina</td><td>13.1</td><td>g/dL</td><td>12.0 – 16.0</td></tr>
+  <tr><td>Colesterol total</td><td>177</td><td>mg/dL</td><td>&lt; 200</td></tr>
+  <tr><td>Creatinina sérica</td><td>1.1</td><td>mg/dL</td><td>0.6 – 1.3</td></tr>
+  <tr><td>Recuento de leucocitos</td><td>7705</td><td>/mm³</td><td>4.500 – 11.000</td></tr>
+</table>
+
+<h2>Atenciones registradas</h2>
+<table>
+  <tr><th>Fecha</th><th>Especialidad</th><th>Motivo</th></tr>
+  <tr><td>2026-07-28</td><td>Medicina Interna</td><td>Control DM2 e HTA. Refiere buena adherencia.</td></tr>
+  <tr><td>2025-12-03</td><td>Traumatología</td><td>Gonalgia derecha de 6 meses, aumenta al subir escaleras.</td></tr>
+</table>
+<div class="pie">Documento generado electrónicamente. Los valores no requieren firma manuscrita.</div>
+<div class="sint">DATO SINTÉTICO — generado por IMPACTLAB con fines de demostración.
+No corresponde a un paciente real.</div>
 </body>
 </html>

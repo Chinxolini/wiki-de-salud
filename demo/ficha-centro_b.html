@@ -2,142 +2,82 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Informe de Laboratorio — PAC-0006</title>
+<title>Epicrisis — Hospital Regional de Ñuble</title>
 <style>
-    body {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 13px;
-        color: #1a1a1a;
-        max-width: 720px;
-        margin: 20px auto;
-        padding: 0 16px;
-    }
-    .encabezado {
-        border-bottom: 2px solid #2c3e50;
-        padding-bottom: 10px;
-        margin-bottom: 16px;
-    }
-    .encabezado h1 {
-        font-size: 18px;
-        margin: 0 0 2px 0;
-        color: #2c3e50;
-    }
-    .encabezado p {
-        margin: 0;
-        font-size: 11px;
-        color: #555;
-    }
-    .datos-paciente {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 4px 20px;
-        margin-bottom: 18px;
-        background: #f5f6f7;
-        padding: 10px 14px;
-        border-radius: 4px;
-    }
-    .datos-paciente div {
-        font-size: 12px;
-    }
-    .datos-paciente strong {
-        color: #2c3e50;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 6px;
-    }
-    th, td {
-        border: 1px solid #d0d4d8;
-        padding: 6px 8px;
-        font-size: 12px;
-    }
-    th {
-        background: #2c3e50;
-        color: white;
-        text-align: left;
-    }
-    .pie {
-        margin-top: 24px;
-        font-size: 10px;
-        color: #888;
-        border-top: 1px solid #d0d4d8;
-        padding-top: 8px;
-    }
-    .sintetico {
-        margin-top: 4px;
-        font-size: 10px;
-        color: #b03030;
-        font-weight: bold;
-    }
+  body{font-family:Georgia, 'Times New Roman', serif;font-size:13px;color:#1a1a1a;max-width:760px;margin:20px auto;padding:0 18px}
+  .cab{border-bottom:3px solid #1b4f72;padding-bottom:10px;margin-bottom:16px}
+  .cab h1{font-size:17px;margin:0 0 3px;color:#1b4f72}
+  .cab p{margin:0;font-size:11px;color:#555}
+  .datos{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-bottom:18px;
+    background:#f5f6f7;padding:11px 14px;border-radius:4px;font-size:12px}
+  h2{font-size:13px;color:#1b4f72;border-bottom:1px solid #d0d4d8;padding-bottom:4px;
+    margin:22px 0 8px;text-transform:uppercase;letter-spacing:.04em}
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th,td{border:1px solid #d0d4d8;padding:5px 8px;font-size:12px;vertical-align:top}
+  th{background:#1b4f72;color:#fff;text-align:left}
+  ul{margin:6px 0;padding-left:20px;font-size:12px}
+  li{margin-bottom:3px}
+  .prosa{font-size:12px;line-height:1.55;margin:6px 0}
+  .pie{margin-top:26px;font-size:10px;color:#888;border-top:1px solid #d0d4d8;padding-top:8px}
+  .sint{margin-top:4px;font-size:10px;color:#b03030;font-weight:bold}
 </style>
 </head>
 <body>
 
-<div class="encabezado">
-    <h1>Laboratorio Clínico Los Andes</h1>
-    <p>Calle Los Alerces 567, Ñuñoa, Santiago</p>
-    <p>INFORME DE LABORATORIO CLÍNICO</p>
+<div class="cab">
+  <h1>Hospital Regional de Ñuble</h1>
+  <p>Servicio de Salud Ñuble · Unidad de Gestión de Fichas Clínicas</p>
+  <p>EPICRISIS Y RESUMEN DE HOSPITALIZACIÓN</p>
+</div>
+<div class="datos">
+  <div><b>Paciente (ref.):</b> PAC-0006</div>
+  <div><b>N° Ingreso:</b> 2024-44127</div>
+  <div><b>Ingreso:</b> 12-09-2024</div>
+  <div><b>Alta:</b> 18-09-2024</div>
+  <div><b>Servicio:</b> Cirugía General</div>
+  <div><b>Previsión:</b> FONASA C</div>
 </div>
 
-<div class="datos-paciente">
-    <div><strong>Paciente (ref.):</strong> PAC-0006</div>
-    <div><strong>Fecha de informe:</strong> 2026-08-05</div>
-    <div><strong>Sexo:</strong> M</div>
-    <div><strong>Edad:</strong> 76 años</div>
-    <div><strong>Tramo FONASA:</strong> C</div>
-    <div><strong>Servicio de Salud:</strong> Ñuble</div>
-</div>
+<h2>Motivo de ingreso</h2>
+<p class="prosa">Paciente de 74 años consulta en Servicio de Urgencia por cuadro de 18 horas de
+evolución caracterizado por <b>dolor abdominal en hipocondrio derecho</b>, de carácter cólico,
+irradiado a dorso, asociado a náuseas y dos episodios de vómitos. Refiere episodios similares
+autolimitados en los últimos 8 meses, sin consulta previa.</p>
 
+<h2>Antecedentes consignados al ingreso</h2>
+<ul>
+  <li>Diabetes Mellitus tipo 2, en tratamiento desde 2014.</li>
+  <li>Hipertensión arterial esencial.</li>
+  <li>Alergia a Penicilina (exantema). <b>Consignada en brazalete de riesgo.</b></li>
+</ul>
+
+<h2>Intervención</h2>
+<p class="prosa">Se realiza <b>colecistectomía laparoscópica</b> el 13-09-2024 sin incidentes.
+Hallazgo intraoperatorio: vesícula de paredes engrosadas con múltiples cálculos.
+Cirujano responsable: equipo de turno.</p>
+
+<h2>Exámenes durante la hospitalización</h2>
 <table>
-    <thead>
-        <tr>
-            <th>Analito</th>
-            <th style="text-align:center">Valor</th>
-            <th style="text-align:center">Unidad</th>
-            <th style="text-align:center">Rango de referencia</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>Glucosa basal</td>
-            <td style="text-align:center">132</td>
-            <td style="text-align:center">mg/dL</td>
-            <td style="text-align:center">74 – 106</td>
-        </tr>
-        <tr>
-            <td>Hb</td>
-            <td style="text-align:center">13.1</td>
-            <td style="text-align:center">g/dL</td>
-            <td style="text-align:center">12.5 – 15.5</td>
-        </tr>
-        <tr>
-            <td>Colesterol Total (CT)</td>
-            <td style="text-align:center">177</td>
-            <td style="text-align:center">mg/dL</td>
-            <td style="text-align:center">hasta 199</td>
-        </tr>
-        <tr>
-            <td>Creatininemia</td>
-            <td style="text-align:center">1.1</td>
-            <td style="text-align:center">mg/dL</td>
-            <td style="text-align:center">0.5 – 1.2</td>
-        </tr>
-        <tr>
-            <td>Leucocitos totales</td>
-            <td style="text-align:center">7705</td>
-            <td style="text-align:center">cél/mm³</td>
-            <td style="text-align:center">4.000 – 10.500</td>
-        </tr>
-    </tbody>
+  <tr><th>Examen</th><th>Resultado</th><th>Unidad</th><th>Fecha</th></tr>
+  <tr><td>Leucocitos</td><td>14.2</td><td>10³/µL</td><td>12-09-2024</td></tr>
+  <tr><td>Proteína C reactiva</td><td>86</td><td>mg/L</td><td>12-09-2024</td></tr>
+  <tr><td>Glucosa plasmática en ayuno</td><td>148</td><td>mg/dL</td><td>13-09-2024</td></tr>
+  <tr><td>Creatinina</td><td>1.0</td><td>mg/dL</td><td>13-09-2024</td></tr>
 </table>
 
-<div class="pie">
-    Informe generado electrónicamente. Los valores no requieren firma manuscrita.
-</div>
-<div class="sintetico">
-    DATO SINTÉTICO — generado por IMPACTLAB con fines de demostración. No corresponde a un paciente real.
-</div>
+<h2>Imagenología</h2>
+<p class="prosa"><b>Ecotomografía abdominal (12-09-2024).</b> Conclusión del informe:
+"Vesícula biliar de paredes engrosadas de 5 mm, con múltiples imágenes litiásicas en su interior,
+la mayor de 12 mm. Vía biliar de calibre conservado. Hígado, páncreas y riñones sin hallazgos."</p>
 
+<h2>Indicaciones al alta</h2>
+<ul>
+  <li>Continuar Metformina 850 mg cada 12 horas.</li>
+  <li>Losartán potásico 50 mg al día.</li>
+  <li>Control en policlínico de cirugía en 14 días.</li>
+</ul>
+<div class="pie">Documento generado electrónicamente. Los valores no requieren firma manuscrita.</div>
+<div class="sint">DATO SINTÉTICO — generado por IMPACTLAB con fines de demostración.
+No corresponde a un paciente real.</div>
 </body>
 </html>

@@ -2,142 +2,70 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Informe de Laboratorio — PAC-0006</title>
+<title>Registro Ambulatorio — Red de Salud Cordillera</title>
 <style>
-    body {
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 13px;
-        color: #1a1a1a;
-        max-width: 720px;
-        margin: 20px auto;
-        padding: 0 16px;
-    }
-    .encabezado {
-        border-bottom: 2px solid #2c3e50;
-        padding-bottom: 10px;
-        margin-bottom: 16px;
-    }
-    .encabezado h1 {
-        font-size: 18px;
-        margin: 0 0 2px 0;
-        color: #2c3e50;
-    }
-    .encabezado p {
-        margin: 0;
-        font-size: 11px;
-        color: #555;
-    }
-    .datos-paciente {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 4px 20px;
-        margin-bottom: 18px;
-        background: #f5f6f7;
-        padding: 10px 14px;
-        border-radius: 4px;
-    }
-    .datos-paciente div {
-        font-size: 12px;
-    }
-    .datos-paciente strong {
-        color: #2c3e50;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 6px;
-    }
-    th, td {
-        border: 1px solid #d0d4d8;
-        padding: 6px 8px;
-        font-size: 12px;
-    }
-    th {
-        background: #2c3e50;
-        color: white;
-        text-align: left;
-    }
-    .pie {
-        margin-top: 24px;
-        font-size: 10px;
-        color: #888;
-        border-top: 1px solid #d0d4d8;
-        padding-top: 8px;
-    }
-    .sintetico {
-        margin-top: 4px;
-        font-size: 10px;
-        color: #b03030;
-        font-weight: bold;
-    }
+  body{font-family:Verdana, Geneva, sans-serif;font-size:13px;color:#1a1a1a;max-width:760px;margin:20px auto;padding:0 18px}
+  .cab{border-bottom:3px solid #5b3a29;padding-bottom:10px;margin-bottom:16px}
+  .cab h1{font-size:17px;margin:0 0 3px;color:#5b3a29}
+  .cab p{margin:0;font-size:11px;color:#555}
+  .datos{display:grid;grid-template-columns:1fr 1fr;gap:4px 20px;margin-bottom:18px;
+    background:#f5f6f7;padding:11px 14px;border-radius:4px;font-size:12px}
+  h2{font-size:13px;color:#5b3a29;border-bottom:1px solid #d0d4d8;padding-bottom:4px;
+    margin:22px 0 8px;text-transform:uppercase;letter-spacing:.04em}
+  table{width:100%;border-collapse:collapse;margin-top:6px}
+  th,td{border:1px solid #d0d4d8;padding:5px 8px;font-size:12px;vertical-align:top}
+  th{background:#5b3a29;color:#fff;text-align:left}
+  ul{margin:6px 0;padding-left:20px;font-size:12px}
+  li{margin-bottom:3px}
+  .prosa{font-size:12px;line-height:1.55;margin:6px 0}
+  .pie{margin-top:26px;font-size:10px;color:#888;border-top:1px solid #d0d4d8;padding-top:8px}
+  .sint{margin-top:4px;font-size:10px;color:#b03030;font-weight:bold}
 </style>
 </head>
 <body>
 
-<div class="encabezado">
-    <h1>Red de Salud Cordillera</h1>
-    <p>Av. Vicuña Mackenna 8900, La Florida, Santiago</p>
-    <p>INFORME DE LABORATORIO CLÍNICO</p>
+<div class="cab">
+  <h1>Red de Salud Cordillera</h1>
+  <p>Centro Ambulatorio · Registro de atenciones</p>
+  <p>COPIA DE REGISTRO CLÍNICO AMBULATORIO</p>
+</div>
+<div class="datos">
+  <div><b>Paciente (ref.):</b> PAC-0006</div>
+  <div><b>Emisión:</b> 04-08-2026</div>
+  <div><b>Rango solicitado:</b> 2022 – 2026</div>
+  <div><b>Registros:</b> 4 atenciones</div>
 </div>
 
-<div class="datos-paciente">
-    <div><strong>Paciente (ref.):</strong> PAC-0006</div>
-    <div><strong>Fecha de informe:</strong> 2026-08-05</div>
-    <div><strong>Sexo:</strong> M</div>
-    <div><strong>Edad:</strong> 76 años</div>
-    <div><strong>Tramo FONASA:</strong> C</div>
-    <div><strong>Servicio de Salud:</strong> Ñuble</div>
-</div>
+<h2>Atenciones</h2>
 
-<table>
-    <thead>
-        <tr>
-            <th>Analito</th>
-            <th style="text-align:center">Valor</th>
-            <th style="text-align:center">Unidad</th>
-            <th style="text-align:center">Rango de referencia</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>GLUCOSA (ayuno)</td>
-            <td style="text-align:center">132</td>
-            <td style="text-align:center">mg/dL</td>
-            <td style="text-align:center">70-99</td>
-        </tr>
-        <tr>
-            <td>HGB</td>
-            <td style="text-align:center">13.1</td>
-            <td style="text-align:center">g/dL</td>
-            <td style="text-align:center">13.0-17.0 (H) / 12.0-15.0 (M)</td>
-        </tr>
-        <tr>
-            <td>COL-TOTAL</td>
-            <td style="text-align:center">177</td>
-            <td style="text-align:center">mg/dL</td>
-            <td style="text-align:center">Deseable: <200</td>
-        </tr>
-        <tr>
-            <td>CREA</td>
-            <td style="text-align:center">1.1</td>
-            <td style="text-align:center">mg/dL</td>
-            <td style="text-align:center">0.7-1.4</td>
-        </tr>
-        <tr>
-            <td>WBC</td>
-            <td style="text-align:center">7.7</td>
-            <td style="text-align:center">10^3/uL</td>
-            <td style="text-align:center">4.5-11.0</td>
-        </tr>
-    </tbody>
-</table>
+<p class="prosa"><b>15-04-2026 · Kinesiología.</b> Ingresa a programa por gonalgia der. Refiere
+dolor 6/10 EVA al subir escaleras y al levantarse tras estar sentado. Se indica pauta de
+fortalecimiento de cuádriceps, 10 sesiones.</p>
 
-<div class="pie">
-    Informe generado electrónicamente. Los valores no requieren firma manuscrita.
-</div>
-<div class="sintetico">
-    DATO SINTÉTICO — generado por IMPACTLAB con fines de demostración. No corresponde a un paciente real.
-</div>
+<p class="prosa"><b>22-01-2026 · Medicina General.</b> Consulta por <b>lumbago mecánico</b> de 3
+semanas. Sin irradiación ni déficit neurológico. Se solicita radiografía. Indicación: paracetamol
+1 g c/8 h por 5 días y reposo relativo.</p>
 
+<p class="prosa"><b>22-01-2026 · Imagenología.</b> Rx columna lumbosacra AP y lateral. Informe:
+"Signos de espondiloartrosis lumbar de predominio L4-L5. Disminución del espacio intervertebral
+L4-L5. Alineación conservada. No se observan lesiones líticas ni blásticas."</p>
+
+<p class="prosa"><b>09-08-2022 · Oftalmología.</b> Control anual por diabetes tipo II. Fondo de ojo:
+sin signos de retinopatía diabética en ambos ojos. Se indica control anual.</p>
+
+<h2>Fármacos registrados en este centro</h2>
+<p class="prosa">losartan potasico 50 — 1 al dia. metformina 850 — 1 cada 12 hrs.
+paracetamol 1 g SOS dolor (indicado 01-2026, uso puntual).</p>
+
+<h2>Observaciones</h2>
+<p class="prosa">Paciente refiere alergia a antibióticos, no recuerda cuál. Se registra como
+alergia no precisada, pendiente de confirmar con otro prestador.</p>
+
+<h2>Laboratorio 2026</h2>
+<p class="prosa">Perfil lipídico 10-03-2026: colesterol total 184 mg/dl, HDL 41 mg/dl,
+LDL 112 mg/dl, triglicéridos 155 mg/dl. Hemoglobina glicada 7.1%.</p>
+<div class="pie">Documento generado electrónicamente. Los valores no requieren firma manuscrita.</div>
+<div class="sint">DATO SINTÉTICO — generado por IMPACTLAB con fines de demostración.
+No corresponde a un paciente real.</div>
 </body>
 </html>

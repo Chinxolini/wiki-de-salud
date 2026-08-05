@@ -5,6 +5,110 @@
     "centro_origen": { "type": "string" },
     "documento_ref": { "type": "string", "description": "file_id o identificador del documento del que se extrajo" },
     "extraccion_fallida": { "type": "boolean" },
+
+    "diagnosticos": {
+      "type": "array",
+      "description": "Antecedentes mórbidos y diagnósticos consignados. Se transcriben, NUNCA se infieren ni se agregan.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fecha": { "type": ["string", "null"], "description": "ISO 8601 o null si no consta" },
+          "nombre_original": { "type": "string", "description": "Como aparece literalmente en el documento" },
+          "nombre_canonico": { "type": "string", "description": "Nombre normalizado del diagnóstico" },
+          "estado": { "type": "string", "enum": ["activo", "resuelto", "no_consta"] },
+          "confianza": { "type": "string", "enum": ["alta", "media", "baja"] }
+        },
+        "required": ["fecha", "nombre_original", "nombre_canonico", "estado", "confianza"],
+        "additionalProperties": false
+      }
+    },
+
+    "alergias": {
+      "type": "array",
+      "description": "Dato crítico. Si el documento dice explícitamente que no hay alergias conocidas, se registra como tal.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sustancia": { "type": "string" },
+          "reaccion": { "type": ["string", "null"] },
+          "severidad": { "type": "string", "enum": ["leve", "moderada", "severa", "no_consta"] },
+          "confianza": { "type": "string", "enum": ["alta", "media", "baja"] }
+        },
+        "required": ["sustancia", "reaccion", "severidad", "confianza"],
+        "additionalProperties": false
+      }
+    },
+
+    "medicamentos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "nombre_original": { "type": "string" },
+          "principio_activo": { "type": "string", "description": "Normalizado. El mismo fármaco con distinto nombre comercial debe converger acá." },
+          "dosis": { "type": ["string", "null"] },
+          "frecuencia": { "type": ["string", "null"] },
+          "vigente": { "type": ["boolean", "null"], "description": "null si el documento no lo aclara" },
+          "confianza": { "type": "string", "enum": ["alta", "media", "baja"] }
+        },
+        "required": ["nombre_original", "principio_activo", "dosis", "frecuencia", "vigente", "confianza"],
+        "additionalProperties": false
+      }
+    },
+
+    "atenciones": {
+      "type": "array",
+      "description": "Consultas, urgencias y controles: por qué la persona fue y qué se registró.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fecha": { "type": ["string", "null"] },
+          "tipo": { "type": "string", "enum": ["consulta_ambulatoria", "urgencia", "control", "interconsulta", "hospitalizacion", "no_consta"] },
+          "especialidad": { "type": ["string", "null"] },
+          "motivo_consulta": { "type": "string", "description": "Lo que la persona refirió, transcrito" },
+          "hallazgos": { "type": ["string", "null"], "description": "Lo que el profesional consignó. Transcripción, no interpretación." },
+          "confianza": { "type": "string", "enum": ["alta", "media", "baja"] }
+        },
+        "required": ["fecha", "tipo", "especialidad", "motivo_consulta", "hallazgos", "confianza"],
+        "additionalProperties": false
+      }
+    },
+
+    "procedimientos": {
+      "type": "array",
+      "description": "Cirugías, procedimientos invasivos y hospitalizaciones.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fecha": { "type": ["string", "null"] },
+          "nombre_original": { "type": "string" },
+          "nombre_canonico": { "type": "string" },
+          "establecimiento": { "type": ["string", "null"] },
+          "confianza": { "type": "string", "enum": ["alta", "media", "baja"] }
+        },
+        "required": ["fecha", "nombre_original", "nombre_canonico", "establecimiento", "confianza"],
+        "additionalProperties": false
+      }
+    },
+
+    "imagenes": {
+      "type": "array",
+      "description": "Informes de imagenología. Se transcribe la conclusión del informe, nunca se reinterpreta la imagen.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fecha": { "type": ["string", "null"] },
+          "tipo_original": { "type": "string" },
+          "tipo_canonico": { "type": "string" },
+          "region": { "type": ["string", "null"] },
+          "conclusion_informe": { "type": "string", "description": "Textual, del informe radiológico" },
+          "confianza": { "type": "string", "enum": ["alta", "media", "baja"] }
+        },
+        "required": ["fecha", "tipo_original", "tipo_canonico", "region", "conclusion_informe", "confianza"],
+        "additionalProperties": false
+      }
+    },
+
     "examenes": {
       "type": "array",
       "items": {
@@ -36,8 +140,15 @@
         "additionalProperties": false
       }
     },
+
+    "campos_ilegibles": {
+      "type": "array",
+      "description": "Lo que no se pudo leer con certeza. Va al expediente como ilegible, visible y enlazado a su original. Nunca se rellena.",
+      "items": { "type": "string" }
+    },
+
     "notas_extraccion": { "type": "string" }
   },
-  "required": ["paciente_ref", "centro_origen", "documento_ref", "extraccion_fallida", "examenes", "notas_extraccion"],
+  "required": ["paciente_ref", "centro_origen", "documento_ref", "extraccion_fallida", "diagnosticos", "alergias", "medicamentos", "atenciones", "procedimientos", "imagenes", "examenes", "campos_ilegibles", "notas_extraccion"],
   "additionalProperties": false
 }
