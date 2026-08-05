@@ -20,3 +20,6 @@ registro/
 # con `git checkout -- casos/`. Se excluye con `casos/*` y no con `casos/`
 # porque git no desciende a un directorio excluido y la negacion no aplicaria.
 !casos/CASO-0006/
+
+.vercel
+.env*

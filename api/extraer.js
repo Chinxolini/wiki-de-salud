@@ -23,8 +23,14 @@ const FICHAS = {
 
 // Cuotas. La instancia serverless se recicla, así que esto no es una defensa
 // dura — es un tope razonable que evita el accidente y el script casual.
-const LIMITE_POR_IP = 12;         // por ventana
-const LIMITE_GLOBAL = 300;        // por instancia
+//
+// El límite por IP es generoso a propósito: los jueces evalúan desde el wifi
+// del evento y comparten una sola IP tras el NAT. Un tope bajo los cortaría a
+// todos juntos, que es el peor resultado posible para una demo. Cada llamada
+// cuesta ~medio centavo de dólar; el freno que importa es el límite de gasto
+// configurado en la consola de Anthropic, no este contador.
+const LIMITE_POR_IP = 60;         // por ventana
+const LIMITE_GLOBAL = 400;        // por instancia
 const VENTANA_MS = 15 * 60 * 1000;
 
 const usoPorIP = new Map();
