@@ -33,28 +33,31 @@
   input[type=text],input[type=email],input[type=tel],select,textarea{
     width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;
     background:var(--bg);color:var(--ink);font:inherit;font-size:.95rem}
-  textarea{min-height:70px;resize:vertical}
+  input[type=text].codigo{font-size:1.5rem;letter-spacing:.4em;text-align:center;
+    font-family:ui-monospace,Menlo,Consolas,monospace;padding:14px}
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
   @media(max-width:560px){.grid2{grid-template-columns:1fr}}
-  .prest{display:flex;gap:11px;align-items:flex-start;padding:11px;border:1px solid var(--line);
+  .prest{display:flex;gap:11px;align-items:flex-start;padding:12px;border:1px solid var(--line);
          border-radius:8px;margin-bottom:8px;cursor:pointer}
+  .prest:has(input:checked){border-color:var(--accent);background:var(--accent-soft)}
   .prest input{margin-top:3px;flex:none}
-  .prest .nm{font-weight:600;font-size:.92rem}
+  .prest .nm{font-weight:600;font-size:.92rem;display:block}
   .prest .ch{font-size:.79rem;color:var(--muted)}
-  .tag{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.04em;
-       padding:2px 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent);
-       text-transform:uppercase;margin-left:6px;vertical-align:1px}
   .poder{border:1px solid var(--line);border-radius:8px;background:var(--bg);
-         padding:16px;max-height:230px;overflow-y:auto;font-size:.85rem;line-height:1.5}
+         padding:16px;max-height:240px;overflow-y:auto;font-size:.85rem;line-height:1.5}
   .poder h4{margin:0 0 10px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em}
   .poder p{margin:0 0 9px}
   .check{display:flex;gap:11px;align-items:flex-start;margin-top:14px;font-size:.9rem}
   .check input{margin-top:4px;flex:none}
-  .via{border:1px solid var(--line);border-radius:10px;padding:14px}
-  .via:has(input[type=checkbox]:checked){border-color:var(--accent);background:var(--accent-soft)}
-  .drop{border:2px dashed var(--line);border-radius:10px;padding:22px;text-align:center;
-        cursor:pointer;display:grid;gap:5px;background:var(--bg)}
-  .drop:hover,.drop.over{border-color:var(--accent);background:var(--accent-soft)}
+  .si-no{display:flex;gap:10px;margin:4px 0 0}
+  .si-no label{display:flex;align-items:center;gap:8px;margin:0;padding:9px 18px;
+    border:1px solid var(--line);border-radius:8px;cursor:pointer;font-weight:600;font-size:.9rem}
+  .si-no label:has(input:checked){border-color:var(--accent);background:var(--accent-soft);
+    color:var(--accent)}
+  .si-no input{margin:0}
+  .subir{border:1px dashed var(--line);border-radius:9px;padding:14px;text-align:center;
+        cursor:pointer;background:var(--bg);font-size:.88rem;font-weight:600}
+  .subir:hover,.subir.over{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
   .arch{display:flex;justify-content:space-between;gap:10px;align-items:center;
         padding:8px 11px;border:1px solid var(--line);border-radius:7px;margin-top:7px;
         font-size:.85rem;background:var(--bg)}
@@ -64,15 +67,31 @@
   .aviso strong{color:var(--warn)}
   button{width:100%;padding:14px;border:0;border-radius:9px;background:var(--accent);
          color:#fff;font:inherit;font-weight:700;font-size:1rem;cursor:pointer;margin-top:6px}
+  button.sec{background:transparent;color:var(--accent);border:1px solid var(--accent);padding:10px}
   button:disabled{opacity:.4;cursor:not-allowed}
   @media (prefers-color-scheme: dark){ button{color:#10201b} }
   .foot{color:var(--muted);font-size:.78rem;text-align:center;margin-top:18px;line-height:1.6}
-  #salida{display:none}
+  #salida,#verificacion{display:none}
   .ok{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid var(--line);font-size:.9rem}
   .ok:last-child{border:0}
   .ok .ic{flex:none;color:var(--accent);font-weight:700}
   code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:4px;
        font-size:.85em;word-break:break-all}
+  dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);
+    max-width:640px;width:calc(100% - 32px);padding:0;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+  dialog::backdrop{background:rgba(0,0,0,.45)}
+  .dlg-head{position:sticky;top:0;background:var(--card);border-bottom:1px solid var(--line);
+    padding:16px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+  .dlg-head h3{margin:0;font-size:1rem}
+  .dlg-body{padding:20px;font-size:.86rem;line-height:1.6;max-height:65vh;overflow-y:auto}
+  .dlg-body p{margin:0 0 12px}
+  .cerrar{background:none;border:0;color:var(--muted);font-size:1.4rem;cursor:pointer;
+    width:auto;margin:0;padding:0 4px}
+  .link{background:none;border:0;color:var(--accent);text-decoration:underline;cursor:pointer;
+    font:inherit;font-weight:600;padding:0;width:auto;margin:0}
+  .sim{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.04em;
+    padding:2px 7px;border-radius:99px;background:var(--warn-soft);color:var(--warn);
+    text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -107,47 +126,58 @@
         <input type="tel" name="fono" placeholder="+56 9 ...">
       </div>
     </div>
-    <label>Cédula de identidad <span class="hint">— los centros la exigen; foto por ambos lados</span></label>
-    <input type="text" name="cedula" placeholder="[demo] adjuntar archivo" disabled
-           value="cedula-demo.jpg (simulado)">
+
+    <label style="margin-top:18px">Foto de tu cédula, por ambos lados</label>
+    <p class="hint" style="margin:0 0 8px">
+      Los centros la exigen para entregar una ficha. Es el único documento que necesitas.
+    </p>
+    <div class="subir" id="subirCedula">Elegir las fotos de tu cédula</div>
+    <input type="file" id="cedula" accept="image/*,.pdf" multiple hidden>
+    <div id="listaCedula"></div>
   </div>
 
   <!-- 2 -->
   <div class="card">
     <div class="step"><b>2</b> Dónde te has atendido</div>
     <p class="hint" style="margin:0 0 12px">
-      El núcleo del servicio es pedir tu ficha en <b>cada centro donde te atendiste</b> y juntar
-      todo en un solo expediente. Marca solo donde efectivamente te atendiste: no mandamos
-      solicitudes a ciegas, saturaría a los prestadores y no serviría de nada.
+      Marca cada lugar donde recuerdes haberte atendido. Pedimos tu ficha en todos y juntamos
+      todo en un solo expediente. Solo donde de verdad te atendiste: no mandamos solicitudes
+      a ciegas.
     </p>
     <div id="prestadores"></div>
-    <label>Otro centro <span class="hint">(opcional)</span></label>
-    <input type="text" name="otro" placeholder="Nombre del centro">
-    <label>Período aproximado</label>
-    <input type="text" name="periodo" placeholder="Ej.: 2020 a hoy" value="Últimos 5 años">
-
-    <label style="margin-top:20px">¿Ya tienes documentos? Adelántalos <span class="hint">(opcional)</span></label>
-    <p class="hint" style="margin:0 0 10px">
-      Exámenes sueltos, epicrisis o fichas que ya tengas entran directo al expediente, sin esperar
-      a nadie. El resto lo conseguimos nosotros: lo que traigas se suma, no reemplaza la búsqueda.
-    </p>
-    <div class="drop" id="drop">
-      <b>Arrastra tus archivos aquí</b>
-      <span class="hint">PDF, JPG o PNG. También sirven los escaneos y las fotos del papel.</span>
-      <input type="file" id="archivos" name="archivos" multiple
-             accept=".pdf,.jpg,.jpeg,.png" style="display:none">
-    </div>
-    <div id="listaArchivos"></div>
+    <label>¿Te atendiste en otro lugar? <span class="hint">(opcional)</span></label>
+    <input type="text" name="otro" placeholder="Escribe el nombre del centro o clínica">
+    <label>¿Desde cuándo, más o menos?</label>
+    <input type="text" name="periodo" placeholder="Ej.: desde 2020" value="Últimos 5 años">
   </div>
 
   <!-- 3 -->
-  <div class="card" id="cardPoder">
-    <div class="step"><b>3</b> Tu autorización</div>
+  <div class="card">
+    <div class="step"><b>3</b> ¿Ya tienes algún documento tuyo?</div>
+    <p class="hint" style="margin:0 0 10px">
+      Si tienes exámenes o informes guardados, súbelos y entran de inmediato al expediente.
+      Lo que traigas <b>se suma</b>: igual vamos a buscar el resto.
+    </p>
+    <div class="si-no">
+      <label><input type="radio" name="tiene" value="no" checked> No tengo</label>
+      <label><input type="radio" name="tiene" value="si"> Sí, tengo algunos</label>
+    </div>
+    <div id="bloqueSubir" style="display:none;margin-top:14px">
+      <div class="subir" id="subirDocs">Elegir mis documentos
+        <div class="hint" style="font-weight:400;margin-top:4px">PDF o fotos. También sirven los escaneos.</div>
+      </div>
+      <input type="file" id="archivos" accept=".pdf,.jpg,.jpeg,.png" multiple hidden>
+      <div id="listaArchivos"></div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="card">
+    <div class="step"><b>4</b> Tu autorización</div>
     <p class="hint" style="margin:0 0 12px">
       Para pedir tu ficha en tu nombre la ley exige un poder simple, firmado ante notario
       <em>o</em> por un sistema electrónico que garantice su autenticidad
-      (art. 13 letra b, Ley 20.584). Un simple “acepto los términos” no cumple. Este es el texto
-      completo que estás firmando:
+      (art. 13 letra b, Ley 20.584). Un “acepto los términos” no cumple. Esto es lo que firmas:
     </p>
 
     <div class="poder">
@@ -167,9 +197,11 @@
       correo. Desde que lo recibo revocado, se suprime todo de inmediato.</p>
       <p><b>Séptimo.</b> Se firma por sistema electrónico que garantiza su autenticidad
       (Ley 19.799). La constancia técnica va adjunta al documento.</p>
-      <p style="color:var(--muted)">Texto íntegro y anexo de autenticidad:
-      <code>legal/PODER-SIMPLE-mandato.md</code></p>
     </div>
+    <p style="margin:10px 0 0">
+      <button type="button" class="link" id="verPoder">Ver el texto legal completo y cómo se
+      acredita la firma →</button>
+    </p>
 
     <label class="check">
       <input type="checkbox" name="poder" required>
@@ -180,17 +212,11 @@
       <input type="checkbox" name="veracidad" required>
       <span>Declaro que soy la persona cuya ficha se solicita y que los datos son efectivos.</span>
     </label>
-
-    <p class="hint" style="margin:14px 0 0">
-      Al enviar te llega un código de un solo uso a tu correo. Validarlo es lo que convierte esto en
-      firma electrónica: acredita que quien firma controla esa casilla.
-    </p>
   </div>
 
-
-  <!-- 4 -->
+  <!-- 5 -->
   <div class="card">
-    <div class="step"><b>4</b> Qué recibes, y qué no</div>
+    <div class="step"><b>5</b> Qué recibes, y qué no</div>
     <div class="aviso">
       <p style="margin:0 0 9px"><strong>Esto no es un diagnóstico ni una indicación médica.</strong>
       Lo que te entregamos es <b>tu propia información</b>, transcrita y ordenada por un sistema
@@ -210,54 +236,170 @@
     </label>
   </div>
 
-  <button type="submit">Solicitar mi historial</button>
+  <button type="submit">Continuar y firmar</button>
   <p class="foot">
     Demo del Claude Impact Lab · Longevidad 2026 — Equipo LOS INMORTALES.<br>
     Datos 100% sintéticos. Ningún dato real se envía a ningún centro desde este formulario.
   </p>
 </form>
 
-<!-- resultado -->
+<!-- PASO DE FIRMA: el codigo de un solo uso -->
+<div id="verificacion">
+  <div class="card">
+    <div class="step"><b>✍</b> Firma tu poder</div>
+    <p style="margin:0 0 6px;font-size:.92rem">
+      Te enviamos un <b>código de 6 dígitos</b> a <code id="correoEco"></code>.
+    </p>
+    <p class="hint" style="margin:0 0 16px">
+      Escribirlo aquí es lo que convierte esto en firma electrónica: acredita que quien firma
+      controla ese correo. Junto con tu cédula, el texto que leíste y la hora exacta, forma la
+      constancia de autenticidad que se adjunta al poder.
+    </p>
+
+    <div class="aviso" style="margin-bottom:16px">
+      <span class="sim">Demo</span>
+      <p style="margin:8px 0 0">Esta versión no manda correos de verdad. Tu código es
+      <b style="font-size:1.1em;letter-spacing:.15em" id="codigoDemo"></b> — escríbelo abajo para
+      seguir, tal como lo haría la persona al recibirlo.</p>
+    </div>
+
+    <label>Código recibido</label>
+    <input type="text" class="codigo" id="inputCodigo" maxlength="6" inputmode="numeric"
+           placeholder="······" autocomplete="one-time-code">
+    <div id="errorCodigo" class="hint" style="color:var(--warn);min-height:20px;margin-top:6px"></div>
+    <button type="button" id="btnFirmar">Firmar y enviar mis solicitudes</button>
+    <button type="button" class="sec" id="btnVolverForm">← Volver y corregir mis datos</button>
+  </div>
+</div>
+
+<!-- RESULTADO -->
 <div id="salida">
   <div class="card">
-    <div class="step"><b>✓</b> Solicitud registrada</div>
+    <div class="step"><b>✓</b> Listo, tu solicitud está en marcha</div>
     <div id="pasos"></div>
   </div>
+
+  <div class="card">
+    <div class="step"><b>◷</b> Qué va a pasar ahora</div>
+    <div id="seguimiento"></div>
+  </div>
+
   <div class="card">
     <div class="step"><b>i</b> Y cuando termine</div>
-    <p style="margin:0;font-size:.9rem">Recibes un paquete descargable con tu wiki de salud y los
-    originales de cada centro. Después borramos tu casilla y tus documentos, y te mandamos la
-    constancia. De ti no queda nada en nuestro sistema, salvo cuánto demoró cada centro en responder
-    — sin tu nombre.</p>
+    <p style="margin:0;font-size:.9rem">Recibes un paquete descargable con tu expediente y los
+    documentos originales de cada centro. Después borramos tu casilla y tus documentos, y te
+    mandamos la constancia. De ti no queda nada en nuestro sistema, salvo cuánto demoró cada centro
+    en responder — sin tu nombre.</p>
   </div>
 
   <div class="card" id="cardDemoVivo" style="display:none">
     <div class="step"><b>▶</b> Míralo funcionar ahora</div>
     <p class="hint" style="margin:0 0 12px">
-      Esto no es una maqueta: el botón manda una ficha sintética de demostración a Claude (Haiku)
-      y abajo aparece lo que extrajo y normalizó, en vivo.
+      Esto no es una maqueta. El botón manda una ficha de laboratorio de demostración a Claude y
+      abajo aparece lo que leyó y normalizó, en vivo, con el consumo real de tokens.
     </p>
-    <button type="button" id="btnDemo">Procesar una ficha de demostración con Claude</button>
+    <button type="button" id="btnDemo">Procesar una ficha con Claude</button>
     <div id="demoEstado" class="hint" style="margin-top:10px"></div>
     <div id="demoResultado" style="overflow-x:auto"></div>
   </div>
-  <p class="foot"><a href="#" onclick="location.reload();return false" style="color:var(--accent)">← Volver</a></p>
+
+  <p class="foot"><button type="button" class="link" onclick="location.reload()">← Empezar de nuevo</button></p>
 </div>
+
+<!-- El poder completo, al alcance de un click -->
+<dialog id="dlgPoder">
+  <div class="dlg-head">
+    <h3>Poder simple — texto íntegro</h3>
+    <button class="cerrar" onclick="document.getElementById('dlgPoder').close()">×</button>
+  </div>
+  <div class="dlg-body">
+    <p><b>PODER SIMPLE PARA SOLICITAR Y RECIBIR COPIA DE FICHA CLÍNICA</b></p>
+    <p>En [ciudad], a [fecha]. Yo, <b>[nombre completo del titular]</b>, cédula nacional de
+    identidad N° <b>[RUT]</b>, domiciliado/a en [domicilio], en adelante “el titular”, vengo en
+    conferir <b>poder simple</b> a <b>[mandatario]</b>, para que en mi nombre y representación
+    ejerza las facultades que a continuación se indican.</p>
+
+    <p><b>PRIMERO. Facultades conferidas.</b> El mandatario queda facultado para:
+    (a) solicitar, ante los prestadores individualizados en la cláusula SEGUNDA, copia íntegra de
+    mi ficha clínica y de los antecedentes que de mí obren en su poder, conforme al artículo 13 de
+    la Ley N° 20.584; (b) recibir dicha copia, en soporte físico o electrónico, y acusar recibo de
+    ella; (c) ejercer, respecto de esos mismos antecedentes, el <b>derecho de acceso</b> que
+    reconoce la legislación de protección de datos personales, y presentar las reclamaciones que
+    procedan ante la autoridad competente en caso de denegación, silencio o entrega defectuosa;
+    (d) efectuar las gestiones administrativas accesorias estrictamente necesarias, incluyendo
+    completar formularios, acompañar documentos de identidad y designar una casilla de correo
+    electrónico para la recepción de las respuestas.</p>
+
+    <p><b>SEGUNDO. Prestadores comprendidos.</b> Este poder se otorga exclusivamente respecto de
+    los prestadores que el titular seleccionó al momento de firmar. No se extiende a ningún otro.</p>
+
+    <p><b>TERCERO. Finalidad única y prohibición de uso ulterior.</b> Los antecedentes obtenidos
+    serán utilizados <b>únicamente</b> para consolidarlos y entregármelos a mí. El mandatario
+    <b>no queda facultado</b> para cederlos, comunicarlos, publicarlos ni tratarlos con ninguna
+    finalidad distinta, ni para consentir tratamientos por cuenta de terceros.</p>
+
+    <p><b>CUARTO. Casilla de correo designada.</b> Para la recepción de las respuestas se designa
+    una casilla creada a nombre del titular. Toda comunicación recibida en ella le será reenviada
+    íntegramente a su correo personal.</p>
+
+    <p><b>QUINTO. Supresión al término del encargo.</b> Cumplido el encargo y entregados los
+    antecedentes, el mandatario <b>suprimirá</b> de sus sistemas la casilla designada y la
+    totalidad de los documentos y datos personales obtenidos, conservando únicamente un registro
+    estadístico <b>sin datos personales</b> relativo al plazo y formato de respuesta de cada
+    prestador. Se entregará al titular constancia de la supresión con su fecha y hora.</p>
+
+    <p><b>SEXTO. Vigencia y revocación.</b> Este poder rige por el plazo necesario para el
+    cumplimiento del encargo. El titular <b>puede revocarlo en cualquier momento, sin expresión de
+    causa</b>, mediante comunicación escrita, incluso por correo electrónico. La revocación produce
+    efectos desde su recepción y obliga a la supresión inmediata conforme a la cláusula QUINTA.</p>
+
+    <p><b>SÉPTIMO. Forma de otorgamiento.</b> Este poder se otorga y firma <b>a través de un
+    sistema electrónico que garantiza su autenticidad</b>, en los términos del artículo 13 letra b)
+    de la Ley N° 20.584 y de la Ley N° 19.799 sobre documentos electrónicos y firma electrónica. La
+    constancia técnica de la firma se incorpora como Anexo de Autenticidad y forma parte integrante
+    de este instrumento.</p>
+
+    <p><b>OCTAVO. Declaración del titular.</b> Declaro que la información proporcionada es
+    efectiva, que soy la persona cuya ficha clínica se solicita, y que comprendo el alcance de las
+    facultades que confiero.</p>
+
+    <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+
+    <p><b>ANEXO DE AUTENTICIDAD — qué queda registrado de tu firma</b></p>
+    <p>La ley pide un sistema <em>que garantice la autenticidad</em>, sin definir cómo. Esto es lo
+    que registramos y adjuntamos al poder, y lo que se muestra si un prestador lo objeta:</p>
+    <p>
+      • <b>Identidad declarada</b>: nombre, RUT, correo, teléfono.<br>
+      • <b>Documento de identidad</b>: imagen de la cédula por ambos lados.<br>
+      • <b>Prueba de control del correo</b>: código de un solo uso enviado y validado, con hora de
+        emisión y de validación. Es el elemento nuclear de la firma electrónica simple.<br>
+      • <b>Manifestación de voluntad</b>: el texto íntegro mostrado en pantalla antes de firmar, más
+        la marca de aceptación expresa, nunca premarcada.<br>
+      • <b>Integridad</b>: hash SHA-256 del documento al momento de firmar.<br>
+      • <b>Sello de tiempo</b>: fecha y hora UTC de cada paso.<br>
+      • <b>Trazas técnicas</b>: IP, navegador, identificador de sesión.<br>
+      • <b>Constancia de envío</b>: copia íntegra del poder firmado, enviada al correo del titular.
+    </p>
+    <p class="hint">Esto es firma electrónica <b>simple</b>, hecha bien. No es firma avanzada y no
+    afirmamos que lo sea: la ley no la exige para este trámite.</p>
+  </div>
+</dialog>
 
 </div>
 
 <script>
-// L14 — el canal es un atributo del prestador, no una constante del sistema.
-// Espejo de prestadores/protocolos.json (en producto se carga desde ahí).
+// L14 — el canal es un atributo del prestador, pero al usuario no le importa si
+// es formulario web o mostrador: le importa cuanto demora. La jerga se queda en
+// el sistema (prestadores/protocolos.json); aca se muestra lo util.
 const PRESTADORES = [
   {id:"chp",          nombre:"Clínica Hospital del Profesor", canal:"formulario_web",
-   detalle:"Formulario web · responde por correo · medido: contestó el mismo día"},
+   demora:"Suele contestar el mismo día"},
   {id:"hcuch",        nombre:"Hospital Clínico Universidad de Chile", canal:"formulario_web",
-   detalle:"OIRS MINSAL · formulario web · plazo declarado 20 días hábiles"},
+   demora:"Hasta 20 días hábiles"},
   {id:"integramedica",nombre:"IntegraMédica (Bupa)", canal:"formulario_web",
-   detalle:"Formulario web · cubre los 30+ centros de la red · 5 días hábiles"},
+   demora:"Unos 5 días hábiles · cubre los 30+ centros de la red"},
   {id:"redsalud",     nombre:"RedSalud", canal:"presencial",
-   detalle:"Presencial y por cada sede donde te atendiste · 10-20 días hábiles"}
+   demora:"Entre 10 y 20 días hábiles · hay que pedirlo en cada sede"}
 ];
 const ETIQUETA = {formulario_web:"formulario web", presencial:"presencial", correo:"correo"};
 
@@ -265,101 +407,146 @@ document.getElementById("prestadores").innerHTML = PRESTADORES.map(p=>`
   <label class="prest">
     <input type="checkbox" name="prestador" value="${p.id}">
     <span>
-      <span class="nm">${p.nombre}<span class="tag">${ETIQUETA[p.canal]}</span></span>
-      <span class="ch">${p.detalle}</span>
+      <span class="nm">${p.nombre}</span>
+      <span class="ch">${p.demora}</span>
     </span>
   </label>`).join("");
 
-// --- Documentos adelantados ----------------------------------------------------
-// Lo que la persona ya tiene se suma al expediente; no reemplaza la busqueda en
-// los prestadores, que es el nucleo del servicio. El poder se firma siempre: el
-// modelo junta el contenido de varias fichas y para eso hay que ir a buscarlas.
-const inputArchivos = document.getElementById("archivos");
-const drop = document.getElementById("drop");
-let archivos = [];
+// --- Adjuntos: el selector se abre SOLO cuando la persona lo pide -------------
+function gestorArchivos(idBoton, idInput, idLista, alCambiar){
+  const boton = document.getElementById(idBoton);
+  const input = document.getElementById(idInput);
+  const lista = document.getElementById(idLista);
+  let items = [];
 
-function pintarArchivos(){
-  document.getElementById("listaArchivos").innerHTML = archivos.map((a,i)=>`
-    <div class="arch"><span>${a.name} <span class="hint">(${(a.size/1024).toFixed(0)} KB)</span></span>
-    <span class="x" data-i="${i}">quitar</span></div>`).join("");
-  document.querySelectorAll(".arch .x").forEach(x=>x.onclick=()=>{
-    archivos.splice(+x.dataset.i,1); pintarArchivos();
-  });
+  function pintar(){
+    lista.innerHTML = items.map((a,i)=>`
+      <div class="arch"><span>${a.name} <span class="hint">(${(a.size/1024).toFixed(0)} KB)</span></span>
+      <span class="x" data-i="${i}">quitar</span></div>`).join("");
+    lista.querySelectorAll(".x").forEach(x=>x.onclick=()=>{
+      items.splice(+x.dataset.i,1); pintar(); alCambiar && alCambiar(items);
+    });
+    alCambiar && alCambiar(items);
+  }
+  boton.addEventListener("click", ()=>input.click());
+  input.addEventListener("change", e=>{ items = items.concat(Array.from(e.target.files)); pintar(); });
+  ["dragenter","dragover"].forEach(ev=>boton.addEventListener(ev,e=>{
+    e.preventDefault(); boton.classList.add("over");
+  }));
+  ["dragleave","drop"].forEach(ev=>boton.addEventListener(ev,e=>{
+    e.preventDefault(); boton.classList.remove("over");
+  }));
+  boton.addEventListener("drop", e=>{ items = items.concat(Array.from(e.dataTransfer.files)); pintar(); });
+  return ()=>items;
 }
-function agregar(lista){
-  archivos = archivos.concat(Array.from(lista));
-  pintarArchivos();
-}
-drop.addEventListener("click", ()=>inputArchivos.click());
-inputArchivos.addEventListener("change", e=>agregar(e.target.files));
-["dragenter","dragover"].forEach(ev=>drop.addEventListener(ev, e=>{
-  e.preventDefault(); drop.classList.add("over");
+const getCedula   = gestorArchivos("subirCedula","cedula","listaCedula");
+const getArchivos = gestorArchivos("subirDocs","archivos","listaArchivos");
+
+// El bloque de subida aparece solo si la persona dice que si. Antes se mostraba
+// siempre y la gente se ponia a buscar archivos sin necesitarlo.
+document.querySelectorAll("[name=tiene]").forEach(r=>r.addEventListener("change", ()=>{
+  const si = document.querySelector("[name=tiene]:checked").value === "si";
+  document.getElementById("bloqueSubir").style.display = si ? "" : "none";
 }));
-["dragleave","drop"].forEach(ev=>drop.addEventListener(ev, e=>{
-  e.preventDefault(); drop.classList.remove("over");
-}));
-drop.addEventListener("drop", e=>agregar(e.dataTransfer.files));
+
+document.getElementById("verPoder").addEventListener("click",
+  ()=>document.getElementById("dlgPoder").showModal());
+
+// --- Estado del envio ---------------------------------------------------------
+let datos = null;
+let codigoEsperado = null;
 
 document.getElementById("f").addEventListener("submit", e=>{
   e.preventDefault();
   const d = new FormData(e.target);
-
   const sel = PRESTADORES.filter(p=>d.getAll("prestador").includes(p.id));
+  const archivos = getArchivos();
+
   if(!sel.length && !archivos.length){
-    alert("Marca al menos un centro donde te hayas atendido, o sube algún documento que ya tengas.");
+    alert("Marca al menos un lugar donde te hayas atendido, o sube algún documento que ya tengas.");
     return;
   }
+  datos = { correo:d.get("correo"), nombre:(d.get("nombre")||"").trim(), sel, archivos,
+            cedula:getCedula() };
 
-  const nombre = (d.get("nombre")||"").trim();
+  codigoEsperado = String(Math.floor(100000 + Math.random()*900000));
+  document.getElementById("correoEco").textContent = datos.correo;
+  document.getElementById("codigoDemo").textContent = codigoEsperado;
+  document.getElementById("f").style.display="none";
+  document.getElementById("verificacion").style.display="block";
+  window.scrollTo({top:0,behavior:"smooth"});
+  document.getElementById("inputCodigo").focus();
+});
+
+document.getElementById("btnVolverForm").addEventListener("click", ()=>{
+  document.getElementById("verificacion").style.display="none";
+  document.getElementById("f").style.display="block";
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+
+document.getElementById("btnFirmar").addEventListener("click", ()=>{
+  const err = document.getElementById("errorCodigo");
+  const val = document.getElementById("inputCodigo").value.trim();
+  if(val !== codigoEsperado){
+    err.textContent = val ? "Ese código no coincide. Revísalo e inténtalo de nuevo."
+                          : "Escribe el código para poder firmar.";
+    return;
+  }
+  err.textContent = "";
+  mostrarResultado();
+});
+
+function mostrarResultado(){
+  const {correo, nombre, sel, archivos} = datos;
   const casilla = nombre.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
                     .replace(/[^a-z\s]/g,"").trim().split(/\s+/).slice(0,2).join(".")
                   + "@chiledao.cl";
-
-  const auto = sel.filter(p=>p.canal==="correo");
+  const auto  = sel.filter(p=>p.canal==="correo");
   const asist = sel.filter(p=>p.canal!=="correo");
+  const ahora = new Date();
   const pasos = [];
   let n = 0;
   const paso = t => pasos.push([String(++n), t]);
 
-  paso("Se te envió un <b>código de un solo uso</b> a <code>"+d.get("correo")+"</code>. "+
-       "Al validarlo queda firmado el poder, con su anexo de autenticidad (hash del documento, "+
-       "sello de tiempo y constancia de control del correo).");
+  paso("<b>Poder firmado</b> a las "+ahora.toLocaleTimeString("es-CL")+". Se generó su constancia "+
+       "de autenticidad: código validado, tu cédula, el texto que leíste, el hash del documento y "+
+       "el sello de tiempo. Te llega una copia íntegra a <code>"+correo+"</code>.");
   if(archivos.length){
-    paso("<b>"+archivos.length+" documento"+(archivos.length>1?"s":"")+"</b> que adelantaste, en "+
-         "proceso ahora mismo: "+archivos.map(a=>"<code>"+a.name+"</code>").join(", ")+". "+
-         "Se leen, se transcriben y se normalizan al mismo esquema. Esta parte de tu expediente "+
-         "está lista en minutos, mientras el resto se va a buscar.");
+    paso("<b>"+archivos.length+" documento"+(archivos.length>1?"s":"")+"</b> que adelantaste, "+
+         "leyéndose ahora: "+archivos.map(a=>"<code>"+a.name+"</code>").join(", ")+".");
   }
   if(sel.length){
     paso("Se creó tu <b>casilla espejo</b> <code>"+casilla+"</code>. Es la dirección que se declara "+
          "ante cada centro, y todo lo que llegue ahí se te reenvía íntegro.");
     paso("<b>"+sel.length+" solicitud"+(sel.length>1?"es":"")+"</b> preparada"+(sel.length>1?"s":"")+
-         ", una por centro, con el texto legal invocando el art. 13 de la Ley 20.584 y exigiendo "+
-         "<b>formato digital legible</b>."+
-         (auto.length? " <b>"+auto.length+"</b> se envía"+(auto.length>1?"n":"")+" automáticamente por correo.":"")+
-         (asist.length? " <b>"+asist.length+"</b> requiere"+(asist.length>1?"n":"")+" acción asistida ("+
-           asist.map(p=>p.nombre+" — "+ETIQUETA[p.canal]).join("; ")+
-           "): ningún prestador levantado recibe por correo. La ida es formulario o mostrador; "+
-           "la vuelta siempre es correo, a tu casilla espejo.":""));
-    paso("El agente queda <b>escuchando la casilla</b>. Cuando llegue una respuesta, lee, clasifica "+
-         "y extrae; lo que venga dudoso escala a un modelo mayor antes de entrar al expediente.");
-  }
-  if(sel.length && archivos.length){
-    paso("Todo converge en <b>un solo expediente</b>: lo que adelantaste y lo que vayan mandando "+
-         "los centros se normalizan al mismo esquema, así que tus exámenes quedan comparables "+
-         "entre sí aunque cada laboratorio los nombre distinto.");
+         ", una por centro, invocando el art. 13 de la Ley 20.584 y exigiendo <b>formato digital "+
+         "legible</b>."+
+         (auto.length?" <b>"+auto.length+"</b> sale"+(auto.length>1?"n":"")+" por correo ahora mismo.":"")+
+         (asist.length?" <b>"+asist.length+"</b> "+(asist.length>1?"van":"va")+" por el canal propio "+
+           "de cada centro ("+asist.map(p=>p.nombre).join(", ")+"), que no admite envío automático: "+
+           "lo hace una persona del equipo hoy mismo.":""));
   }
   document.getElementById("pasos").innerHTML =
-    pasos.map(([n,t])=>`<div class="ok"><span class="ic">${n}</span><span>${t}</span></div>`).join("");
-  document.getElementById("f").style.display="none";
+    pasos.map(([i,t])=>`<div class="ok"><span class="ic">${i}</span><span>${t}</span></div>`).join("");
+
+  // Seguimiento: la persona necesita saber que esperar y cuando, no quedarse en blanco.
+  const filas = sel.map(p=>`<div class="ok"><span class="ic">◷</span><span><b>${p.nombre}</b><br>
+    <span class="hint">${p.demora}. Te avisamos por correo apenas conteste.</span></span></div>`).join("");
+  document.getElementById("seguimiento").innerHTML =
+    (archivos.length? `<div class="ok"><span class="ic">✓</span><span><b>Tus documentos</b><br>
+      <span class="hint">Listos en minutos: ya están en el expediente.</span></span></div>`:"") +
+    filas +
+    `<p class="hint" style="margin:14px 0 0">No tienes que hacer nada más ni volver a esta página.
+     Todo llega a tu correo. Si quieres detener el proceso, respondes cualquiera de esos correos
+     con “revoco” y borramos todo el mismo día.</p>`;
+
+  document.getElementById("verificacion").style.display="none";
   document.getElementById("salida").style.display="block";
-  // El demo en vivo necesita el backend: solo aparece cuando la pagina corre
-  // servida (Vercel o local con `vercel dev`), no abierta como archivo.
   if(location.protocol.startsWith("http")){
     document.getElementById("cardDemoVivo").style.display="block";
   }
   window.scrollTo({top:0,behavior:"smooth"});
-});
+}
 
 // --- Demo en vivo: una ficha sintetica pasa por Claude via /api/extraer -------
 document.getElementById("btnDemo").addEventListener("click", async ()=>{
@@ -368,17 +555,12 @@ document.getElementById("btnDemo").addEventListener("click", async ()=>{
   const out = document.getElementById("demoResultado");
   btn.disabled = true;
   out.innerHTML = "";
-  est.textContent = "Leyendo la ficha sintética…";
+  est.textContent = "Claude está leyendo la ficha y normalizando los resultados…";
   try{
-    const ficha = await fetch("/demo/ficha-centro_a.html");
-    if(!ficha.ok) throw new Error("No se pudo leer la ficha de demo ("+ficha.status+").");
-    const documento = await ficha.text();
-
-    est.textContent = "Claude (Haiku) está extrayendo y normalizando…";
     const r = await fetch("/api/extraer", {
-      method: "POST",
-      headers: {"content-type":"application/json"},
-      body: JSON.stringify({documento, centro:"Centro Médico San Rafael"})
+      method:"POST",
+      headers:{"content-type":"application/json"},
+      body: JSON.stringify({ficha:"centro_a"})
     });
     const data = await r.json();
     if(!r.ok) throw new Error(data.error || "Error del servidor.");
@@ -393,7 +575,7 @@ document.getElementById("btnDemo").addEventListener("click", async ()=>{
         <thead><tr>
           <th style="text-align:left;padding:6px;border-bottom:2px solid var(--line)">Como lo dice el centro</th>
           <th style="text-align:left;padding:6px;border-bottom:2px solid var(--line)">Valor original</th>
-          <th style="text-align:left;padding:6px;border-bottom:2px solid var(--line)">Canónico</th>
+          <th style="text-align:left;padding:6px;border-bottom:2px solid var(--line)">Nombre canónico</th>
           <th style="text-align:left;padding:6px;border-bottom:2px solid var(--line)">Valor canónico</th>
           <th style="text-align:left;padding:6px;border-bottom:2px solid var(--line)">Confianza</th>
         </tr></thead><tbody>${filas}</tbody></table>`;

@@ -1,17 +1,48 @@
 // Función serverless de Vercel — el mock del pipeline, corriendo de verdad.
 //
-// Recibe el texto de una ficha clínica (HTML o texto plano) y devuelve el
-// registro extraído y normalizado por Claude. La API key vive en la variable
-// de entorno ANTHROPIC_API_KEY del proyecto Vercel: nunca toca el navegador.
+// Está pensada para que los jueces prueben en vivo sin que nadie pueda usar la
+// cuenta de terceros. La clave vive en la variable de entorno del proyecto y
+// nunca toca el navegador; lo que se protege acá es el USO del endpoint:
 //
-// Guardarraíles para que la demo pública no reviente la cuenta:
-//   - Modelo fijo: Haiku. No se puede pedir otro desde afuera.
-//   - Entrada limitada a 40.000 caracteres, salida a 2.000 tokens.
-//   - Datos sintéticos: esto es una demo. No subir documentos reales.
+//   1. Catálogo cerrado. No se acepta texto arbitrario: solo se puede pedir una
+//      de las fichas sintéticas que vienen en el repo. Es la diferencia entre
+//      una demo y un proxy gratuito a la API de Anthropic.
+//   2. Modelo fijo (Haiku) y salida acotada. No se puede escalar desde afuera.
+//   3. Límite por IP y límite global de la instancia, para que un script no
+//      queme el presupuesto del Lab.
 
 const MODELO = "claude-haiku-4-5";
-const MAX_ENTRADA = 40000;
 const MAX_TOKENS = 2000;
+
+// Catálogo cerrado: las únicas entradas posibles. Cualquier otra cosa se rechaza.
+const FICHAS = {
+  centro_a: { archivo: "ficha-centro_a.html", centro: "Centro Médico San Rafael" },
+  centro_b: { archivo: "ficha-centro_b.html", centro: "Laboratorio Clínico Los Andes" },
+  centro_c: { archivo: "ficha-centro_c.html", centro: "Red de Salud Cordillera" },
+};
+
+// Cuotas. La instancia serverless se recicla, así que esto no es una defensa
+// dura — es un tope razonable que evita el accidente y el script casual.
+const LIMITE_POR_IP = 12;         // por ventana
+const LIMITE_GLOBAL = 300;        // por instancia
+const VENTANA_MS = 15 * 60 * 1000;
+
+const usoPorIP = new Map();
+let usoGlobal = 0;
+
+function excedeCuota(ip) {
+  if (++usoGlobal > LIMITE_GLOBAL) return "La demo alcanzó su límite de uso. Escríbenos y la reactivamos.";
+  const ahora = Date.now();
+  const previo = usoPorIP.get(ip);
+  if (!previo || ahora - previo.desde > VENTANA_MS) {
+    usoPorIP.set(ip, { desde: ahora, n: 1 });
+    return null;
+  }
+  if (++previo.n > LIMITE_POR_IP) {
+    return "Demasiadas pruebas seguidas. Espera unos minutos e intenta de nuevo.";
+  }
+  return null;
+}
 
 const SYSTEM = `Eres el extractor de un servicio que ordena el historial clínico de una persona.
 Recibes una ficha de laboratorio (HTML o texto). Transcribe lo que efectivamente dice y
@@ -49,13 +80,27 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Falta ANTHROPIC_API_KEY en el entorno del proyecto." });
   }
 
-  const { documento, centro } = req.body || {};
-  if (!documento || typeof documento !== "string") {
-    return res.status(400).json({ error: "Falta 'documento' (texto de la ficha)." });
+  const ip = (req.headers["x-forwarded-for"] || "desconocida").split(",")[0].trim();
+  const cuota = excedeCuota(ip);
+  if (cuota) return res.status(429).json({ error: cuota });
+
+  // Solo se acepta un id del catálogo. Nada de texto libre.
+  const { ficha } = req.body || {};
+  const elegida = FICHAS[ficha];
+  if (!elegida) {
+    return res.status(400).json({
+      error: "Ficha no válida.",
+      disponibles: Object.keys(FICHAS),
+    });
   }
-  if (documento.length > MAX_ENTRADA) {
-    return res.status(413).json({ error: `Documento demasiado largo (máx. ${MAX_ENTRADA} caracteres en la demo).` });
+
+  // El documento se lee del propio despliegue, no de lo que mande el cliente.
+  const base = `https://${req.headers.host}`;
+  const doc = await fetch(`${base}/demo/${elegida.archivo}`);
+  if (!doc.ok) {
+    return res.status(500).json({ error: `No se pudo leer la ficha de demo (${doc.status}).` });
   }
+  const documento = await doc.text();
 
   const r = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -70,14 +115,14 @@ export default async function handler(req, res) {
       system: SYSTEM,
       messages: [{
         role: "user",
-        content: `Centro de origen: ${centro || "no informado"}\n\nFicha:\n${documento}`,
+        content: `Centro de origen: ${elegida.centro}\n\nFicha:\n${documento}`,
       }],
     }),
   });
 
   if (!r.ok) {
     const detalle = await r.text();
-    return res.status(502).json({ error: "La llamada a Claude falló.", detalle: detalle.slice(0, 500) });
+    return res.status(502).json({ error: "La llamada a Claude falló.", detalle: detalle.slice(0, 300) });
   }
 
   const data = await r.json();
@@ -85,10 +130,9 @@ export default async function handler(req, res) {
 
   let registro;
   try {
-    // Haiku a veces envuelve el JSON en un fence; se tolera.
     registro = JSON.parse(texto.replace(/^```(json)?\s*/i, "").replace(/\s*```\s*$/, ""));
   } catch {
-    return res.status(502).json({ error: "La respuesta no fue JSON válido.", crudo: texto.slice(0, 500) });
+    return res.status(502).json({ error: "La respuesta no fue JSON válido.", crudo: texto.slice(0, 300) });
   }
 
   return res.status(200).json({
