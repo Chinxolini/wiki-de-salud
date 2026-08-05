@@ -114,55 +114,30 @@
 
   <!-- 2 -->
   <div class="card">
-    <div class="step"><b>2</b> Qué quieres hacer</div>
-    <p class="hint" style="margin:0 0 14px">
-      Las dos vías llegan al mismo lugar: tu expediente ordenado, con cada dato enlazado a su
-      documento original. Puedes usar las dos a la vez.
+    <div class="step"><b>2</b> Dónde te has atendido</div>
+    <p class="hint" style="margin:0 0 12px">
+      El núcleo del servicio es pedir tu ficha en <b>cada centro donde te atendiste</b> y juntar
+      todo en un solo expediente. Marca solo donde efectivamente te atendiste: no mandamos
+      solicitudes a ciegas, saturaría a los prestadores y no serviría de nada.
     </p>
+    <div id="prestadores"></div>
+    <label>Otro centro <span class="hint">(opcional)</span></label>
+    <input type="text" name="otro" placeholder="Nombre del centro">
+    <label>Período aproximado</label>
+    <input type="text" name="periodo" placeholder="Ej.: 2020 a hoy" value="Últimos 5 años">
 
-    <div class="via">
-      <label class="check" style="margin:0">
-        <input type="checkbox" name="via" value="solicitar" checked id="viaSolicitar">
-        <span><b>A. No tengo mis documentos — consíguelos por mí</b>
-        <span class="hint" style="display:block">Pedimos tu ficha a cada centro por ti, con tu
-        poder firmado. Demora lo que demore cada prestador: días o semanas.</span></span>
-      </label>
-
-      <div id="bloqueSolicitar" style="margin-top:14px">
-        <p class="hint" style="margin:0 0 10px">
-          Marca solo los centros donde efectivamente te atendiste. No mandamos solicitudes a ciegas:
-          saturaría a los prestadores y no serviría de nada.
-        </p>
-        <div id="prestadores"></div>
-        <label>Otro centro <span class="hint">(opcional)</span></label>
-        <input type="text" name="otro" placeholder="Nombre del centro">
-        <label>Período aproximado</label>
-        <input type="text" name="periodo" placeholder="Ej.: 2020 a hoy" value="Últimos 5 años">
-      </div>
+    <label style="margin-top:20px">¿Ya tienes documentos? Adelántalos <span class="hint">(opcional)</span></label>
+    <p class="hint" style="margin:0 0 10px">
+      Exámenes sueltos, epicrisis o fichas que ya tengas entran directo al expediente, sin esperar
+      a nadie. El resto lo conseguimos nosotros: lo que traigas se suma, no reemplaza la búsqueda.
+    </p>
+    <div class="drop" id="drop">
+      <b>Arrastra tus archivos aquí</b>
+      <span class="hint">PDF, JPG o PNG. También sirven los escaneos y las fotos del papel.</span>
+      <input type="file" id="archivos" name="archivos" multiple
+             accept=".pdf,.jpg,.jpeg,.png" style="display:none">
     </div>
-
-    <div class="via" style="margin-top:14px">
-      <label class="check" style="margin:0">
-        <input type="checkbox" name="via" value="cargar" id="viaCargar">
-        <span><b>B. Ya tengo documentos — ordénalos ahora</b>
-        <span class="hint" style="display:block">Si ya tienes exámenes, epicrisis o tu ficha en PDF
-        o foto, súbelos y los procesamos de inmediato. Sin esperar a nadie.</span></span>
-      </label>
-
-      <div id="bloqueCargar" style="margin-top:14px;display:none">
-        <div class="drop" id="drop">
-          <b>Arrastra tus archivos aquí</b>
-          <span class="hint">PDF, JPG o PNG. También sirven los escaneos y las fotos del papel.</span>
-          <input type="file" id="archivos" name="archivos" multiple
-                 accept=".pdf,.jpg,.jpeg,.png" style="display:none">
-        </div>
-        <div id="listaArchivos"></div>
-        <p class="hint" style="margin:10px 0 0">
-          Los documentos se procesan y se te devuelven en el paquete. No los conservamos: se borran
-          igual que todo lo demás, con la misma constancia.
-        </p>
-      </div>
-    </div>
+    <div id="listaArchivos"></div>
   </div>
 
   <!-- 3 -->
@@ -212,20 +187,6 @@
     </p>
   </div>
 
-  <!-- 3b: solo vía B -->
-  <div class="card" id="cardSoloCarga" style="display:none">
-    <div class="step"><b>3</b> Tu autorización</div>
-    <p class="hint" style="margin:0 0 6px">
-      Como solo vas a subir documentos que ya tienes, <b>no hace falta ningún poder</b>: no vamos a
-      pedirle nada a nadie en tu nombre. Lo único que necesitamos es tu permiso para procesar los
-      archivos que subas.
-    </p>
-    <label class="check">
-      <input type="checkbox" name="consentimiento_carga">
-      <span>Autorizo a procesar los documentos que suba, <b>con la única finalidad</b> de ordenarlos
-      y devolvérmelos, y entiendo que se suprimen al terminar.</span>
-    </label>
-  </div>
 
   <!-- 4 -->
   <div class="card">
@@ -269,6 +230,17 @@
     constancia. De ti no queda nada en nuestro sistema, salvo cuánto demoró cada centro en responder
     — sin tu nombre.</p>
   </div>
+
+  <div class="card" id="cardDemoVivo" style="display:none">
+    <div class="step"><b>▶</b> Míralo funcionar ahora</div>
+    <p class="hint" style="margin:0 0 12px">
+      Esto no es una maqueta: el botón manda una ficha sintética de demostración a Claude (Haiku)
+      y abajo aparece lo que extrajo y normalizó, en vivo.
+    </p>
+    <button type="button" id="btnDemo">Procesar una ficha de demostración con Claude</button>
+    <div id="demoEstado" class="hint" style="margin-top:10px"></div>
+    <div id="demoResultado" style="overflow-x:auto"></div>
+  </div>
   <p class="foot"><a href="#" onclick="location.reload();return false" style="color:var(--accent)">← Volver</a></p>
 </div>
 
@@ -298,33 +270,13 @@ document.getElementById("prestadores").innerHTML = PRESTADORES.map(p=>`
     </span>
   </label>`).join("");
 
-// --- Las dos vías de entrada -------------------------------------------------
-// A (solicitar) es el diferenciador: conseguimos la ficha por mandato.
-// B (cargar) da valor inmediato a quien ya tiene sus papeles y no quiere esperar.
-// Las dos desembocan en el mismo pipeline de extraccion y entrega.
-const vA = document.getElementById("viaSolicitar");
-const vB = document.getElementById("viaCargar");
-const cardPoder = document.getElementById("cardPoder");
-const cardSoloCarga = document.getElementById("cardSoloCarga");
+// --- Documentos adelantados ----------------------------------------------------
+// Lo que la persona ya tiene se suma al expediente; no reemplaza la busqueda en
+// los prestadores, que es el nucleo del servicio. El poder se firma siempre: el
+// modelo junta el contenido de varias fichas y para eso hay que ir a buscarlas.
 const inputArchivos = document.getElementById("archivos");
 const drop = document.getElementById("drop");
 let archivos = [];
-
-function sincronizar(){
-  document.getElementById("bloqueSolicitar").style.display = vA.checked ? "" : "none";
-  document.getElementById("bloqueCargar").style.display    = vB.checked ? "" : "none";
-  // El poder solo se exige si vamos a actuar en nombre de la persona. Si solo
-  // sube sus propios documentos, pedirle un mandato seria pedirle que autorice
-  // algo que no va a ocurrir.
-  const soloCarga = vB.checked && !vA.checked;
-  cardPoder.style.display = soloCarga ? "none" : "";
-  cardSoloCarga.style.display = soloCarga ? "" : "none";
-  cardPoder.querySelectorAll("input[type=checkbox]").forEach(c => c.required = !soloCarga);
-  document.querySelector("[name=consentimiento_carga]").required = soloCarga;
-}
-vA.addEventListener("change", sincronizar);
-vB.addEventListener("change", sincronizar);
-sincronizar();
 
 function pintarArchivos(){
   document.getElementById("listaArchivos").innerHTML = archivos.map((a,i)=>`
@@ -352,16 +304,10 @@ document.getElementById("f").addEventListener("submit", e=>{
   e.preventDefault();
   const d = new FormData(e.target);
 
-  if(!vA.checked && !vB.checked){
-    alert("Elige al menos una de las dos vías: que consigamos tus documentos, o subirlos tú.");
+  const sel = PRESTADORES.filter(p=>d.getAll("prestador").includes(p.id));
+  if(!sel.length && !archivos.length){
+    alert("Marca al menos un centro donde te hayas atendido, o sube algún documento que ya tengas.");
     return;
-  }
-  const sel = vA.checked ? PRESTADORES.filter(p=>d.getAll("prestador").includes(p.id)) : [];
-  if(vA.checked && !sel.length){
-    alert("Marca al menos un centro donde te hayas atendido."); return;
-  }
-  if(vB.checked && !archivos.length){
-    alert("Sube al menos un documento, o desmarca la vía B."); return;
   }
 
   const nombre = (d.get("nombre")||"").trim();
@@ -375,16 +321,16 @@ document.getElementById("f").addEventListener("submit", e=>{
   let n = 0;
   const paso = t => pasos.push([String(++n), t]);
 
-  if(vB.checked){
-    paso("<b>"+archivos.length+" documento"+(archivos.length>1?"s":"")+"</b> en proceso ahora mismo: "+
-         archivos.map(a=>"<code>"+a.name+"</code>").join(", ")+". "+
-         "Se leen, se transcriben y se normalizan nombres y unidades al mismo esquema. "+
-         "<b>No hay que esperar a nadie</b>: esta parte de tu expediente está lista en minutos.");
+  paso("Se te envió un <b>código de un solo uso</b> a <code>"+d.get("correo")+"</code>. "+
+       "Al validarlo queda firmado el poder, con su anexo de autenticidad (hash del documento, "+
+       "sello de tiempo y constancia de control del correo).");
+  if(archivos.length){
+    paso("<b>"+archivos.length+" documento"+(archivos.length>1?"s":"")+"</b> que adelantaste, en "+
+         "proceso ahora mismo: "+archivos.map(a=>"<code>"+a.name+"</code>").join(", ")+". "+
+         "Se leen, se transcriben y se normalizan al mismo esquema. Esta parte de tu expediente "+
+         "está lista en minutos, mientras el resto se va a buscar.");
   }
-  if(vA.checked){
-    paso("Se te envió un <b>código de un solo uso</b> a <code>"+d.get("correo")+"</code>. "+
-         "Al validarlo queda firmado el poder, con su anexo de autenticidad (hash del documento, "+
-         "sello de tiempo y constancia de control del correo).");
+  if(sel.length){
     paso("Se creó tu <b>casilla espejo</b> <code>"+casilla+"</code>. Es la dirección que se declara "+
          "ante cada centro, y todo lo que llegue ahí se te reenvía íntegro.");
     paso("<b>"+sel.length+" solicitud"+(sel.length>1?"es":"")+"</b> preparada"+(sel.length>1?"s":"")+
@@ -398,16 +344,69 @@ document.getElementById("f").addEventListener("submit", e=>{
     paso("El agente queda <b>escuchando la casilla</b>. Cuando llegue una respuesta, lee, clasifica "+
          "y extrae; lo que venga dudoso escala a un modelo mayor antes de entrar al expediente.");
   }
-  if(vA.checked && vB.checked){
-    paso("Todo converge en <b>un solo expediente</b>: lo que subiste y lo que vayan mandando los "+
-         "centros se normalizan al mismo esquema, así que tus exámenes quedan comparables entre sí "+
-         "aunque cada laboratorio los nombre distinto.");
+  if(sel.length && archivos.length){
+    paso("Todo converge en <b>un solo expediente</b>: lo que adelantaste y lo que vayan mandando "+
+         "los centros se normalizan al mismo esquema, así que tus exámenes quedan comparables "+
+         "entre sí aunque cada laboratorio los nombre distinto.");
   }
   document.getElementById("pasos").innerHTML =
     pasos.map(([n,t])=>`<div class="ok"><span class="ic">${n}</span><span>${t}</span></div>`).join("");
   document.getElementById("f").style.display="none";
   document.getElementById("salida").style.display="block";
+  // El demo en vivo necesita el backend: solo aparece cuando la pagina corre
+  // servida (Vercel o local con `vercel dev`), no abierta como archivo.
+  if(location.protocol.startsWith("http")){
+    document.getElementById("cardDemoVivo").style.display="block";
+  }
   window.scrollTo({top:0,behavior:"smooth"});
+});
+
+// --- Demo en vivo: una ficha sintetica pasa por Claude via /api/extraer -------
+document.getElementById("btnDemo").addEventListener("click", async ()=>{
+  const btn = document.getElementById("btnDemo");
+  const est = document.getElementById("demoEstado");
+  const out = document.getElementById("demoResultado");
+  btn.disabled = true;
+  out.innerHTML = "";
+  est.textContent = "Leyendo la ficha sintética…";
+  try{
+    const ficha = await fetch("/demo/ficha-centro_a.html");
+    if(!ficha.ok) throw new Error("No se pudo leer la ficha de demo ("+ficha.status+").");
+    const documento = await ficha.text();
+
+    est.textContent = "Claude (Haiku) está extrayendo y normalizando…";
+    const r = await fetch("/api/extraer", {
+      method: "POST",
+      headers: {"content-type":"application/json"},
+      body: JSON.stringify({documento, centro:"Centro Médico San Rafael"})
+    });
+    const data = await r.json();
+    if(!r.ok) throw new Error(data.error || "Error del servidor.");
+
+    const reg = data.registro;
+    const filas = (reg.resultados||[]).map(x=>
+      `<tr><td>${x.analito_original}</td><td>${x.valor_original} ${x.unidad_original}</td>`+
+      `<td><b>${x.analito_canonico}</b></td><td><b>${x.valor_canonico} ${x.unidad_canonica}</b></td>`+
+      `<td>${x.confianza}</td></tr>`).join("");
+    out.innerHTML =
+      `<table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-top:10px">
+        <thead><tr>
+          <th style="text-align:left;padding:6px;border-bottom:2px solid var(--line)">Como lo dice el centro</th>
+          <th style="text-align:left;padding:6px;border-bottom:2px solid var(--line)">Valor original</th>
+          <th style="text-align:left;padding:6px;border-bottom:2px solid var(--line)">Canónico</th>
+          <th style="text-align:left;padding:6px;border-bottom:2px solid var(--line)">Valor canónico</th>
+          <th style="text-align:left;padding:6px;border-bottom:2px solid var(--line)">Confianza</th>
+        </tr></thead><tbody>${filas}</tbody></table>`;
+    out.querySelectorAll("td").forEach(td=>{
+      td.style.padding="6px"; td.style.borderBottom="1px solid var(--line)";
+    });
+    est.textContent = `Listo — ${reg.resultados?.length ?? 0} analitos · ${data.uso.modelo} · `+
+      `${data.uso.tokens_entrada} tokens de entrada, ${data.uso.tokens_salida} de salida.`;
+  }catch(err){
+    est.textContent = "⚠ " + err.message;
+  }finally{
+    btn.disabled = false;
+  }
 });
 </script>
 </body>
