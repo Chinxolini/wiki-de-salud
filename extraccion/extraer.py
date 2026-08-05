@@ -25,8 +25,11 @@ AQUI = Path(__file__).resolve().parent
 PROMPT_EXTRACCION = AQUI.parent / "prompts" / "extraccion.md"
 SCHEMA_WIKI_SALUD = AQUI.parent / "schemas" / "wiki-salud.schema.json"
 
-# Modelo. Cambiar acá y en ningún otro lado.
-MODELO = "claude-opus-5"
+# Modelo por defecto. Haiku basta para esta extracción y es ~20x más barato que
+# Opus: verificado 5-ago contra las 3 fichas de demo, resultado idéntico
+# (mismos canónicos, misma conversión de unidades). Se puede sobreescribir con
+# --modelo sin tocar el código.
+MODELO = "claude-haiku-4-5"
 MAX_TOKENS = 16000
 
 
@@ -65,7 +68,7 @@ def bloque_documento(client, ruta: Path):
     return {"type": "text", "text": ruta.read_text(encoding="utf-8")}, ruta.name
 
 
-def extraer(client, ruta: Path, centro: str, paciente_ref: str) -> dict:
+def extraer(client, ruta: Path, centro: str, paciente_ref: str, modelo: str = MODELO) -> dict:
     """Una llamada a Claude por documento. Devuelve el registro `wiki_salud`."""
     prompt, schema = cargar_legos()
     bloque, doc_ref = bloque_documento(client, ruta)
@@ -77,7 +80,7 @@ def extraer(client, ruta: Path, centro: str, paciente_ref: str) -> dict:
     )
 
     respuesta = client.beta.messages.create(
-        model=MODELO,
+        model=modelo,
         max_tokens=MAX_TOKENS,
         betas=["files-api-2025-04-14"],
         system=[
@@ -119,6 +122,7 @@ def main():
     ap.add_argument("--entrada", nargs="+", required=True, help="Archivos o glob")
     ap.add_argument("--centro", default=None, help="Nombre del centro (si es un solo archivo)")
     ap.add_argument("--paciente", default="PAC-0006", help="Seudónimo del titular")
+    ap.add_argument("--modelo", default=MODELO, help=f"Modelo a usar (default: {MODELO})")
     ap.add_argument("--salida", default=None, help="JSON de salida. Si se omite, imprime a stdout")
     args = ap.parse_args()
 
@@ -134,10 +138,10 @@ def main():
     client = anthropic.Anthropic()
     registros = []
 
-    print(f"Extrayendo {len(rutas)} documento(s) con {MODELO}...", file=sys.stderr)
+    print(f"Extrayendo {len(rutas)} documento(s) con {args.modelo}...", file=sys.stderr)
     for ruta in sorted(rutas):
         centro = args.centro or CENTROS_DEMO.get(ruta.name, ruta.stem)
-        registros.append(extraer(client, ruta, centro, args.paciente))
+        registros.append(extraer(client, ruta, centro, args.paciente, args.modelo))
 
     salida = json.dumps(registros, ensure_ascii=False, indent=2)
     if args.salida:
