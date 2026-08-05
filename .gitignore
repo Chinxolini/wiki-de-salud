@@ -4,3 +4,17 @@ __pycache__/
 cohorte.json
 demo/*.html
 demo/wiki.json
+
+# Las fichas sinteticas de demo SI van al repo: la web desplegada las sirve para
+# el boton "Miralo funcionar ahora". Son 100% sinteticas, sin dato real alguno.
+!demo/ficha-centro_*.html
+
+# Casos y registros de supresion: pueden contener datos del titular. Nunca al repo.
+casos/*
+registro/
+
+# Excepcion: el caso de demostracion es sintetico (PAC-0006) y lo necesita
+# borrar_caso.py. Como esta versionado, despues de correr la demo se restaura
+# con `git checkout -- casos/`. Se excluye con `casos/*` y no con `casos/`
+# porque git no desciende a un directorio excluido y la negacion no aplicaria.
+!casos/CASO-0006/

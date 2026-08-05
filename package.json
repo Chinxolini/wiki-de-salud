@@ -1,0 +1,6 @@
+{
+  "name": "wiki-de-salud",
+  "private": true,
+  "type": "module",
+  "description": "Gestion del acceso al historial clinico propio: solicitud, normalizacion y entrega. Claude Impact Lab Longevidad 2026."
+}
