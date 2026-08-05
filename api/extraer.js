@@ -56,10 +56,37 @@ vocabulario que ese centro use. Tu tarea es transcribir lo que el documento dice
 un esquema único, para que después pueda compararse con lo que digan otros centros.
 
 Normalización: cada elemento conserva SIEMPRE su forma original junto a la canónica.
-- Diagnósticos: "DM2", "Diabetes Mellitus tipo 2" y "diabetes tipo II" convergen al mismo canónico.
-- Medicamentos: el nombre comercial ("COZAAR 50 mg") convive con su principio activo ("Losartán").
-- Exámenes: mismo analito con distinta unidad se convierte a la unidad canónica.
-- Procedimientos e imágenes: nombre original y nombre canónico.
+
+CRÍTICO — procesas un documento a la vez, sin ver los demás, pero tu salida se une con la de otros
+centros. Por eso el valor canónico NO puede depender de cómo venga escrito en este documento: tiene
+que ser idéntico al que produzcas para el mismo concepto en cualquier otro. Usa exactamente este
+vocabulario, respetando mayúsculas y tildes:
+
+DIAGNÓSTICOS (usa esta forma exacta):
+- "Diabetes mellitus tipo 2"  ← DM2, DM tipo 2, diabetes tipo II, diabetes mellitus 2
+- "Hipertensión arterial esencial"  ← HTA, HTA esencial, hipertensión esencial
+- "Dislipidemia"  ← dislipidemia mixta, hipercolesterolemia, DLP
+- "Artrosis"  ← artrosis, gonartrosis, espondiloartrosis (indica la región en el original)
+
+MEDICAMENTOS — "principio_activo" es SIEMPRE el principio activo solo, sin sal, sin dosis, sin
+marca y en singular. Nunca uses el nombre comercial ahí:
+- "Losartán"  ← COZAAR, Losartán potásico, losartan potasico
+- "Metformina"  ← METFORMINA LCH, Glafornil, metformina clorhidrato
+- "Atorvastatina", "Paracetamol"  ← ídem, forma simple
+
+EXÁMENES — "analito_canonico" y "unidad_canonica" son fijos por analito. Convierte el valor:
+- Leucocitos → unidad canónica "10³/µL". Si viene en /mm³ o /µL, DIVIDE POR 1000
+  (7705 /mm³ = 7.705 10³/µL). Es la conversión más frecuente y la que más importa.
+- Glucosa en ayunas → "mg/dL" · Hemoglobina → "g/dL" · Creatinina → "mg/dL"
+- Colesterol total, Colesterol HDL, Colesterol LDL, Triglicéridos → "mg/dL"
+- Hemoglobina glicosilada → "%"  (canónico "Hemoglobina glicosilada", NO "HbA1c" ni "Hemoglobina A1c")
+- Proteína C reactiva → "mg/L"
+- La unidad canónica se escribe SIEMPRE con la misma grafía: "mg/dL", nunca "mg/dl" ni "MG/DL".
+
+Si un analito, fármaco o diagnóstico no está en estas listas, normalízalo igual: nombre completo,
+sin siglas, sin marca, primera letra mayúscula, y la unidad en la grafía convencional del SI.
+
+Procedimientos e imágenes: nombre original y nombre canónico, con el mismo criterio.
 
 Reglas que no se rompen:
 - Transcribe, no interpretes. Cero diagnóstico propio, cero recomendación, cero juicio clínico.
