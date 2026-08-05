@@ -26,7 +26,7 @@ PROMPT_EXTRACCION = AQUI.parent / "prompts" / "extraccion.md"
 SCHEMA_WIKI_SALUD = AQUI.parent / "schemas" / "wiki-salud.schema.json"
 
 # Modelo. Cambiar acá y en ningún otro lado.
-MODELO = "claude-opus-4-7"
+MODELO = "claude-opus-5"
 MAX_TOKENS = 16000
 
 
