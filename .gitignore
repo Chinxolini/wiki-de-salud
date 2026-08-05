@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+.env
+cohorte.json
+demo/*.html
+demo/wiki.json

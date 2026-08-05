@@ -1,0 +1,92 @@
+[
+  {
+    "paciente_ref": "PAC-0006",
+    "centro_origen": "Centro Salud Andes",
+    "documento_ref": "doc-andes-2026-04-12",
+    "extraccion_fallida": false,
+    "examenes": [
+      {
+        "fecha": "2026-04-12",
+        "tipo_examen": "Perfil bioquímico",
+        "analitos": [
+          {
+            "nombre_original": "Glicemia en ayunas",
+            "nombre_canonico": "Glucosa en ayunas",
+            "valor": 98,
+            "unidad": "mg/dL",
+            "rango_referencia": "70-100",
+            "fuera_de_rango": false,
+            "confianza": "alta"
+          },
+          {
+            "nombre_original": "Leucocitos",
+            "nombre_canonico": "Recuento de leucocitos",
+            "valor": 7200,
+            "unidad": "/mm³",
+            "rango_referencia": "4500-11000",
+            "fuera_de_rango": false,
+            "confianza": "alta"
+          }
+        ]
+      }
+    ],
+    "notas_extraccion": "Documento legible, sin observaciones."
+  },
+  {
+    "paciente_ref": "PAC-0006",
+    "centro_origen": "Clínica Los Robles",
+    "documento_ref": "doc-robles-2026-06-30",
+    "extraccion_fallida": false,
+    "examenes": [
+      {
+        "fecha": "2026-06-30",
+        "tipo_examen": "Hemograma y glicemia",
+        "analitos": [
+          {
+            "nombre_original": "GLUCOSA (ayuno)",
+            "nombre_canonico": "Glucosa en ayunas",
+            "valor": 112,
+            "unidad": "mg/dL",
+            "rango_referencia": "70-100",
+            "fuera_de_rango": true,
+            "confianza": "alta"
+          },
+          {
+            "nombre_original": "Leucos",
+            "nombre_canonico": "Recuento de leucocitos",
+            "valor": 6.8,
+            "unidad": "10^3/uL",
+            "rango_referencia": "4.5-11.0",
+            "fuera_de_rango": false,
+            "confianza": "media"
+          },
+          {
+            "nombre_original": "PCR ultrasensible",
+            "nombre_canonico": "Proteína C reactiva",
+            "valor": "no informado",
+            "unidad": null,
+            "rango_referencia": null,
+            "fuera_de_rango": null,
+            "confianza": "baja"
+          }
+        ]
+      },
+      {
+        "fecha": null,
+        "tipo_examen": "Orina completa",
+        "analitos": [
+          {
+            "nombre_original": "Densidad",
+            "nombre_canonico": "Densidad urinaria",
+            "valor": 1.02,
+            "unidad": null,
+            "rango_referencia": "1.005-1.030",
+            "fuera_de_rango": false,
+            "confianza": "media"
+          }
+        ]
+      }
+    ],
+    "notas_extraccion": "Fecha del segundo examen no consta en el documento escaneado."
+  }
+]

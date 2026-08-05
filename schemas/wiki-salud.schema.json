@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "properties": {
+    "paciente_ref": { "type": "string", "description": "Seudónimo del titular, formato PAC-XXXX. Nunca el nombre real." },
+    "centro_origen": { "type": "string" },
+    "documento_ref": { "type": "string", "description": "file_id o identificador del documento del que se extrajo" },
+    "extraccion_fallida": { "type": "boolean" },
+    "examenes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "fecha": { "type": ["string", "null"], "description": "ISO 8601, null si no consta" },
+          "tipo_examen": { "type": "string" },
+          "analitos": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "nombre_original": { "type": "string", "description": "Como aparece literalmente en el documento" },
+                "nombre_canonico": { "type": "string", "description": "Nombre normalizado del analito" },
+                "valor": { "type": ["number", "string", "null"] },
+                "unidad": { "type": ["string", "null"] },
+                "rango_referencia": { "type": ["string", "null"] },
+                "fuera_de_rango": { "type": ["boolean", "null"] },
+                "confianza": { "type": "string", "enum": ["alta", "media", "baja"] }
+              },
+              "required": ["nombre_original", "nombre_canonico", "valor", "unidad", "rango_referencia", "fuera_de_rango", "confianza"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["fecha", "tipo_examen", "analitos"],
+        "additionalProperties": false
+      }
+    },
+    "notas_extraccion": { "type": "string" }
+  },
+  "required": ["paciente_ref", "centro_origen", "documento_ref", "extraccion_fallida", "examenes", "notas_extraccion"],
+  "additionalProperties": false
+}

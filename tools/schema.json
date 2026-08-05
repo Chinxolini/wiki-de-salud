@@ -1,0 +1,94 @@
+[
+  {
+    "name": "buscar_correos",
+    "description": "Lee la casilla espejo del caso y devuelve los mensajes no procesados. Llama a esta herramienta al inicio de cada ciclo, antes de cualquier otra cosa. Devuelve metadata y cuerpo en texto; los adjuntos vienen solo referenciados por id, hay que descargarlos aparte.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "caso_id": { "type": "string", "description": "Identificador del caso" },
+        "desde": { "type": "string", "description": "ISO 8601. Solo mensajes posteriores a esta fecha. Omitir para traer todos los no procesados." }
+      },
+      "required": ["caso_id"],
+      "additionalProperties": false
+    },
+    "strict": true
+  },
+  {
+    "name": "descargar_adjunto",
+    "description": "Descarga un adjunto y lo sube a la Files API de Anthropic, devolviendo un file_id que puedes referenciar como documento o imagen en tu siguiente turno. Úsala cuando buscar_correos reporte adjuntos y necesites leer su contenido. El caso normal es PDF escaneado sin texto seleccionable: se te entregará como imagen para que lo leas con visión.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "adjunto_id": { "type": "string" },
+        "caso_id": { "type": "string" }
+      },
+      "required": ["adjunto_id", "caso_id"],
+      "additionalProperties": false
+    },
+    "strict": true
+  },
+  {
+    "name": "derivar_a_revision_humana",
+    "description": "Envía el expediente al panel de la profesional de salud y DETIENE el ciclo. Llámala siempre que haya que juzgar si el contenido clínico recibido es suficiente — ese juicio no es tuyo. Después de llamarla, no continúes: el ciclo se reanuda cuando llegue la decisión humana.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "caso_id": { "type": "string" },
+        "clasificacion": {
+          "type": "string",
+          "enum": ["entrega_completa", "entrega_parcial", "requisito_adicional", "rechazo", "acuse_recibo", "no_relacionado"]
+        },
+        "lo_solicitado": { "type": "string", "description": "Qué se pidió en la solicitud original" },
+        "lo_recibido": { "type": "string", "description": "Qué llegó efectivamente, según tu lectura" },
+        "brecha_detectada": { "type": "string", "description": "Qué falta, o cadena vacía si no falta nada" },
+        "confianza_extraccion": { "type": "string", "enum": ["alta", "media", "baja"] },
+        "documentos_ref": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "file_ids de los documentos analizados"
+        }
+      },
+      "required": ["caso_id", "clasificacion", "lo_solicitado", "lo_recibido", "brecha_detectada", "confianza_extraccion", "documentos_ref"],
+      "additionalProperties": false
+    },
+    "strict": true
+  },
+  {
+    "name": "enviar_correo",
+    "description": "Envía un correo desde la casilla espejo del caso. Úsala solo después de que la profesional haya aprobado la acción. El texto que entregues se envía tal cual: redáctalo completo y formal.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "caso_id": { "type": "string" },
+        "destinatario": { "type": "string" },
+        "asunto": { "type": "string" },
+        "cuerpo": { "type": "string", "description": "Texto plano del mensaje, listo para enviar" },
+        "en_respuesta_a": { "type": "string", "description": "message_id al que responde, para mantener el hilo. Omitir si es solicitud nueva." }
+      },
+      "required": ["caso_id", "destinatario", "asunto", "cuerpo"],
+      "additionalProperties": false
+    },
+    "strict": true
+  },
+  {
+    "name": "registrar_protocolo_centro",
+    "description": "Registra lo aprendido sobre cómo opera un centro de salud. Llámala cada vez que un centro responda. Este registro es agregado y no contiene datos del titular: sobrevive al borrado del caso y es el activo acumulado del servicio.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "centro": { "type": "string" },
+        "dias_habiles_respuesta": { "type": "integer" },
+        "formato_entrega": {
+          "type": "string",
+          "enum": ["pdf_texto", "pdf_imagen", "imagen", "texto_correo", "portal_web", "presencial", "sin_entrega"]
+        },
+        "anios_historial_entregados": { "type": "integer", "description": "-1 si no aplica o no se pudo determinar" },
+        "requisitos_adicionales": { "type": "array", "items": { "type": "string" } },
+        "canal_efectivo": { "type": "string" }
+      },
+      "required": ["centro", "dias_habiles_respuesta", "formato_entrega", "anios_historial_entregados", "requisitos_adicionales", "canal_efectivo"],
+      "additionalProperties": false
+    },
+    "strict": true
+  }
+]
