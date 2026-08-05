@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wiki de salud — Solicitar mi historial clínico</title>
+<style>
+  :root{
+    --bg:#f7f7f5; --card:#fff; --ink:#1c1c1a; --muted:#6b6b66;
+    --line:#e2e2dd; --accent:#1a5f4a; --accent-soft:#e8f1ee;
+    --warn:#8a5a00; --warn-soft:#fdf4e3;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#161614; --card:#1f1f1c; --ink:#eceae5; --muted:#a0a099;
+           --line:#33332e; --accent:#6fc0a4; --accent-soft:#1d2f29;
+           --warn:#e0b055; --warn-soft:#2d2519; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;}
+  .wrap{max-width:720px;margin:0 auto;padding:32px 20px 80px}
+  header{margin-bottom:28px}
+  h1{font-size:1.6rem;line-height:1.25;margin:0 0 8px}
+  .sub{color:var(--muted);margin:0}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;
+        padding:22px;margin-bottom:18px}
+  .step{display:flex;align-items:center;gap:9px;font-size:.78rem;font-weight:700;
+        letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+  .step b{display:grid;place-items:center;width:22px;height:22px;border-radius:50%;
+          background:var(--accent);color:var(--card);font-size:.75rem}
+  label{display:block;font-weight:600;font-size:.9rem;margin:14px 0 5px}
+  .hint{font-weight:400;color:var(--muted);font-size:.82rem}
+  input[type=text],input[type=email],input[type=tel],select,textarea{
+    width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:8px;
+    background:var(--bg);color:var(--ink);font:inherit;font-size:.95rem}
+  textarea{min-height:70px;resize:vertical}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+  @media(max-width:560px){.grid2{grid-template-columns:1fr}}
+  .prest{display:flex;gap:11px;align-items:flex-start;padding:11px;border:1px solid var(--line);
+         border-radius:8px;margin-bottom:8px;cursor:pointer}
+  .prest input{margin-top:3px;flex:none}
+  .prest .nm{font-weight:600;font-size:.92rem}
+  .prest .ch{font-size:.79rem;color:var(--muted)}
+  .tag{display:inline-block;font-size:.68rem;font-weight:700;letter-spacing:.04em;
+       padding:2px 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent);
+       text-transform:uppercase;margin-left:6px;vertical-align:1px}
+  .poder{border:1px solid var(--line);border-radius:8px;background:var(--bg);
+         padding:16px;max-height:230px;overflow-y:auto;font-size:.85rem;line-height:1.5}
+  .poder h4{margin:0 0 10px;font-size:.85rem;text-transform:uppercase;letter-spacing:.05em}
+  .poder p{margin:0 0 9px}
+  .check{display:flex;gap:11px;align-items:flex-start;margin-top:14px;font-size:.9rem}
+  .check input{margin-top:4px;flex:none}
+  .aviso{background:var(--warn-soft);border-left:3px solid var(--warn);border-radius:0 8px 8px 0;
+         padding:13px 15px;font-size:.85rem;line-height:1.5}
+  .aviso strong{color:var(--warn)}
+  button{width:100%;padding:14px;border:0;border-radius:9px;background:var(--accent);
+         color:#fff;font:inherit;font-weight:700;font-size:1rem;cursor:pointer;margin-top:6px}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  @media (prefers-color-scheme: dark){ button{color:#10201b} }
+  .foot{color:var(--muted);font-size:.78rem;text-align:center;margin-top:18px;line-height:1.6}
+  #salida{display:none}
+  .ok{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+  .ok:last-child{border:0}
+  .ok .ic{flex:none;color:var(--accent);font-weight:700}
+  code{background:var(--accent-soft);color:var(--accent);padding:1px 6px;border-radius:4px;
+       font-size:.85em;word-break:break-all}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1>Solicita tu historial clínico</h1>
+  <p class="sub">Tú tienes derecho a tu ficha. Nosotros hacemos el trámite, lo ordenamos y te lo
+  entregamos. No nos lo quedamos.</p>
+</header>
+
+<form id="f">
+
+  <!-- 1 -->
+  <div class="card">
+    <div class="step"><b>1</b> Quién eres</div>
+    <div class="grid2">
+      <div>
+        <label>Nombre completo</label>
+        <input type="text" name="nombre" required placeholder="Como aparece en tu cédula">
+      </div>
+      <div>
+        <label>RUT</label>
+        <input type="text" name="rut" required placeholder="12.345.678-9">
+      </div>
+      <div>
+        <label>Correo electrónico</label>
+        <input type="email" name="correo" required placeholder="tu@correo.cl">
+      </div>
+      <div>
+        <label>Teléfono <span class="hint">(opcional)</span></label>
+        <input type="tel" name="fono" placeholder="+56 9 ...">
+      </div>
+    </div>
+    <label>Cédula de identidad <span class="hint">— los centros la exigen; foto por ambos lados</span></label>
+    <input type="text" name="cedula" placeholder="[demo] adjuntar archivo" disabled
+           value="cedula-demo.jpg (simulado)">
+  </div>
+
+  <!-- 2 -->
+  <div class="card">
+    <div class="step"><b>2</b> Dónde te has atendido</div>
+    <p class="hint" style="margin:0 0 12px">
+      Marca solo los centros donde efectivamente te atendiste. No mandamos solicitudes a ciegas:
+      saturaría a los prestadores y no serviría de nada.
+    </p>
+    <div id="prestadores"></div>
+    <label>Otro centro <span class="hint">(opcional)</span></label>
+    <input type="text" name="otro" placeholder="Nombre del centro">
+    <label>Período aproximado</label>
+    <input type="text" name="periodo" placeholder="Ej.: 2020 a hoy" value="Últimos 5 años">
+  </div>
+
+  <!-- 3 -->
+  <div class="card">
+    <div class="step"><b>3</b> Tu autorización</div>
+    <p class="hint" style="margin:0 0 12px">
+      Para pedir tu ficha en tu nombre la ley exige un poder simple, firmado ante notario
+      <em>o</em> por un sistema electrónico que garantice su autenticidad
+      (art. 13 letra b, Ley 20.584). Un simple “acepto los términos” no cumple. Este es el texto
+      completo que estás firmando:
+    </p>
+
+    <div class="poder">
+      <h4>Poder simple para solicitar y recibir copia de ficha clínica</h4>
+      <p><b>Primero.</b> Autorizo a solicitar ante los centros que marqué copia íntegra de mi ficha
+      clínica, a recibirla, a ejercer mi derecho de acceso sobre esos antecedentes y a reclamar ante
+      la autoridad si me la niegan, no responden o la entregan mal.</p>
+      <p><b>Segundo.</b> El poder vale <b>solo para los centros que marqué</b>. Para ningún otro.</p>
+      <p><b>Tercero.</b> Los antecedentes se usan <b>únicamente</b> para consolidarlos y
+      entregármelos a mí. No se ceden, no se publican, no se tratan con otra finalidad.</p>
+      <p><b>Cuarto.</b> Las respuestas llegan a una casilla creada a mi nombre, y todo lo que llegue
+      ahí se reenvía íntegro a mi correo personal.</p>
+      <p><b>Quinto.</b> Cumplido el encargo se <b>suprime</b> la casilla y todos mis documentos y
+      datos. Queda solo un registro estadístico sin datos personales sobre cuánto demoró cada centro.
+      Recibo constancia de la supresión con fecha y hora.</p>
+      <p><b>Sexto.</b> Puedo <b>revocar este poder cuando quiera</b>, sin dar explicaciones, por
+      correo. Desde que lo recibo revocado, se suprime todo de inmediato.</p>
+      <p><b>Séptimo.</b> Se firma por sistema electrónico que garantiza su autenticidad
+      (Ley 19.799). La constancia técnica va adjunta al documento.</p>
+      <p style="color:var(--muted)">Texto íntegro y anexo de autenticidad:
+      <code>legal/PODER-SIMPLE-mandato.md</code></p>
+    </div>
+
+    <label class="check">
+      <input type="checkbox" name="poder" required>
+      <span>He leído el poder y <b>autorizo</b> a solicitar mi ficha clínica en mi nombre ante los
+      centros que marqué.</span>
+    </label>
+    <label class="check">
+      <input type="checkbox" name="veracidad" required>
+      <span>Declaro que soy la persona cuya ficha se solicita y que los datos son efectivos.</span>
+    </label>
+
+    <p class="hint" style="margin:14px 0 0">
+      Al enviar te llega un código de un solo uso a tu correo. Validarlo es lo que convierte esto en
+      firma electrónica: acredita que quien firma controla esa casilla.
+    </p>
+  </div>
+
+  <!-- 4 -->
+  <div class="card">
+    <div class="step"><b>4</b> Qué recibes, y qué no</div>
+    <div class="aviso">
+      <p style="margin:0 0 9px"><strong>Esto no es un diagnóstico ni una indicación médica.</strong>
+      Lo que te entregamos es <b>tu propia información</b>, transcrita y ordenada por un sistema
+      automatizado con inteligencia artificial, junto con los documentos originales de cada centro
+      para que puedas contrastar cada dato.</p>
+      <p style="margin:0 0 9px">No interpretamos tus resultados, no te decimos qué tienes, no te
+      indicamos tratamientos ni te decimos a quién consultar. <b>Cualquier decisión sobre tu salud
+      es tuya y de los profesionales que te atienden</b>, sobre los documentos originales, que van
+      incluidos.</p>
+      <p style="margin:0">Un sistema automatizado puede equivocarse al transcribir. Por eso cada
+      valor del expediente <b>queda enlazado al documento del que salió</b>: siempre puedes verificar.</p>
+    </div>
+    <label class="check">
+      <input type="checkbox" name="disclaimer" required>
+      <span>Entiendo que el expediente es un ordenamiento automatizado de mis propios documentos,
+      <b>no un diagnóstico ni una recomendación médica</b>, y que lo uso bajo mi responsabilidad.</span>
+    </label>
+  </div>
+
+  <button type="submit">Solicitar mi historial</button>
+  <p class="foot">
+    Demo del Claude Impact Lab · Longevidad 2026 — Equipo LOS INMORTALES.<br>
+    Datos 100% sintéticos. Ningún dato real se envía a ningún centro desde este formulario.
+  </p>
+</form>
+
+<!-- resultado -->
+<div id="salida">
+  <div class="card">
+    <div class="step"><b>✓</b> Solicitud registrada</div>
+    <div id="pasos"></div>
+  </div>
+  <div class="card">
+    <div class="step"><b>i</b> Y cuando termine</div>
+    <p style="margin:0;font-size:.9rem">Recibes un paquete descargable con tu wiki de salud y los
+    originales de cada centro. Después borramos tu casilla y tus documentos, y te mandamos la
+    constancia. De ti no queda nada en nuestro sistema, salvo cuánto demoró cada centro en responder
+    — sin tu nombre.</p>
+  </div>
+  <p class="foot"><a href="#" onclick="location.reload();return false" style="color:var(--accent)">← Volver</a></p>
+</div>
+
+</div>
+
+<script>
+// L14 — el canal es un atributo del prestador, no una constante del sistema.
+// Espejo de prestadores/protocolos.json (en producto se carga desde ahí).
+const PRESTADORES = [
+  {id:"chp",          nombre:"Clínica Hospital del Profesor", canal:"formulario_web",
+   detalle:"Formulario web · responde por correo · medido: contestó el mismo día"},
+  {id:"hcuch",        nombre:"Hospital Clínico Universidad de Chile", canal:"formulario_web",
+   detalle:"OIRS MINSAL · formulario web · plazo declarado 20 días hábiles"},
+  {id:"integramedica",nombre:"IntegraMédica (Bupa)", canal:"formulario_web",
+   detalle:"Formulario web · cubre los 30+ centros de la red · 5 días hábiles"},
+  {id:"redsalud",     nombre:"RedSalud", canal:"presencial",
+   detalle:"Presencial y por cada sede donde te atendiste · 10-20 días hábiles"}
+];
+const ETIQUETA = {formulario_web:"formulario web", presencial:"presencial", correo:"correo"};
+
+document.getElementById("prestadores").innerHTML = PRESTADORES.map(p=>`
+  <label class="prest">
+    <input type="checkbox" name="prestador" value="${p.id}">
+    <span>
+      <span class="nm">${p.nombre}<span class="tag">${ETIQUETA[p.canal]}</span></span>
+      <span class="ch">${p.detalle}</span>
+    </span>
+  </label>`).join("");
+
+document.getElementById("f").addEventListener("submit", e=>{
+  e.preventDefault();
+  const d = new FormData(e.target);
+  const sel = PRESTADORES.filter(p=>d.getAll("prestador").includes(p.id));
+  if(!sel.length){ alert("Marca al menos un centro donde te hayas atendido."); return; }
+
+  const nombre = (d.get("nombre")||"").trim();
+  const casilla = nombre.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
+                    .replace(/[^a-z\s]/g,"").trim().split(/\s+/).slice(0,2).join(".")
+                  + "@chiledao.cl";
+
+  const auto = sel.filter(p=>p.canal==="correo");
+  const asist = sel.filter(p=>p.canal!=="correo");
+
+  const pasos = [
+    ["1","Se te envió un <b>código de un solo uso</b> a <code>"+d.get("correo")+"</code>. "+
+        "Al validarlo queda firmado el poder, con su anexo de autenticidad (hash del documento, "+
+        "sello de tiempo y constancia de control del correo)."],
+    ["2","Se creó tu <b>casilla espejo</b> <code>"+casilla+"</code>. Es la dirección que se declara "+
+        "ante cada centro, y todo lo que llegue ahí se te reenvía íntegro."],
+    ["3","<b>"+sel.length+" solicitud"+(sel.length>1?"es":"")+"</b> preparada"+(sel.length>1?"s":"")+
+        ", una por centro, con el texto legal invocando el art. 13 de la Ley 20.584 y exigiendo "+
+        "<b>formato digital legible</b>."+
+        (auto.length? " <b>"+auto.length+"</b> se envía"+(auto.length>1?"n":"")+" automáticamente por correo.":"")+
+        (asist.length? " <b>"+asist.length+"</b> requiere"+(asist.length>1?"n":"")+" acción asistida ("+
+          asist.map(p=>p.nombre+" — "+ETIQUETA[p.canal]).join("; ")+
+          "): ningún prestador levantado recibe por correo. La ida es formulario o mostrador; "+
+          "la vuelta siempre es correo, a tu casilla espejo.":"")],
+    ["4","El agente queda <b>escuchando la casilla</b>. Cuando llegue una respuesta, lee, clasifica "+
+        "y extrae; lo que venga dudoso escala a un modelo mayor antes de entrar al expediente."]
+  ];
+  document.getElementById("pasos").innerHTML =
+    pasos.map(([n,t])=>`<div class="ok"><span class="ic">${n}</span><span>${t}</span></div>`).join("");
+  document.getElementById("f").style.display="none";
+  document.getElementById("salida").style.display="block";
+  window.scrollTo({top:0,behavior:"smooth"});
+});
+</script>
+</body>
+</html>

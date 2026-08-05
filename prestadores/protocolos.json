@@ -1,0 +1,112 @@
+{
+  "$schema": "./protocolos.schema.json",
+  "version": "1.0",
+  "actualizado": "2026-08-05",
+  "nota": "Registro de protocolo por prestador (L14). El canal NO es una constante del sistema: es un atributo del prestador. El orquestador consulta este registro ANTES de actuar y elige la herramienta segun 'canal.tipo'. Desde el 1-dic-2026 el art. 14 ter c) de la Ley 21.719 obliga a cada responsable a publicar y mantener operativo un canal para recibir solicitudes de titulares: este registro pasa a ser verificable contra esa obligacion.",
+  "prestadores": [
+    {
+      "id": "chp",
+      "nombre": "Clinica Hospital del Profesor",
+      "tipo": "privado",
+      "canal": {
+        "tipo": "formulario_web",
+        "url": "https://www.chp.cl/web-chp/contactenos",
+        "automatizable": false,
+        "responde_a": "correo_indicado_en_el_formulario",
+        "verificado": "2026-08-05 por Ignacio (solicitud real enviada 4-ago)"
+      },
+      "canales_alternativos": [
+        { "tipo": "telefono", "valor": "2 2299 6000", "nota": "call center, deriva a OIRS" },
+        { "tipo": "correo", "valor": "cuentaspaciente@chp.cl", "nota": "cuentas paciente; no confirmado para fichas" }
+      ],
+      "requisitos": ["cedula de identidad", "poder simple si solicita un tercero (art. 13 b Ley 20.584)"],
+      "plazo_declarado_dias_habiles": null,
+      "formato_entrega_declarado": null,
+      "medicion_c5": {
+        "solicitud_enviada": "2026-08-04",
+        "primera_respuesta": "2026-08-04",
+        "dias_primera_respuesta": 0,
+        "tipo_respuesta": "acuse + derivacion interna",
+        "canal_efectivo_respuesta": "correo al indicado en el formulario",
+        "entrega_efectiva": null,
+        "estado": "abierta - esperando entrega"
+      }
+    },
+    {
+      "id": "hcuch",
+      "nombre": "Hospital Clinico Universidad de Chile",
+      "tipo": "publico",
+      "canal": {
+        "tipo": "formulario_web",
+        "url": "https://oirs.minsal.cl",
+        "automatizable": false,
+        "responde_a": "correo_indicado_en_el_formulario",
+        "verificado": "2026-08-04 investigacion web"
+      },
+      "canales_alternativos": [
+        { "tipo": "presencial", "valor": "OIRS Piso 5 Sector C, Of. 504 - Dr. Carlos Lorca Tobar 999" },
+        { "tipo": "telefono", "valor": "+56 2 2978 8000 ext. 2" }
+      ],
+      "requisitos": [
+        "fotocopia cedula ambos lados",
+        "poder simple o certificado de parentesco si es tercero",
+        "formulario de solicitud firmado",
+        "pago segun numero de hojas (tesoreria)"
+      ],
+      "plazo_declarado_dias_habiles": 20,
+      "formato_entrega_declarado": "papel (retiro presencial) o correo electronico previa solicitud",
+      "medicion_c5": { "estado": "no enviada" },
+      "riesgo": "demoras documentadas en reclamos.cl; sanciones Superintendencia 2011-2019"
+    },
+    {
+      "id": "integramedica",
+      "nombre": "IntegraMedica (Bupa Chile)",
+      "tipo": "privado",
+      "canal": {
+        "tipo": "formulario_web",
+        "url": "https://www.integramedica.cl/contactanos",
+        "automatizable": false,
+        "responde_a": "correo_indicado_en_el_formulario",
+        "verificado": "2026-08-04 investigacion web"
+      },
+      "canales_alternativos": [
+        { "tipo": "portal_paciente", "valor": "https://www.integramedica.cl/portal-pacientes", "nota": "resultados de examenes: RUT + n de episodio + fecha nacimiento, descarga inmediata" },
+        { "tipo": "telefono", "valor": "600 636 6666" }
+      ],
+      "requisitos": ["formulario en linea o presencial con firma simple", "poder notarial + cedula si es tercero"],
+      "plazo_declarado_dias_habiles": 5,
+      "formato_entrega_declarado": "primera copia gratuita; adicionales a costo material",
+      "cobertura": "ficha compartida entre 30+ centros de la red: una sola solicitud cubre toda la red",
+      "medicion_c5": { "estado": "no enviada" }
+    },
+    {
+      "id": "redsalud",
+      "nombre": "RedSalud (grupo ILC)",
+      "tipo": "privado",
+      "canal": {
+        "tipo": "presencial",
+        "url": null,
+        "automatizable": false,
+        "responde_a": "sede_de_origen",
+        "verificado": "2026-08-04 investigacion web"
+      },
+      "canales_alternativos": [
+        { "tipo": "telefono", "valor": "600 718 6000", "nota": "deriva a OIRS" },
+        { "tipo": "correo", "valor": "atencionalcliente.providencia@redsalud.cl", "nota": "por sede; NO confirmado para fichas" },
+        { "tipo": "portal_paciente", "valor": "https://mi.redsalud.cl/", "nota": "solo resultados de examenes; requiere Clave Unica" }
+      ],
+      "requisitos": ["cedula", "formulario in situ", "poder notarial + ambas cedulas si es tercero"],
+      "plazo_declarado_dias_habiles": 20,
+      "formato_entrega_declarado": "digital (PDF) o impreso, depende de la sede",
+      "cobertura": "POR SEDE: hay que solicitar en cada clinica donde se atendio, pese al HIS centralizado interno",
+      "medicion_c5": { "estado": "no enviada" },
+      "friccion_maxima": true
+    }
+  ],
+  "resumen": {
+    "total": 4,
+    "por_canal": { "formulario_web": 3, "presencial": 1, "correo": 0 },
+    "automatizables_hoy": 0,
+    "hallazgo": "NINGUNO de los 4 prestadores recibe solicitudes de ficha por correo como canal declarado. El supuesto de L8 (enviamos correo, responden a la casilla espejo) solo se sostiene en la VUELTA: los 3 con formulario web responden al correo que se indica en el formulario. La ida es formulario o mostrador; la vuelta es correo."
+  }
+}

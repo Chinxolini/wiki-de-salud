@@ -28,34 +28,72 @@
     "strict": true
   },
   {
-    "name": "derivar_a_revision_humana",
-    "description": "Envía el expediente al panel de la profesional de salud y DETIENE el ciclo. Llámala siempre que haya que juzgar si el contenido clínico recibido es suficiente — ese juicio no es tuyo. Después de llamarla, no continúes: el ciclo se reanuda cuando llegue la decisión humana.",
+    "name": "consultar_protocolo_prestador",
+    "description": "Devuelve cómo opera un prestador: por qué canal recibe solicitudes (correo, formulario web o presencial), su dirección o URL, los requisitos que exige y el plazo declarado. LLÁMALA SIEMPRE ANTES de intentar enviar una solicitud. El canal no es una constante del sistema: es un atributo del prestador. Ninguno de los prestadores levantados hasta hoy recibe por correo — la ida es formulario o mostrador, la vuelta siempre es correo a la casilla espejo. Si el canal no es 'correo', NO llames a enviar_correo: llama a registrar_accion_asistida.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "prestador_id": { "type": "string", "description": "Identificador del registro, p. ej. 'chp', 'hcuch', 'integramedica', 'redsalud'" }
+      },
+      "required": ["prestador_id"],
+      "additionalProperties": false
+    },
+    "strict": true
+  },
+  {
+    "name": "registrar_accion_asistida",
+    "description": "Deja preparada una solicitud que NO se puede enviar automáticamente porque el prestador recibe por formulario web o presencialmente. Genera el texto listo para pegar y los datos a completar, y marca el caso como pendiente de acción humana. Úsala en lugar de enviar_correo cuando consultar_protocolo_prestador devuelva un canal distinto de 'correo'. No inventes que enviaste algo que no enviaste.",
     "input_schema": {
       "type": "object",
       "properties": {
         "caso_id": { "type": "string" },
-        "clasificacion": {
-          "type": "string",
-          "enum": ["entrega_completa", "entrega_parcial", "requisito_adicional", "rechazo", "acuse_recibo", "no_relacionado"]
-        },
-        "lo_solicitado": { "type": "string", "description": "Qué se pidió en la solicitud original" },
-        "lo_recibido": { "type": "string", "description": "Qué llegó efectivamente, según tu lectura" },
-        "brecha_detectada": { "type": "string", "description": "Qué falta, o cadena vacía si no falta nada" },
-        "confianza_extraccion": { "type": "string", "enum": ["alta", "media", "baja"] },
-        "documentos_ref": {
-          "type": "array",
-          "items": { "type": "string" },
-          "description": "file_ids de los documentos analizados"
-        }
+        "prestador_id": { "type": "string" },
+        "canal": { "type": "string", "enum": ["formulario_web", "presencial"] },
+        "url_o_direccion": { "type": "string" },
+        "texto_solicitud": { "type": "string", "description": "El cuerpo completo de la solicitud, listo para pegar en el formulario" },
+        "correo_de_contacto": { "type": "string", "description": "La casilla espejo que se declara para recibir la respuesta" },
+        "documentos_a_adjuntar": { "type": "array", "items": { "type": "string" } }
       },
-      "required": ["caso_id", "clasificacion", "lo_solicitado", "lo_recibido", "brecha_detectada", "confianza_extraccion", "documentos_ref"],
+      "required": ["caso_id", "prestador_id", "canal", "url_o_direccion", "texto_solicitud", "correo_de_contacto", "documentos_a_adjuntar"],
+      "additionalProperties": false
+    },
+    "strict": true
+  },
+  {
+    "name": "escalar_verificacion",
+    "description": "Escala la lectura de un documento a un modelo mayor cuando la extracción no es confiable. Llámala cuando el cotejo contra el original arroje discrepancias, cuando haya campos que no puedas leer con certeza, o cuando el documento sea un escaneo degradado o esté manuscrito. Marcar un campo como ilegible y escalar es la respuesta correcta, no un fracaso: NUNCA completes un valor que no puedas leer. No juzgas suficiencia clínica — ese juicio no es tuyo ni de ningún modelo; el médico tratante verifica el dossier final contra los originales que van en el paquete.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "caso_id": { "type": "string" },
+        "documento_ref": { "type": "string", "description": "file_id o nombre del documento a reprocesar" },
+        "calidad_documento": { "type": "string", "enum": ["texto_limpio", "escaneo_legible", "escaneo_degradado", "manuscrito", "ilegible"] },
+        "motivo": { "type": "string", "enum": ["discrepancia_de_valor", "campos_ilegibles", "documento_degradado", "manuscrito", "unidades_ambiguas"] },
+        "campos_afectados": { "type": "array", "items": { "type": "string" } },
+        "nivel": { "type": "string", "enum": ["sonnet", "opus"], "description": "sonnet para discrepancias puntuales o confianza media; opus para manuscrito, ilegible o cuando sonnet tampoco cuadre" }
+      },
+      "required": ["caso_id", "documento_ref", "calidad_documento", "motivo", "campos_afectados", "nivel"],
+      "additionalProperties": false
+    },
+    "strict": true
+  },
+  {
+    "name": "borrar_caso",
+    "description": "Suprime la casilla espejo, los documentos y todos los datos personales del caso, y emite la constancia de supresión para el titular. Llámala cuando el paquete haya sido entregado, cuando el titular revoque el mandato o cuando venza el poder. Conserva únicamente el registro agregado por prestador, que no contiene datos personales. Es la contrapartida de la cláusula QUINTA del poder simple: si el borrado no ocurre, el mandato se incumple.",
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "caso_id": { "type": "string" },
+        "motivo": { "type": "string", "enum": ["servicio_completado", "revocacion_mandato", "solicitud_del_titular", "vencimiento_del_poder"] }
+      },
+      "required": ["caso_id", "motivo"],
       "additionalProperties": false
     },
     "strict": true
   },
   {
     "name": "enviar_correo",
-    "description": "Envía un correo desde la casilla espejo del caso. Úsala solo después de que la profesional haya aprobado la acción. El texto que entregues se envía tal cual: redáctalo completo y formal.",
+    "description": "Envía un correo desde la casilla espejo del caso. Úsala solo cuando consultar_protocolo_prestador indique canal 'correo', o para responder un hilo ya abierto por un prestador. El texto que entregues se envía tal cual: redáctalo completo y formal.",
     "input_schema": {
       "type": "object",
       "properties": {

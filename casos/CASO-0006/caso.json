@@ -1,0 +1,44 @@
+{
+  "caso_id": "CASO-0006",
+  "nota": "Caso de demostración. Titular sintético de la cohorte (PAC-0006). Ningún dato real.",
+  "casilla_espejo": "paciente.demo@chiledao.cl",
+  "estado": "entregado",
+  "centros": [
+    {
+      "centro": "Clínica Hospital del Profesor",
+      "canal": "formulario_web",
+      "canal_respuesta": "correo",
+      "dias_primera_respuesta": 0,
+      "dias_entrega": 11,
+      "formato_entrega": "pdf_imagen",
+      "anios_entregados": 5,
+      "cobro": false,
+      "exigio_poder": true,
+      "requisitos_adicionales": ["cédula por ambos lados"]
+    },
+    {
+      "centro": "IntegraMédica",
+      "canal": "formulario_web",
+      "canal_respuesta": "correo",
+      "dias_primera_respuesta": 2,
+      "dias_entrega": 5,
+      "formato_entrega": "pdf_texto",
+      "anios_entregados": 3,
+      "cobro": false,
+      "exigio_poder": true,
+      "requisitos_adicionales": []
+    },
+    {
+      "centro": "RedSalud",
+      "canal": "presencial",
+      "canal_respuesta": "correo",
+      "dias_primera_respuesta": 4,
+      "dias_entrega": 18,
+      "formato_entrega": "pdf_imagen",
+      "anios_entregados": 2,
+      "cobro": true,
+      "exigio_poder": true,
+      "requisitos_adicionales": ["solicitud por cada sede", "poder notarial exigido pese al art. 13 b"]
+    }
+  ]
+}

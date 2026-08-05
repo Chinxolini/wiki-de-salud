@@ -12,6 +12,18 @@ centro y lo entrega como un expediente portable del titular.
 Ver `LEGOS.md`. Cada pieza se cambia sin tocar las otras; el contrato central es
 `schemas/wiki-salud.schema.json`.
 
+## El viaje completo
+
+| # | Paso | Pieza |
+|---|---|---|
+| 1 | La persona llega, dice dónde se atendió y firma el poder | `entrada/index.html` (L12) + `legal/` (L13) |
+| 2 | Se resuelve por qué canal recibe cada prestador | `prestadores/` (L14) |
+| 3 | Sale la solicitud (correo) o se prepara la acción asistida (formulario/mostrador) | L8 |
+| 4 | El prestador responde a la casilla espejo; se lee y se extrae | `extraccion/extraer.py` |
+| 5 | Se coteja contra el original y se escala lo dudoso | `extraccion/verificar.py` (L9) |
+| 6 | Se consolida el wiki normalizado y se empaqueta con los originales | `render/` + `empaquetar.py` |
+| 7 | Se borra todo y se emite la constancia | `borrar_caso.py` (L15) |
+
 ## Correr la demo
 
 ```bash
@@ -25,9 +37,18 @@ python generador/generar_ficha_pdf.py
 export ANTHROPIC_API_KEY=...
 python extraccion/extraer.py --entrada "demo/ficha-*.html" --salida demo/wiki.json
 
-# 4. El wiki de salud
-python render/render_wiki.py --in demo/wiki.json --out demo/wiki-salud.html
+# 4. Cascada de verificación: coteja y escala lo dudoso
+python extraccion/verificar.py --wiki demo/wiki.json --documentos "demo/ficha-*.html" \
+    --salida demo/wiki-verificado.json
+
+# 5. El wiki de salud
+python render/render_wiki.py --in demo/wiki-verificado.json --out demo/wiki-salud.html
+
+# 6. El cierre del arco: no queda nada del titular
+python borrar_caso.py --caso CASO-0006 --motivo servicio_completado
 ```
+
+La entrada del usuario se abre directo en el navegador: `entrada/index.html`.
 
 ## Límites del agente
 
@@ -35,8 +56,15 @@ python render/render_wiki.py --in demo/wiki.json --out demo/wiki-salud.html
   nomenclaturas y unidades distintas al mismo campo, y arma un expediente portable.
 - **No hace nunca**: no diagnostica, no indica tratamiento, no ajusta dosis, no
   completa un dato que no pueda leer.
-- **Deriva**: toda evaluación de suficiencia clínica va a una profesional de salud
-  antes de responderle al centro.
+- **Escala**: cuando la lectura de un documento no es confiable (discrepancia con
+  el original, campos ilegibles, escaneo degradado, manuscrito), la extracción se
+  reprocesa con un modelo mayor. Lo que ni así se resuelve queda marcado como
+  ilegible en el expediente, visible y enlazado a su original.
+- **No juzga suficiencia clínica.** Ese juicio no es del sistema. El médico
+  tratante que recibe al titular verifica el dossier contra los documentos
+  originales, que van incluidos en el paquete.
+- **Borra.** Entregado el paquete, se suprimen la casilla, los documentos y los
+  datos, y se emite constancia. Sobrevive solo el registro por prestador, sin PII.
 
 ## Datos
 
