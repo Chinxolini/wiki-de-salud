@@ -19,6 +19,7 @@ Cada pieza se cambia sin tocar las otras. Si algo se discute con el equipo, se d
 | L13 | **Mandato / representación** | `legal/PODER-SIMPLE-mandato.md` | Poder simple electrónico (Ley 20.584 art. 13 b + Ley 19.799) con anexo de autenticidad. Firma simulada en demo; API de Firme.cl en producto | ✅ |
 | L14 | **Protocolo por prestador** | `prestadores/protocolos.json` | **El canal es atributo del prestador, no constante del sistema.** El orquestador lo consulta antes de actuar. 4 prestadores levantados | ✅ |
 | L15 | **Supresión del caso** | `borrar_caso.py` | Borra casilla + documentos + datos, emite constancia, conserva solo el protocolo agregado sin PII. Cláusula QUINTA del poder | ✅ |
+| L16 | **Detección y reclamo** | `denuncia/denunciar.py` | Entrada: el registro de L15 · Salida: hallazgos + borrador de reclamo. La ruta depende de la fecha (Superintendencia hasta 30-nov-2026; Agencia desde el 1-dic). Detecta y propone: **no denuncia solo** | ✅ |
 
 ## Piezas bloqueadas (decisión de Ignacio, no se discuten hoy)
 
