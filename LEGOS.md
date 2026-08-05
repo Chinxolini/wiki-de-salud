@@ -12,8 +12,11 @@ Cada pieza se cambia sin tocar las otras. Si algo se discute con el equipo, se d
 | L6 | **System prompt orquestador** | `prompts/orquestador.md` | Usa L7 | ✅ |
 | L7 | **Tools schema** | `tools/schema.json` | 5 tools. Las implementaciones son intercambiables | ✅ |
 | L8 | **Mail-service** | *(de Mauro)* | Implementa `buscar_correos`, `descargar_adjunto`, `enviar_correo` de L7 | ⬜ |
-| L9 | **Panel de revisión humana** | *(pendiente)* | Consume `derivar_a_revision_humana` de L7 | ⬜ |
-| L10 | **Render del wiki** | *(pendiente)* | Entrada: L5 · Salida: `wiki-salud.html` | ⬜ |
+| L9 | **Cascada de verificación** | *(rediseñado 5-ago)* | Haiku extrae → verificador coteja → escala a Sonnet/Opus si confianza media/baja (docs antiguos, fotos, manuscrito). Sin humano en el ciclo; **el médico tratante verifica el dossier final** contra los originales de L11 | 🔨 |
+| L10 | **Render del wiki** | `render/render_wiki.py` | Entrada: L5 · Salida: `wiki-salud.html`, cada valor linkea a su original | ✅ |
+| L11 | **Paquete del titular** | `empaquetar.py` | Entrada: L10 + originales · Salida: ZIP con wiki + `originales/` | ✅ |
+| L12 | **Entrada del usuario** | *(sin resolver)* | Cómo llega la persona, qué autoriza, cómo se lanza el flujo | 🔴 **el hueco** |
+| L13 | **Mandato / representación** | *(sin resolver)* | Poder simple electrónico (Ley 20.584 art. 13 b) | 🔴 en investigación |
 
 ## Piezas bloqueadas (decisión de Ignacio, no se discuten hoy)
 
