@@ -32,6 +32,26 @@ Ejemplos: "Glicemia en ayunas" y "Glucosa basal" → ambos `nombre_canonico:
 Conservar el original es lo que hace la trazabilidad auditable. Normalizar es lo
 que permite comparar dos centros distintos en el mismo eje.
 
+## Unidades
+
+Normalizar el nombre no basta: dos centros pueden medir lo mismo en unidades
+distintas. Por eso cada analito lleva también:
+
+- `valor` y `unidad`: exactamente como están impresos en el documento.
+- `valor_canonico` y `unidad_canonica`: el mismo dato convertido a la unidad
+  canónica del analito.
+
+Ejemplo: leucocitos informados como `7200 /mm³` en un centro y `6.8 10^3/uL` en
+otro son, en unidad canónica, `7.2` y `6.8` en `10^3/uL`. Recién ahí son
+comparables.
+
+Unidades canónicas a usar: glucosa `mg/dL` · hemoglobina `g/dL` · leucocitos
+`10^3/uL` · creatinina `mg/dL` · colesterol `mg/dL`.
+
+Si el valor no es numérico ("no informado", "hemolizado"), o si no sabes cómo
+convertir la unidad, deja `valor_canonico` y `unidad_canonica` en `null`.
+**No adivines un factor de conversión.**
+
 ## Datos identificadores
 
 Si el documento contiene nombre, RUT o domicilio del titular, **no los

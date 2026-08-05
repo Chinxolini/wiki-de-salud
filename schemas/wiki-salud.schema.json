@@ -19,13 +19,15 @@
               "properties": {
                 "nombre_original": { "type": "string", "description": "Como aparece literalmente en el documento" },
                 "nombre_canonico": { "type": "string", "description": "Nombre normalizado del analito" },
-                "valor": { "type": ["number", "string", "null"] },
-                "unidad": { "type": ["string", "null"] },
+                "valor": { "type": ["number", "string", "null"], "description": "Valor tal como aparece en el documento" },
+                "unidad": { "type": ["string", "null"], "description": "Unidad tal como aparece en el documento" },
+                "valor_canonico": { "type": ["number", "null"], "description": "Mismo valor convertido a la unidad canónica del analito. null si no se puede convertir o si el valor no es numérico." },
+                "unidad_canonica": { "type": ["string", "null"], "description": "Unidad canónica del analito, la misma para todos los centros. null si no aplica." },
                 "rango_referencia": { "type": ["string", "null"] },
                 "fuera_de_rango": { "type": ["boolean", "null"] },
                 "confianza": { "type": "string", "enum": ["alta", "media", "baja"] }
               },
-              "required": ["nombre_original", "nombre_canonico", "valor", "unidad", "rango_referencia", "fuera_de_rango", "confianza"],
+              "required": ["nombre_original", "nombre_canonico", "valor", "unidad", "valor_canonico", "unidad_canonica", "rango_referencia", "fuera_de_rango", "confianza"],
               "additionalProperties": false
             }
           }
