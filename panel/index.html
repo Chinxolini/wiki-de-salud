@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Panel de seguimiento — Wiki de salud</title>
+<style>
+  :root{
+    --bg:#faf8f4; --card:#fff; --ink:#17201d; --muted:#6b7570;
+    --line:#e4e0d7; --accent:#0f5c46; --accent-2:#c9782f; --soft:#e9f2ee;
+    --warn:#8a5a00; --warn-soft:#fdf4e3; --shadow:0 1px 2px rgba(23,32,29,.05),0 8px 24px rgba(23,32,29,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#121614; --card:#1b211e; --ink:#e8ece9; --muted:#98a49e;
+           --line:#2c3531; --accent:#63c3a2; --accent-2:#e0a061; --soft:#182b24;
+           --warn:#e0b055; --warn-soft:#2b2418; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.6 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  .wrap{max-width:1100px;margin:0 auto;padding:48px 20px 80px}
+  .wrap.angosto{max-width:620px}
+  h1{font-size:1.6rem;line-height:1.2;margin:0 0 8px;letter-spacing:-.01em;font-weight:800}
+  .lede{color:var(--muted);margin:0 0 28px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;
+    margin-bottom:14px;box-shadow:var(--shadow)}
+  .fila{display:flex;justify-content:space-between;gap:14px;padding:9px 0;
+    border-bottom:1px solid var(--line);font-size:.92rem}
+  .fila:last-child{border-bottom:0}
+  .fila span:first-child{color:var(--muted)}
+  .fila b{text-align:right}
+  code{background:var(--soft);padding:2px 7px;border-radius:6px;font-size:.88rem}
+  button{padding:14px 20px;border:0;border-radius:10px;background:var(--accent);color:var(--bg);
+    font:inherit;font-weight:700;font-size:1rem;cursor:pointer}
+  button:hover:not(:disabled){filter:brightness(1.08)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.sec{background:transparent;color:var(--accent);border:1.5px solid var(--line)}
+  .hint{color:var(--muted);font-size:.84rem}
+  .err{background:var(--warn-soft);border-left:3px solid var(--warn);padding:16px 18px;
+    border-radius:0 10px 10px 0;font-size:.9rem}
+  .foot{color:var(--muted);font-size:.78rem;text-align:center;margin-top:34px;line-height:1.65}
+
+  /* --- panel --- */
+  .resumen{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:22px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px 18px;
+    box-shadow:var(--shadow)}
+  .stat .n{font-size:1.7rem;font-weight:800;display:block;font-variant-numeric:tabular-nums}
+  .stat .l{color:var(--muted);font-size:.8rem}
+  .stat.alerta .n{color:var(--warn)}
+
+  .barra{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px;align-items:center}
+  .barra input, .barra select{
+    padding:10px 12px;border:1.5px solid var(--line);border-radius:9px;background:var(--card);
+    color:var(--ink);font:inherit;font-size:.92rem}
+  .barra input{flex:1;min-width:200px}
+
+  table{width:100%;border-collapse:collapse;font-size:.9rem}
+  th{text-align:left;color:var(--muted);font-weight:650;font-size:.76rem;text-transform:uppercase;
+    letter-spacing:.05em;padding:8px 12px;border-bottom:1.5px solid var(--line)}
+  td{padding:12px;border-bottom:1px solid var(--line);vertical-align:top}
+  tbody tr{cursor:pointer}
+  tbody tr:hover{background:var(--soft)}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;font-weight:700;
+    letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:99px;
+    background:var(--soft);color:var(--accent)}
+  .chip.warn{background:var(--warn-soft);color:var(--warn)}
+  .plazo-corto{color:var(--warn);font-weight:700}
+
+  .tablescroll{overflow-x:auto}
+  .msg{border-bottom:1px solid var(--line);padding:12px 0}
+  .msg:last-child{border-bottom:0}
+  .msg .de{font-weight:650;font-size:.9rem}
+  .msg .asunto{font-size:.92rem;margin:2px 0}
+  .msg .fecha{color:var(--muted);font-size:.78rem}
+
+  .cerrar{background:transparent;border:0;color:var(--muted);font-size:1.3rem;cursor:pointer;
+    padding:0 4px;line-height:1}
+  .detalle-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+</style>
+</head>
+<body>
+
+<div class="wrap angosto" id="pedirClave">
+  <h1>Panel de seguimiento</h1>
+  <p class="lede">Vista interna del equipo. Escribe la clave del panel para continuar.</p>
+  <div class="card">
+    <label for="clave" style="display:block;font-weight:650;font-size:.9rem;margin-bottom:6px">Clave del panel</label>
+    <input id="clave" type="password" autocomplete="off" spellcheck="false"
+           style="width:100%;padding:13px;border:1.5px solid var(--line);border-radius:9px;
+                  background:var(--bg);color:var(--ink);font:inherit;font-size:1rem;box-sizing:border-box">
+    <div id="errClave" style="color:#c0392b;font-size:.84rem;min-height:1.2em;margin-top:6px"></div>
+    <button id="btnEntrar" style="width:100%;margin-top:10px">Entrar</button>
+  </div>
+</div>
+
+<div class="wrap angosto" id="cargando" hidden>
+  <div class="card"><p class="hint" style="margin:0">Cargando casos…</p></div>
+</div>
+
+<div class="wrap" id="panel" hidden>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap">
+    <div>
+      <h1>Panel de seguimiento</h1>
+      <p class="lede" style="margin-bottom:14px">Qué casos hay, en qué estado, y a quién hay que reclamar.</p>
+    </div>
+    <button class="sec" id="btnSalir">Cerrar sesión del panel</button>
+  </div>
+
+  <div class="resumen" id="resumen"></div>
+
+  <div class="barra">
+    <input id="buscador" type="text" placeholder="Buscar por nombre o correo…">
+    <select id="filtroEstado">
+      <option value="">Todos los estados</option>
+    </select>
+    <button class="sec" id="btnActualizar">Actualizar</button>
+  </div>
+
+  <div class="card" id="vacio" hidden>
+    <p class="hint" style="margin:0">Todavía no hay casos registrados.</p>
+  </div>
+
+  <div class="card tablescroll" id="tablaCard">
+    <table>
+      <thead>
+        <tr>
+          <th>Titular</th><th>Correo</th><th>Casilla</th><th>Centros</th>
+          <th>Estado</th><th>Creado</th><th>Vence en</th>
+        </tr>
+      </thead>
+      <tbody id="filas"></tbody>
+    </table>
+  </div>
+
+  <div class="card" id="sinResultados" hidden>
+    <p class="hint" style="margin:0">Ningún caso calza con ese filtro.</p>
+  </div>
+
+  <div class="card" id="detalle" hidden>
+    <div class="detalle-head">
+      <div>
+        <h2 style="font-size:1.1rem;margin:0 0 4px" id="dTitulo"></h2>
+        <p class="hint" style="margin:0" id="dSub"></p>
+      </div>
+      <button class="cerrar" id="btnCerrarDetalle" title="Cerrar">✕</button>
+    </div>
+    <div id="dMensajes" style="margin-top:14px"></div>
+  </div>
+
+  <div class="err" id="errorPanel" hidden style="margin-top:14px"></div>
+</div>
+
+<p class="foot wrap angosto" style="padding-top:0">Demo del Claude Impact Lab · Longevidad 2026 — Equipo LOS INMORTALES.<br>
+Datos 100% sintéticos.</p>
+
+<script>
+const $ = s => document.querySelector(s);
+const CLAVE_KEY = "panel:clave";
+
+const ETIQUETAS = {
+  pendiente_datos: "Falta completar datos",
+  en_gestion:      "En gestión",
+  correo_creado:   "Casilla creada",
+  error_correo:    "Con un problema",
+};
+
+let CASOS = [];
+let RESUMEN = null;
+
+function etiquetaEstado(s){ return ETIQUETAS[s] || s || "Desconocido"; }
+
+function fmtFecha(txt){
+  if(!txt) return "—";
+  const f = new Date(String(txt).replace(" ", "T"));
+  if(isNaN(f)) return txt;
+  return f.toLocaleDateString("es-CL", {day:"numeric", month:"short", year:"numeric"});
+}
+
+function diasHasta(fechaTexto){
+  if(!fechaTexto) return null;
+  const f = new Date(String(fechaTexto).replace(" ", "T"));
+  if(isNaN(f)) return null;
+  return Math.ceil((f - new Date()) / 86400000);
+}
+
+// ---------- llamadas al backend ----------
+async function llamar(accion, extra){
+  const clave = sessionStorage.getItem(CLAVE_KEY) || "";
+  const r = await fetch("/api/casilla", {
+    method: "POST",
+    headers: {"content-type":"application/json"},
+    body: JSON.stringify({accion, clave, ...extra}),
+  });
+  const d = await r.json().catch(() => null);
+  return {status: r.status, ok: r.ok, datos: d};
+}
+
+// ---------- pantalla de clave ----------
+function mostrarPedirClave(msg){
+  $("#pedirClave").hidden = false;
+  $("#cargando").hidden = true;
+  $("#panel").hidden = true;
+  if(msg) $("#errClave").textContent = msg;
+  $("#clave").focus();
+}
+
+async function intentarEntrar(){
+  const clave = $("#clave").value;
+  if(!clave){ $("#errClave").textContent = "Escribe la clave."; return; }
+  $("#btnEntrar").disabled = true; $("#errClave").textContent = "";
+  sessionStorage.setItem(CLAVE_KEY, clave);
+  const ok = await cargarPanel();
+  $("#btnEntrar").disabled = false;
+  if(!ok) sessionStorage.removeItem(CLAVE_KEY);
+}
+
+$("#btnEntrar").addEventListener("click", intentarEntrar);
+$("#clave").addEventListener("keydown", e => { if(e.key === "Enter") intentarEntrar(); });
+$("#btnSalir").addEventListener("click", () => {
+  sessionStorage.removeItem(CLAVE_KEY);
+  location.reload();
+});
+$("#btnActualizar").addEventListener("click", () => cargarPanel());
+
+// ---------- carga y render ----------
+async function cargarPanel(){
+  $("#pedirClave").hidden = true;
+  $("#panel").hidden = true;
+  $("#cargando").hidden = false;
+  $("#errorPanel").hidden = true;
+
+  const res = await llamar("panel-listar");
+
+  if(res.status === 401){
+    mostrarPedirClave("Esa clave no es correcta.");
+    return false;
+  }
+  if(res.status === 500){
+    mostrarPedirClave(res.datos?.error || "El panel no está configurado en el servidor.");
+    return false;
+  }
+  if(!res.ok || !res.datos){
+    $("#cargando").hidden = true;
+    $("#panel").hidden = false;
+    $("#errorPanel").hidden = false;
+    $("#errorPanel").textContent = "No se pudo cargar el panel. Intenta de nuevo en unos minutos.";
+    return true; // la clave sí era correcta, no volver a pedirla
+  }
+
+  CASOS = Array.isArray(res.datos.casos) ? res.datos.casos : [];
+  RESUMEN = res.datos.resumen || null;
+
+  $("#cargando").hidden = true;
+  $("#panel").hidden = false;
+  renderResumen();
+  poblarFiltroEstados();
+  renderTabla();
+  return true;
+}
+
+function renderResumen(){
+  const total = RESUMEN?.total ?? CASOS.length;
+  const porEstado = RESUMEN?.por_estado || {};
+  const enGestion = porEstado.en_gestion || 0;
+  const conCasilla = porEstado.correo_creado || 0;
+  const vencen7 = RESUMEN?.vencen_7_dias ?? 0;
+
+  $("#resumen").innerHTML = `
+    <div class="stat"><span class="n">${total}</span><span class="l">Casos totales</span></div>
+    <div class="stat"><span class="n">${enGestion}</span><span class="l">En gestión</span></div>
+    <div class="stat"><span class="n">${conCasilla}</span><span class="l">Con casilla creada</span></div>
+    <div class="stat ${vencen7 > 0 ? "alerta" : ""}"><span class="n">${vencen7}</span><span class="l">Vencen esta semana</span></div>
+  `;
+}
+
+function poblarFiltroEstados(){
+  const sel = $("#filtroEstado");
+  const actual = sel.value;
+  const estados = [...new Set(CASOS.map(c => c.status).filter(Boolean))];
+  sel.innerHTML = `<option value="">Todos los estados</option>` +
+    estados.map(e => `<option value="${e}">${etiquetaEstado(e)}</option>`).join("");
+  sel.value = actual;
+}
+
+function casosFiltrados(){
+  const q = $("#buscador").value.trim().toLowerCase();
+  const estado = $("#filtroEstado").value;
+  return CASOS.filter(c => {
+    if(estado && c.status !== estado) return false;
+    if(!q) return true;
+    const nombre = (c.nombre || "").toLowerCase();
+    const email = (c.email || "").toLowerCase();
+    return nombre.includes(q) || email.includes(q);
+  });
+}
+
+function renderTabla(){
+  const lista = casosFiltrados();
+
+  $("#vacio").hidden = CASOS.length !== 0;
+  $("#tablaCard").hidden = CASOS.length === 0;
+  $("#sinResultados").hidden = !(CASOS.length > 0 && lista.length === 0);
+
+  $("#filas").innerHTML = lista.map((c, i) => {
+    const dias = diasHasta(c.expires_at);
+    const diasTxt = dias === null ? "—" : dias <= 0 ? "Hoy" : `${dias} día${dias === 1 ? "" : "s"}`;
+    const diasClase = dias !== null && dias <= 7 ? "plazo-corto" : "";
+    const chipClase = dias !== null && dias <= 7 ? "chip warn" : "chip";
+    return `<tr data-idx="${CASOS.indexOf(c)}">
+      <td>${escapar(c.nombre || "—")}</td>
+      <td>${escapar(c.email || "—")}</td>
+      <td><code>${escapar(c.direccion || "sin asignar")}</code></td>
+      <td>${escapar((c.centros || []).join(", ") || "—")}</td>
+      <td><span class="chip">${etiquetaEstado(c.status)}</span></td>
+      <td>${fmtFecha(c.creado)}</td>
+      <td class="${diasClase}"><span class="${chipClase}">${diasTxt}</span></td>
+    </tr>`;
+  }).join("");
+
+  [...$("#filas").children].forEach(tr => {
+    tr.addEventListener("click", () => abrirDetalle(CASOS[Number(tr.dataset.idx)]));
+  });
+}
+
+$("#buscador").addEventListener("input", renderTabla);
+$("#filtroEstado").addEventListener("change", renderTabla);
+
+function escapar(s){
+  return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+}
+
+// ---------- detalle + correos ----------
+async function abrirDetalle(caso){
+  if(!caso) return;
+  $("#detalle").hidden = false;
+  $("#dTitulo").textContent = caso.nombre || caso.email || "Caso";
+  $("#dSub").textContent = `${caso.email || "—"} · ${etiquetaEstado(caso.status)}`;
+  $("#dMensajes").innerHTML = `<p class="hint">Buscando los últimos mensajes…</p>`;
+  $("#detalle").scrollIntoView({behavior:"smooth", block:"start"});
+
+  const direccion = caso.direccion || "";
+  const casilla = direccion.split("@")[0] || "";
+  if(!casilla){
+    $("#dMensajes").innerHTML = `<p class="hint">Este caso todavía no tiene una casilla asignada.</p>`;
+    return;
+  }
+
+  const res = await llamar("panel-correos", { casilla });
+
+  if(res.status === 401){
+    $("#dMensajes").innerHTML = `<p class="hint">La sesión del panel expiró. Vuelve a entrar.</p>`;
+    return;
+  }
+  if(res.status === 501){
+    $("#dMensajes").innerHTML = `<p class="hint">El servidor de correo no tiene disponible la lectura
+      de mensajes en este momento (falta la extensión imap). Nada roto de tu lado: solo no se puede
+      mostrar el contenido de la casilla ahora.</p>`;
+    return;
+  }
+  if(!res.ok || !res.datos){
+    $("#dMensajes").innerHTML = `<p class="hint">No se pudieron cargar los mensajes de esta casilla
+      en este momento. Intenta de nuevo más tarde.</p>`;
+    return;
+  }
+
+  const mensajes = Array.isArray(res.datos.mensajes) ? res.datos.mensajes : [];
+  if(mensajes.length === 0){
+    $("#dMensajes").innerHTML = `<p class="hint">Esta casilla todavía no tiene mensajes.</p>`;
+    return;
+  }
+
+  $("#dMensajes").innerHTML = mensajes.map(m => `
+    <div class="msg">
+      <div class="de">${escapar(m.de || "Remitente desconocido")}</div>
+      <div class="asunto">${escapar(m.asunto || "(sin asunto)")}</div>
+      <div class="fecha">${escapar(m.fecha || "")}</div>
+    </div>
+  `).join("");
+}
+
+$("#btnCerrarDetalle").addEventListener("click", () => { $("#detalle").hidden = true; });
+
+// ---------- arranque ----------
+(async () => {
+  const clave = sessionStorage.getItem(CLAVE_KEY);
+  if(clave){
+    $("#pedirClave").hidden = true;
+    $("#cargando").hidden = false;
+    await cargarPanel();
+  }else{
+    mostrarPedirClave();
+  }
+})();
+</script>
+</body>
+</html>

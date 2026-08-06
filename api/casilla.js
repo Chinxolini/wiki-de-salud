@@ -14,6 +14,7 @@ import crypto from "node:crypto";
 
 const ACCIONES = new Set([
   "crear-y-provisionar", "estado", "emitir-codigo", "validar-codigo", "enviar-acuerdo",
+  "panel-listar", "panel-correos",
 ]);
 
 // ---------- código de firma ----------
@@ -88,6 +89,20 @@ function claveValida(guid, clave) {
 const RE_EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
 const RE_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const RE_CODIGO = /^\d{6}$/;
+const RE_CASILLA = /^[a-z0-9._-]+$/;
+
+// ---------- clave del panel administrativo ----------
+//
+// Clave única compartida por el equipo (no una por caso, como claveCaso): el panel es
+// una vista de gestión interna, no algo que reciba cada titular por correo. Se compara
+// contra process.env.PANEL_CLAVE en tiempo constante, igual que el resto del archivo.
+function panelClaveValida(clave) {
+  const esperada = process.env.PANEL_CLAVE || "";
+  if (!esperada || typeof clave !== "string") return false;
+  const a = Buffer.from(esperada);
+  const b = Buffer.from(clave);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
 
 // Cuotas — mismo espíritu que extraer.js: freno razonable, no defensa dura (la instancia
 // serverless se recicla). "estado" es de solo lectura, así que es más laxa que "crear-y-provisionar".
@@ -103,11 +118,15 @@ const LIMITE_ESTADO_POR_IP = 30;
 // que "crear-y-provisionar" por IP, con un tope global algo más alto porque no crean recursos en cPanel.
 const LIMITE_NOTIFICAR_POR_IP = 10;
 const LIMITE_NOTIFICAR_GLOBAL = 100;
+// El panel lo usa el equipo, no el público del evento: cupo propio y más laxo que el de
+// "estado" (que es por titular), pero igual con un tope — nadie queda sin freno.
+const LIMITE_PANEL_POR_IP = 60;
 const VENTANA_MS = 15 * 60 * 1000;
 
 const usoProvisionPorIP = new Map();
 const usoEstadoPorIP = new Map();
 const usoNotificarPorIP = new Map();
+const usoPanelPorIP = new Map();
 // Contadores globales como objeto mutable (no variable suelta) para que excedeCuota()
 // pueda incrementar el contador correcto según la acción, en vez de asumir uno fijo.
 const contadorProvisionGlobal = { n: 0 };
@@ -225,12 +244,82 @@ export default async function handler(req, res) {
       LIMITE_NOTIFICAR_GLOBAL, "La demo alcanzó su límite de envíos. Escríbenos y la reactivamos.",
       contadorNotificarGlobal);
     if (cuota) return res.status(429).json({ error: cuota });
+  } else if (accion === "panel-listar" || accion === "panel-correos") {
+    const cuota = excedeCuota(usoPanelPorIP, ip, LIMITE_PANEL_POR_IP,
+      "Demasiadas consultas seguidas al panel. Espera unos minutos e intenta de nuevo.", null, null, null);
+    if (cuota) return res.status(429).json({ error: cuota });
   } else {
     const cuota = excedeCuota(usoProvisionPorIP, ip, LIMITE_PROVISION_POR_IP,
       "Demasiadas pruebas seguidas. Espera unos minutos e intenta de nuevo.",
       LIMITE_PROVISION_GLOBAL, "La demo alcanzó su límite de uso. Escríbenos y la reactivamos.",
       contadorProvisionGlobal);
     if (cuota) return res.status(429).json({ error: cuota });
+  }
+
+  // El panel administrativo se resuelve ANTES del interruptor PROVISION_ACTIVA: es lectura
+  // de gestión (listar casos existentes, ver correos ya recibidos), no creación de recursos
+  // en cPanel. Si dependiera del flag, apagar la provisión para el público del evento
+  // dejaría también ciego al equipo justo cuando más necesita mirar el panel.
+  if (accion === "panel-listar" || accion === "panel-correos") {
+    const { clave } = req.body || {};
+    if (!process.env.PANEL_CLAVE) {
+      return res.status(500).json({ error: "Falta configurar la clave del panel en el servidor." });
+    }
+    if (!panelClaveValida(clave)) {
+      return res.status(401).json({ error: "Clave incorrecta." });
+    }
+
+    const base = process.env.CASILLAS_API_URL;
+    const apiKey = process.env.CASILLAS_API_KEY;
+    if (!base || !apiKey) {
+      return res.status(500).json({ error: "Falta configuración del servicio de casillas.", fallback: true });
+    }
+
+    if (accion === "panel-listar") {
+      const controlador = new AbortController();
+      const corte = setTimeout(() => controlador.abort(), 20000);
+      try {
+        const r = await fetch(`${base}?action=listar`, {
+          headers: { "X-Api-Key": apiKey },
+          signal: controlador.signal,
+        });
+        const sobre = await r.json().catch(() => null);
+        if (!r.ok || !sobre || sobre.ok === false) {
+          return res.status(502).json({ error: "No se pudo obtener el listado de casos.", fallback: true });
+        }
+        return res.status(200).json(sobre.data);
+      } catch {
+        return res.status(502).json({ error: "El servicio de casillas no respondió.", fallback: true });
+      } finally {
+        clearTimeout(corte);
+      }
+    }
+
+    // accion === "panel-correos"
+    const { casilla } = req.body || {};
+    if (typeof casilla !== "string" || !RE_CASILLA.test(casilla)) {
+      return res.status(400).json({ error: "Casilla no válida." });
+    }
+    const controlador = new AbortController();
+    const corte = setTimeout(() => controlador.abort(), 20000);
+    try {
+      const r = await fetch(`${base}?action=correos&casilla=${encodeURIComponent(casilla)}`, {
+        headers: { "X-Api-Key": apiKey },
+        signal: controlador.signal,
+      });
+      const sobre = await r.json().catch(() => null);
+      if (r.status === 501) {
+        return res.status(501).json({ error: "El servidor no tiene disponible la lectura de correo (falta la extensión imap)." });
+      }
+      if (!r.ok || !sobre || sobre.ok === false) {
+        return res.status(502).json({ error: "No se pudo consultar la casilla.", fallback: true });
+      }
+      return res.status(200).json(sobre.data);
+    } catch {
+      return res.status(502).json({ error: "El servicio de casillas no respondió.", fallback: true });
+    } finally {
+      clearTimeout(corte);
+    }
   }
 
   // "validar-codigo" se resuelve entero acá dentro, sin hablar con el PHP: es puro HMAC.

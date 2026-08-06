@@ -122,6 +122,26 @@ function proyeccionEstado(array $req): array
 }
 
 /**
+ * Proyección segura de una solicitud para el panel administrativo: nunca incluye
+ * password_temporal, mandato.texto, cedula_path ni la IP. Mismo espíritu que
+ * proyeccionEstado(), con los campos extra que necesita una vista de gestión.
+ */
+function proyeccionListado(array $req): array
+{
+    return [
+        'guid'       => $req['guid'] ?? null,
+        'email'      => $req['email'] ?? null,
+        'nombre'     => $req['detalle']['nombre'] ?? null,
+        'centros'    => $req['detalle']['centros'] ?? [],
+        'periodo'    => $req['detalle']['periodo'] ?? null,
+        'status'     => $req['status'] ?? null,
+        'creado'     => $req['timestamp'] ?? null,
+        'expires_at' => $req['expires_at'] ?? null,
+        'direccion'  => $req['correo']['direccion'] ?? null,
+    ];
+}
+
+/**
  * Construye el EmailProvisioner con la misma configuración que run_provisioning.php.
  */
 function construirProvisioner(): EmailProvisioner
@@ -308,6 +328,46 @@ try {
             }
 
             out(proyeccionEstado($request));
+            break;
+        }
+
+        case 'listar': {
+            $todas = li_read_all();
+
+            // Más reciente primero. timestamp es string 'Y-m-d H:i:s' (o similar), comparable
+            // como texto sin parsear fechas — mismo criterio de simpleza que el resto del archivo.
+            usort($todas, function ($a, $b) {
+                return strcmp((string)($b['timestamp'] ?? ''), (string)($a['timestamp'] ?? ''));
+            });
+
+            $porEstado = [];
+            $vencenEn7Dias = 0;
+            $ahora = time();
+            $limite7 = $ahora + 7 * 86400;
+
+            foreach ($todas as $r) {
+                $status = $r['status'] ?? 'desconocido';
+                $porEstado[$status] = ($porEstado[$status] ?? 0) + 1;
+
+                $expiresAt = $r['expires_at'] ?? null;
+                if ($expiresAt) {
+                    $ts = strtotime((string)$expiresAt);
+                    if ($ts !== false && $ts >= $ahora && $ts <= $limite7) {
+                        $vencenEn7Dias++;
+                    }
+                }
+            }
+
+            $casos = array_map('proyeccionListado', $todas);
+
+            out([
+                'casos' => $casos,
+                'resumen' => [
+                    'total'          => count($todas),
+                    'por_estado'     => $porEstado,
+                    'vencen_7_dias'  => $vencenEn7Dias,
+                ],
+            ]);
             break;
         }
 
