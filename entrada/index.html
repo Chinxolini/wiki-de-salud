@@ -160,17 +160,15 @@
 <div class="wrap">
   <div class="hero" id="hero">
     <span class="kicker">◆ Por ley tienes derecho a una copia íntegra y gratuita</span>
-    <h1>Cada centro donde te has atendido guarda un <em>pedazo</em> de tu historia. Ninguno la
-    tiene completa. Tú tampoco.</h1>
-    <p class="lede">Nosotros la pedimos por ti en cada uno, la ordenamos en un solo expediente y te
-    la entregamos. Después la borramos de nuestro sistema.</p>
+    <h1>Cada centro donde te has atendido guarda un <em>pedazo</em> de tu historia. Ninguno la tiene completa. Tú tampoco.</h1>
+    <p class="lede">Nosotros la pedimos por ti en cada uno, la ordenamos en una sola Carpeta de Salud y te la entregamos. Después la borramos de nuestro sistema.</p>
     <div class="disperso">
       <span class="frag" style="--r:-2deg">Exámenes 2019</span>
       <span class="frag" style="--r:1.5deg">Epicrisis</span>
       <span class="frag" style="--r:-1deg">PDF escaneado</span>
       <span class="frag" style="--r:2deg">Otra clínica</span>
       <span class="flecha">→</span>
-      <span class="uno">Un expediente</span>
+      <span class="uno">Una Carpeta de Salud</span>
     </div>
   </div>
 </div>
@@ -188,8 +186,7 @@
   <!-- PASO 1 -->
   <section class="paso activo" data-paso="1">
     <h2 class="h2">Empecemos por quién eres</h2>
-    <p class="bajada">Solo lo que el centro de salud necesita para encontrar tu ficha y comprobar
-    que eres tú. Nada más.</p>
+    <p class="bajada">Solo lo que el centro de salud necesita para encontrar tu ficha y comprobar que eres tú. Nada más.</p>
     <div class="card">
       <div class="grid2">
         <div>
@@ -206,17 +203,19 @@
         </div>
       </div>
       <label for="correo">Correo electrónico</label>
-      <p class="por">Aquí llega todo: el poder firmado, las respuestas de cada centro y tu
-      expediente final.</p>
+      <p class="por">Aquí llega todo: el poder firmado, las respuestas de cada centro y tu Carpeta de Salud final.</p>
       <input type="email" id="correo" name="correo" autocomplete="email" placeholder="tu@correo.cl">
       <span class="err" id="e-correo"></span>
 
-      <label style="margin-top:20px">Foto de tu cédula, por ambos lados</label>
-      <p class="por">La piden los centros, no nosotros: es lo que les permite entregar una ficha
-      sin arriesgarse a dársela a otra persona.</p>
-      <div class="subir" id="subirCedula" role="button" tabindex="0">Elegir las fotos</div>
-      <input type="file" id="cedula" accept="image/*,.pdf" multiple hidden>
+      <label style="margin-top:20px">Una selfie tuya</label>
+      <p class="por">Es verificación por reconocimiento facial, igual que en tu banco. En el producto real esto se complementa con la foto de tu cédula; aquí basta tu rostro.</p>
+      <div class="subir" id="subirCedula" role="button" tabindex="0">Tomar o elegir la foto</div>
+      <input type="file" id="cedula" accept="image/*" capture="user" hidden>
       <div id="listaCedula"></div>
+      <p style="margin:10px 0 0">
+        <button type="button" class="link" id="saltarSelfie">Prefiero no subir mi foto →</button>
+      </p>
+      <div id="selfiePendiente" class="hint" hidden>⚠ Verificación facial pendiente — en el producto real es obligatoria.</div>
       <span class="err" id="e-cedula"></span>
     </div>
     <div class="nav"><button type="button" data-ir="2">Continuar</button></div>
@@ -225,18 +224,30 @@
   <!-- PASO 2 -->
   <section class="paso" data-paso="2">
     <h2 class="h2">¿Dónde te has atendido?</h2>
-    <p class="bajada">Marca cada lugar que recuerdes. Pedimos tu ficha en todos a la vez y juntamos
-    lo que llegue. Solo donde de verdad te atendiste: no mandamos solicitudes a ciegas.</p>
+    <p class="bajada">Marca cada lugar que recuerdes. Pedimos tu ficha en todos a la vez y juntamos lo que llegue. Solo donde de verdad te atendiste: no mandamos solicitudes a ciegas.</p>
     <div class="card">
+      <label style="margin-top:0">¿Cuál es tu previsión?</label>
+      <p class="por">Con tu autorización, nos sirve para consultar dónde te has atendido. Hoy esa consulta todavía no existe: te pedimos el dato porque habilita esa función a futuro.</p>
+      <div class="duo">
+        <label><input type="radio" name="prevision" value="fonasa"> Fonasa</label>
+        <label><input type="radio" name="prevision" value="isapre"> Isapre</label>
+        <label><input type="radio" name="prevision" value="ninguna"> Ninguna / otra</label>
+      </div>
+
+      <label style="margin-top:20px">¿Dónde te has atendido?</label>
       <div id="prestadores"></div>
+      <label class="opt" style="margin-top:4px">
+        <input type="checkbox" id="noSeCentros">
+        <span><span class="nm">No sé / no me acuerdo</span>
+          <span class="ch">Igual podemos avanzar: te ayudamos a reconstruirlo.</span></span>
+      </label>
       <label for="otro">¿Algún otro lugar?</label>
       <p class="por">Escríbelo aunque no estés seguro del nombre exacto.</p>
       <input type="text" id="otro" name="otro" placeholder="Nombre del centro, clínica u hospital">
       <span class="err" id="e-centros"></span>
 
       <label style="margin-top:20px">¿Qué período quieres pedir?</label>
-      <p class="por">Los centros deben guardar tu ficha <b>15 años</b>. Por eso lo normal es pedirla
-      completa: si acotas, recibes menos de lo que te corresponde.</p>
+      <p class="por">Los centros deben guardar tu ficha <b>15 años</b>. Por eso lo normal es pedirla completa: si acotas, recibes menos de lo que te corresponde.</p>
       <div class="duo">
         <label><input type="radio" name="periodo" value="todo" checked> Toda mi historia</label>
         <label><input type="radio" name="periodo" value="acotar"> Prefiero acotar</label>
@@ -248,8 +259,7 @@
 
     <div class="card">
       <label style="margin-top:0">¿Ya tienes algún documento tuyo?</label>
-      <p class="por">Si tienes exámenes guardados, entran de inmediato al expediente mientras
-      esperamos el resto. Lo que traigas <b>se suma</b>, no reemplaza la búsqueda.</p>
+      <p class="por">Si tienes exámenes guardados, entran de inmediato a la Carpeta de Salud mientras esperamos el resto. Lo que traigas <b>se suma</b>, no reemplaza la búsqueda.</p>
       <div class="duo">
         <label><input type="radio" name="tiene" value="no" checked> No tengo</label>
         <label><input type="radio" name="tiene" value="si"> Sí, tengo algunos</label>
@@ -271,36 +281,24 @@
   <!-- PASO 3 -->
   <section class="paso" data-paso="3">
     <h2 class="h2">Tu autorización</h2>
-    <p class="bajada">Para pedir tu ficha en tu nombre, la ley exige un poder simple: firmado ante
-    notario <em>o</em> por un sistema electrónico que garantice su autenticidad (art. 13 letra b,
-    Ley 20.584). Un “acepto los términos” no cumple.</p>
+    <p class="bajada">Para pedir tu ficha en tu nombre, la ley exige un poder simple: firmado ante notario <em>o</em> por un sistema electrónico que garantice su autenticidad (art. 13 letra b, Ley 20.584). Un “acepto los términos” no cumple.</p>
     <div class="card">
       <div class="legal">
         <h4>Poder simple para solicitar y recibir copia de ficha clínica</h4>
-        <p><b>Primero.</b> Autorizo a solicitar ante los centros que marqué copia íntegra de mi
-        ficha clínica, a recibirla, a ejercer mi derecho de acceso sobre esos antecedentes y a
-        reclamar ante la autoridad si me la niegan, no responden o la entregan mal.</p>
+        <p><b>Primero.</b> Autorizo a solicitar ante los centros que marqué copia íntegra de mi ficha clínica, a recibirla, a ejercer mi derecho de acceso sobre esos antecedentes y a reclamar ante la autoridad si me la niegan, no responden o la entregan mal.</p>
         <p><b>Segundo.</b> El poder vale <b>solo para los centros que marqué</b>. Para ningún otro.</p>
-        <p><b>Tercero.</b> Los antecedentes se usan <b>únicamente</b> para consolidarlos y
-        entregármelos a mí. No se ceden, no se publican, no se tratan con otra finalidad.</p>
-        <p><b>Cuarto.</b> Las respuestas llegan a una casilla creada a mi nombre, y todo lo que
-        llegue ahí se reenvía íntegro a mi correo personal.</p>
-        <p><b>Quinto.</b> Cumplido el encargo se <b>suprime</b> la casilla y todos mis documentos y
-        datos. Queda solo un registro estadístico sin datos personales sobre cuánto demoró cada
-        centro. Recibo constancia de la supresión con fecha y hora.</p>
-        <p><b>Sexto.</b> Puedo <b>revocarlo cuando quiera</b>, sin dar explicaciones, por correo.
-        Desde que se recibe la revocación, se suprime todo de inmediato.</p>
-        <p><b>Séptimo.</b> Se firma por sistema electrónico que garantiza su autenticidad
-        (Ley 19.799). La constancia técnica va adjunta al documento.</p>
+        <p><b>Tercero.</b> Los antecedentes se usan <b>únicamente</b> para consolidarlos y entregármelos a mí. No se ceden, no se publican, no se tratan con otra finalidad.</p>
+        <p><b>Cuarto.</b> Las respuestas llegan a una casilla creada a mi nombre, y todo lo que llegue ahí se reenvía íntegro a mi correo personal.</p>
+        <p><b>Quinto.</b> Cumplido el encargo se <b>suprime</b> la casilla y todos mis documentos y datos. Queda solo un registro estadístico sin datos personales sobre cuánto demoró cada centro. Recibo constancia de la supresión con fecha y hora.</p>
+        <p><b>Sexto.</b> Puedo <b>revocarlo cuando quiera</b>, sin dar explicaciones, por correo. Desde que se recibe la revocación, se suprime todo de inmediato.</p>
+        <p><b>Séptimo.</b> Se firma por sistema electrónico que garantiza su autenticidad (Ley 19.799). La constancia técnica va adjunta al documento.</p>
       </div>
       <p style="margin:12px 0 0">
-        <button type="button" class="link" id="verPoder">Leer el texto legal completo y cómo se
-        acredita la firma →</button>
+        <button type="button" class="link" id="verPoder">Leer el texto legal completo y cómo se acredita la firma →</button>
       </p>
       <label class="check">
         <input type="checkbox" name="poder">
-        <span>He leído el poder y <b>autorizo</b> a solicitar mi ficha clínica en mi nombre ante los
-        centros que marqué.</span>
+        <span>He leído el poder y <b>autorizo</b> a solicitar mi ficha clínica en mi nombre ante los centros que marqué.</span>
       </label>
       <label class="check">
         <input type="checkbox" name="veracidad">
@@ -320,22 +318,13 @@
     <p class="bajada">Lo último, y es lo más importante de todo el formulario.</p>
     <div class="card">
       <div class="aviso">
-        <p style="margin:0 0 10px"><strong>Esto no es un diagnóstico ni una indicación médica.</strong>
-        Lo que te entregamos es <b>tu propia información</b>, transcrita y ordenada por un sistema
-        automatizado con inteligencia artificial, junto con los documentos originales de cada centro
-        para que puedas contrastar cada dato.</p>
-        <p style="margin:0 0 10px">No interpretamos tus resultados, no te decimos qué tienes, no te
-        indicamos tratamientos ni te decimos a quién consultar. <b>Cualquier decisión sobre tu salud
-        es tuya y de los profesionales que te atienden</b>, sobre los documentos originales, que van
-        incluidos.</p>
-        <p style="margin:0">Un sistema automatizado puede equivocarse al transcribir. Por eso cada
-        valor del expediente <b>queda enlazado al documento del que salió</b>: siempre puedes
-        verificar.</p>
+        <p style="margin:0 0 10px"><strong>Esto no es un diagnóstico ni una indicación médica.</strong> Lo que te entregamos es <b>tu propia información</b>, transcrita y ordenada por un sistema automatizado con inteligencia artificial, junto con los documentos originales de cada centro para que puedas contrastar cada dato.</p>
+        <p style="margin:0 0 10px">No interpretamos tus resultados, no te decimos qué tienes, no te indicamos tratamientos ni te decimos a quién consultar. <b>Cualquier decisión sobre tu salud es tuya y de los profesionales que te atienden</b>, sobre los documentos originales, que van incluidos.</p>
+        <p style="margin:0">Un sistema automatizado puede equivocarse al transcribir. Por eso cada valor de la Carpeta de Salud <b>queda enlazado al documento del que salió</b>: siempre puedes verificar.</p>
       </div>
       <label class="check">
         <input type="checkbox" name="disclaimer">
-        <span>Entiendo que el expediente es un ordenamiento automatizado de mis propios documentos,
-        <b>no un diagnóstico ni una recomendación médica</b>, y que lo uso bajo mi responsabilidad.</span>
+        <span>Entiendo que la Carpeta de Salud es un ordenamiento automatizado de mis propios documentos, <b>no un diagnóstico ni una recomendación médica</b>, y que lo uso bajo mi responsabilidad.</span>
       </label>
       <span class="err" id="e-disc"></span>
     </div>
@@ -351,19 +340,19 @@
 <!-- FIRMA -->
 <section id="verificacion" class="paso">
   <h2 class="h2">Firma tu poder</h2>
-  <p class="bajada">Te enviamos un código de 6 dígitos a <code id="correoEco"></code>. Escribirlo es
-  lo que convierte esto en firma electrónica: acredita que quien firma controla ese correo.</p>
+  <p class="bajada">Te enviamos un código de 6 dígitos a <code id="correoEco"></code>. Escribirlo es lo que convierte esto en firma electrónica: acredita que quien firma controla ese correo.</p>
   <div class="card">
-    <div class="aviso" style="margin-bottom:18px">
+    <div class="aviso" style="margin-bottom:18px" id="avisoEnvio">
       <span class="sim">Demo</span>
-      <p style="margin:9px 0 0">Esta versión no manda correos de verdad. Tu código es
-      <b style="font-size:1.15em;letter-spacing:.12em" id="codigoDemo"></b> — escríbelo abajo, tal
-      como lo haría la persona al recibirlo.</p>
+      <p style="margin:9px 0 0" id="textoEnvio">Enviando el código a tu correo…</p>
     </div>
     <label for="inputCodigo">Código recibido</label>
     <input type="text" class="codigo" id="inputCodigo" maxlength="6" inputmode="numeric"
            placeholder="······" autocomplete="one-time-code">
     <span class="err" id="errorCodigo"></span>
+    <p style="margin:10px 0 0">
+      <button type="button" class="link" id="btnRellenar">Rellenar por mí →</button>
+    </p>
     <div class="nav">
       <button type="button" class="atras" id="btnVolverForm">← Corregir datos</button>
       <button type="button" id="btnFirmar">Firmar y enviar</button>
@@ -382,7 +371,7 @@
 
   <div class="card" style="background:var(--soft);border-color:var(--accent)">
     <p style="margin:0;font-size:.9rem"><b>Y cuando termine:</b> recibes un paquete descargable con
-    tu expediente y los documentos originales de cada centro. Después borramos tu casilla y tus
+    tu Carpeta de Salud y los documentos originales de cada centro. Después borramos tu casilla y tus
     documentos, y te mandamos la constancia. De ti no queda nada en nuestro sistema, salvo cuánto
     demoró cada centro en responder — sin tu nombre.</p>
   </div>
@@ -390,18 +379,18 @@
   <div class="card" id="cardDemoVivo" hidden>
     <h2 class="h2" style="font-size:1.1rem">▶ Míralo funcionar ahora</h2>
     <p class="por">No es una maqueta. El botón manda las fichas clínicas de los tres centros a
-    Claude, que las lee y las unifica en un solo expediente a tu nombre. Con el consumo real de
+    Claude, que las lee y las unifica en una sola Carpeta de Salud a tu nombre. Con el consumo real de
     tokens a la vista.</p>
-    <button type="button" id="btnDemo" style="width:100%">Reunir mi expediente con Claude</button>
+    <button type="button" id="btnDemo" style="width:100%">Reunir mi Carpeta de Salud con Claude</button>
     <div id="demoEstado" class="hint" style="margin-top:12px"></div>
     <div id="demoResultado"></div>
     <div id="descargas" hidden style="margin-top:18px">
-      <p class="por" style="margin-bottom:10px"><b>Tu paquete está listo.</b> Se armó aquí, en tu
+      <p class="por" style="margin-bottom:10px"><b>Tu Carpeta de Salud está lista.</b> Se armó aquí, en tu
       navegador: tu nombre y tu RUT nunca salieron de este dispositivo.</p>
       <div class="duo" style="flex-direction:column">
-        <button type="button" id="dlWiki" style="width:100%">⬇ Descargar mi expediente de salud</button>
+        <button type="button" id="dlWiki" style="width:100%">🖨 Generar mi Carpeta de Salud (PDF)</button>
         <button type="button" class="atras" id="dlFichas" style="width:100%;flex:1">
-          ⬇ Descargar las fichas originales de cada centro</button>
+          🖨 Generar las fichas originales de cada centro (PDF)</button>
       </div>
     </div>
   </div>
@@ -416,57 +405,28 @@
   </div>
   <div class="db">
     <p><b>PODER SIMPLE PARA SOLICITAR Y RECIBIR COPIA DE FICHA CLÍNICA</b></p>
-    <p>En [ciudad], a [fecha]. Yo, <b>[nombre completo del titular]</b>, cédula nacional de
-    identidad N° <b>[RUT]</b>, en adelante “el titular”, vengo en conferir <b>poder simple</b> a
-    <b>[mandatario]</b>, para que en mi nombre y representación ejerza las facultades que a
-    continuación se indican.</p>
-    <p><b>PRIMERO. Facultades conferidas.</b> El mandatario queda facultado para: (a) solicitar,
-    ante los prestadores individualizados en la cláusula SEGUNDA, copia íntegra de mi ficha clínica
-    y de los antecedentes que de mí obren en su poder, conforme al artículo 13 de la Ley N° 20.584;
-    (b) recibir dicha copia, en soporte físico o electrónico, y acusar recibo de ella; (c) ejercer,
-    respecto de esos mismos antecedentes, el <b>derecho de acceso</b> que reconoce la legislación de
-    protección de datos personales, y presentar las reclamaciones que procedan ante la autoridad
-    competente en caso de denegación, silencio o entrega defectuosa; (d) efectuar las gestiones
-    administrativas accesorias estrictamente necesarias, incluyendo completar formularios, acompañar
-    documentos de identidad y designar una casilla de correo para recibir las respuestas.</p>
-    <p><b>SEGUNDO. Prestadores comprendidos.</b> Este poder se otorga exclusivamente respecto de los
-    prestadores que el titular seleccionó al firmar. No se extiende a ningún otro.</p>
-    <p><b>TERCERO. Finalidad única.</b> Los antecedentes se usarán <b>únicamente</b> para
-    consolidarlos y entregárselos al titular. El mandatario <b>no queda facultado</b> para cederlos,
-    comunicarlos, publicarlos ni tratarlos con ninguna finalidad distinta.</p>
-    <p><b>CUARTO. Casilla designada.</b> Las respuestas se reciben en una casilla creada a nombre
-    del titular, y se le reenvían íntegramente a su correo personal.</p>
-    <p><b>QUINTO. Supresión al término del encargo.</b> Cumplido el encargo, el mandatario
-    <b>suprimirá</b> la casilla y la totalidad de los documentos y datos personales obtenidos,
-    conservando únicamente un registro estadístico <b>sin datos personales</b> sobre el plazo y
-    formato de respuesta de cada prestador. Se entrega constancia con fecha y hora.</p>
-    <p><b>SEXTO. Vigencia y revocación.</b> Rige por el plazo necesario para cumplir el encargo. El
-    titular <b>puede revocarlo en cualquier momento, sin expresión de causa</b>, incluso por correo.
-    La revocación obliga a la supresión inmediata conforme a la cláusula QUINTA.</p>
-    <p><b>SÉPTIMO. Forma de otorgamiento.</b> Se firma <b>a través de un sistema electrónico que
-    garantiza su autenticidad</b>, en los términos del art. 13 letra b) de la Ley N° 20.584 y de la
-    Ley N° 19.799. La constancia técnica se incorpora como Anexo de Autenticidad.</p>
-    <p><b>OCTAVO. Declaración.</b> Declaro que la información proporcionada es efectiva, que soy la
-    persona cuya ficha se solicita, y que comprendo el alcance de las facultades que confiero.</p>
+    <p>En [ciudad], a [fecha]. Yo, <b>[nombre completo del titular]</b>, cédula nacional de identidad N° <b>[RUT]</b>, en adelante “el titular”, vengo en conferir <b>poder simple</b> a <b>[mandatario]</b>, para que en mi nombre y representación ejerza las facultades que a continuación se indican.</p>
+    <p><b>PRIMERO. Facultades conferidas.</b> El mandatario queda facultado para: (a) solicitar, ante los prestadores individualizados en la cláusula SEGUNDA, copia íntegra de mi ficha clínica y de los antecedentes que de mí obren en su poder, conforme al artículo 13 de la Ley N° 20.584; (b) recibir dicha copia, en soporte físico o electrónico, y acusar recibo de ella; (c) ejercer, respecto de esos mismos antecedentes, el <b>derecho de acceso</b> que reconoce la legislación de protección de datos personales, y presentar las reclamaciones que procedan ante la autoridad competente en caso de denegación, silencio o entrega defectuosa; (d) efectuar las gestiones administrativas accesorias estrictamente necesarias, incluyendo completar formularios, acompañar documentos de identidad y designar una casilla de correo para recibir las respuestas.</p>
+    <p><b>SEGUNDO. Prestadores comprendidos.</b> Este poder se otorga exclusivamente respecto de los prestadores que el titular seleccionó al firmar. No se extiende a ningún otro.</p>
+    <p><b>TERCERO. Finalidad única.</b> Los antecedentes se usarán <b>únicamente</b> para consolidarlos y entregárselos al titular. El mandatario <b>no queda facultado</b> para cederlos, comunicarlos, publicarlos ni tratarlos con ninguna finalidad distinta.</p>
+    <p><b>CUARTO. Casilla designada.</b> Las respuestas se reciben en una casilla creada a nombre del titular, y se le reenvían íntegramente a su correo personal.</p>
+    <p><b>QUINTO. Supresión al término del encargo.</b> Cumplido el encargo, el mandatario <b>suprimirá</b> la casilla y la totalidad de los documentos y datos personales obtenidos, conservando únicamente un registro estadístico <b>sin datos personales</b> sobre el plazo y formato de respuesta de cada prestador. Se entrega constancia con fecha y hora.</p>
+    <p><b>SEXTO. Vigencia y revocación.</b> Rige por el plazo necesario para cumplir el encargo. El titular <b>puede revocarlo en cualquier momento, sin expresión de causa</b>, incluso por correo. La revocación obliga a la supresión inmediata conforme a la cláusula QUINTA.</p>
+    <p><b>SÉPTIMO. Forma de otorgamiento.</b> Se firma <b>a través de un sistema electrónico que garantiza su autenticidad</b>, en los términos del art. 13 letra b) de la Ley N° 20.584 y de la Ley N° 19.799. La constancia técnica se incorpora como Anexo de Autenticidad.</p>
+    <p><b>OCTAVO. Declaración.</b> Declaro que la información proporcionada es efectiva, que soy la persona cuya ficha se solicita, y que comprendo el alcance de las facultades que confiero.</p>
     <hr style="border:0;border-top:1px solid var(--line);margin:22px 0">
     <p><b>ANEXO DE AUTENTICIDAD — qué queda registrado de tu firma</b></p>
-    <p>La ley pide un sistema <em>que garantice la autenticidad</em>, sin definir cómo. Esto es lo
-    que registramos y adjuntamos al poder:</p>
+    <p>La ley pide un sistema <em>que garantice la autenticidad</em>, sin definir cómo. Esto es lo que registramos y adjuntamos al poder:</p>
     <p>• <b>Identidad declarada</b>: nombre, RUT y correo.<br>
-    • <b>Documento de identidad</b>: imagen de la cédula por ambos lados.<br>
-    • <b>Prueba de control del correo</b>: código de un solo uso enviado y validado, con hora de
-      emisión y de validación. Es el elemento nuclear de la firma electrónica simple.<br>
-    • <b>Manifestación de voluntad</b>: el texto íntegro mostrado antes de firmar, más la marca de
-      aceptación expresa, nunca premarcada.<br>
+    • <b>Verificación facial</b>: una selfie, con complemento de cédula en el producto real.<br>
+    • <b>Prueba de control del correo</b>: código de un solo uso enviado y validado, con hora de emisión y de validación. Es el elemento nuclear de la firma electrónica simple.<br>
+    • <b>Manifestación de voluntad</b>: el texto íntegro mostrado antes de firmar, más la marca de aceptación expresa, nunca premarcada.<br>
     • <b>Integridad</b>: hash SHA-256 del documento al momento de firmar.<br>
     • <b>Sello de tiempo</b>: fecha y hora UTC de cada paso.<br>
     • <b>Trazas técnicas</b>: IP, navegador, identificador de sesión.<br>
     • <b>Constancia de envío</b>: copia íntegra del poder firmado, al correo del titular.</p>
-    <p class="hint">Esto es firma electrónica <b>simple</b>, hecha bien. No es firma avanzada y no
-    afirmamos que lo sea: la ley no la exige para este trámite.</p>
-    <p class="hint"><b>Minimización.</b> No pedimos domicilio ni teléfono: con RUT y cédula el
-    titular queda plenamente identificado, y todo lo demás sería un dato personal más que
-    custodiar y borrar sin razón.</p>
+    <p class="hint">Esto es firma electrónica <b>simple</b>, hecha bien. No es firma avanzada y no afirmamos que lo sea: la ley no la exige para este trámite.</p>
+    <p class="hint"><b>Minimización.</b> No pedimos domicilio ni teléfono: con RUT y verificación facial el titular queda plenamente identificado, y todo lo demás sería un dato personal más que custodiar y borrar sin razón.</p>
   </div>
 </dialog>
 
@@ -480,20 +440,15 @@
 <script>
 // Catalogo de prestadores. El canal (formulario web / presencial) vive en
 // prestadores/protocolos.json y lo usa el orquestador; al usuario no le importa
-// el canal, le importa el plazo. La jerga se queda en el sistema.
-// Cada plazo dice de donde sale. No son datos del mismo tipo: uno es medicion
-// propia de un solo caso, dos son lo que declara el centro y uno esta estimado
-// porque nadie lo publica. Presentarlos como equivalentes seria justamente la
-// opacidad que el producto denuncia.
+// el canal, le importa que su solicitud salga. La jerga se queda en el sistema.
+// Los plazos y su procedencia (medicion propia / declarado por el centro / estimado)
+// se sacaron de la UI de seleccion: se mezclaban datos de distinta calidad como si
+// fueran equivalentes. Quedan solo nombre y canal.
 const PRESTADORES = [
-  {id:"chp", nombre:"Clínica Hospital del Profesor", canal:"formulario_web",
-   demora:"Nos respondió el mismo día", fuente:"nuestra medición, 1 caso"},
-  {id:"hcuch", nombre:"Hospital Clínico Universidad de Chile", canal:"formulario_web",
-   demora:"Hasta 20 días hábiles", fuente:"según el centro"},
-  {id:"integramedica", nombre:"IntegraMédica (Bupa)", canal:"formulario_web",
-   demora:"5 días hábiles · cubre los 30+ centros de la red", fuente:"según el centro"},
-  {id:"redsalud", nombre:"RedSalud", canal:"presencial",
-   demora:"10 a 20 días hábiles · hay que pedirlo en cada sede", fuente:"estimado, no publicado"}
+  {id:"chp", nombre:"Clínica Hospital del Profesor", canal:"formulario_web"},
+  {id:"hcuch", nombre:"Hospital Clínico Universidad de Chile", canal:"formulario_web"},
+  {id:"integramedica", nombre:"IntegraMédica (Bupa)", canal:"formulario_web"},
+  {id:"redsalud", nombre:"RedSalud", canal:"presencial"}
 ];
 const $ = s => document.querySelector(s);
 const TOTAL = 4;
@@ -501,8 +456,7 @@ const TOTAL = 4;
 $("#prestadores").innerHTML = PRESTADORES.map(p=>`
   <label class="opt">
     <input type="checkbox" name="prestador" value="${p.id}">
-    <span><span class="nm">${p.nombre}</span>
-      <span class="ch">${p.demora} <span class="fuente">${p.fuente}</span></span></span>
+    <span><span class="nm">${p.nombre}</span></span>
   </label>`).join("");
 
 // ---------- progreso ----------
@@ -577,12 +531,12 @@ function validarPaso(n){
     ok = marcar("#e-correo", $("#correo"),
       /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test($("#correo").value.trim()) ? "" : "Escribe un correo válido.") && ok;
     ok = marcar("#e-cedula", null,
-      getCedula().length ? "" : "Sube al menos una foto de tu cédula.") && ok;
+      (getCedula().length || selfieOmitida) ? "" : "Sube tu selfie, o marca que prefieres no subirla.") && ok;
   }
   if(n === 2){
     const marcados = document.querySelectorAll("[name=prestador]:checked").length;
     ok = marcar("#e-centros", null,
-      (marcados || $("#otro").value.trim() || getArchivos().length) ? ""
+      (marcados || noSeCentros.checked || $("#otro").value.trim() || getArchivos().length) ? ""
       : "Marca al menos un lugar donde te hayas atendido, o sube un documento tuyo.") && ok;
   }
   if(n === 3){
@@ -624,6 +578,28 @@ function gestor(idBoton, idInput, idLista){
 }
 const getCedula = gestor("#subirCedula","#cedula","#listaCedula");
 const getArchivos = gestor("#subirDocs","#archivos","#listaArchivos");
+$("#cedula").addEventListener("change",()=>{
+  if(getCedula().length){ selfieOmitida = false; $("#selfiePendiente").hidden = true; }
+});
+
+// ---------- "no sé / no me acuerdo" es exclusivo con los centros marcados ----------
+const noSeCentros = $("#noSeCentros");
+noSeCentros.addEventListener("change",()=>{
+  if(noSeCentros.checked){
+    document.querySelectorAll("[name=prestador]:checked").forEach(c=>c.checked=false);
+  }
+});
+document.querySelectorAll("[name=prestador]").forEach(c=>c.addEventListener("change",()=>{
+  if(c.checked) noSeCentros.checked = false;
+}));
+
+// ---------- selfie: "prefiero no subir mi foto" salta la exigencia ----------
+let selfieOmitida = false;
+$("#saltarSelfie").addEventListener("click",()=>{
+  selfieOmitida = true;
+  $("#selfiePendiente").hidden = false;
+  $("#e-cedula").textContent = "";
+});
 
 document.querySelectorAll("[name=tiene]").forEach(r=>r.addEventListener("change",()=>{
   $("#bloqueSubir").hidden = $("[name=tiene]:checked").value !== "si";
@@ -634,7 +610,7 @@ document.querySelectorAll("[name=periodo]").forEach(r=>r.addEventListener("chang
 $("#verPoder").addEventListener("click",()=>dlgPoder.showModal());
 
 // ---------- firma ----------
-let datos = null, codigoEsperado = null;
+let datos = null;
 
 $("#f").addEventListener("submit", e=>{
   e.preventDefault();
@@ -644,16 +620,52 @@ $("#f").addEventListener("submit", e=>{
   const periodoSel = document.querySelector("[name=periodo]:checked")?.value;
   const periodo = periodoSel === "acotar" ? ($("#periodoTexto").value.trim() || "acotado") : "toda la historia";
   const mandatoTexto = $(".paso[data-paso=\"3\"] .legal")?.textContent?.trim().replace(/\s+/g," ") || "";
+  const prevision = document.querySelector("[name=prevision]:checked")?.value || "no informada";
   datos = { correo:$("#correo").value.trim(), nombre:$("#nombre").value.trim(),
-            sel, archivos:getArchivos(), periodo, mandatoTexto };
-  codigoEsperado = String(Math.floor(100000 + Math.random()*900000));
+            sel, archivos:getArchivos(), periodo, mandatoTexto, prevision,
+            noSeCentros: noSeCentros.checked };
   $("#correoEco").textContent = datos.correo;
-  $("#codigoDemo").textContent = codigoEsperado;
+  $("#textoEnvio").textContent = "Enviando el código a tu correo…";
   document.querySelectorAll(".paso[data-paso]").forEach(s=>s.classList.remove("activo"));
   $("#verificacion").classList.add("activo");
   $("#barra").hidden = true;
   window.scrollTo({top:0});
   $("#inputCodigo").focus();
+  enviarCodigo(datos.correo);
+});
+
+// El código lo genera y lo valida el SERVIDOR. Acá no se conoce: si viviera en el
+// navegador, cualquiera lo leería en las herramientas del navegador y la firma no
+// acreditaría nada — y acreditar que la persona controla ese correo es justo lo que
+// sostiene el poder simple. Lo único que guarda el navegador es un token opaco.
+let tokenFirma = null;
+let codigoDemo = null;   // solo si el servidor está en modo demostración
+
+async function enviarCodigo(correo){
+  tokenFirma = null; codigoDemo = null;
+  $("#btnRellenar").hidden = true;
+  try{
+    const r = await fetch("/api/casilla", {method:"POST",
+      headers:{"content-type":"application/json"},
+      body: JSON.stringify({accion:"emitir-codigo", email:correo})});
+    const data = await r.json().catch(()=>null);
+    if(!r.ok || !data || !data.token) throw new Error("sin token");
+    tokenFirma = data.token;
+    codigoDemo = data.codigo_demo || null;
+    // "enviado" dice que el servidor lo aceptó para envío, no que llegó a la bandeja:
+    // puede caer en spam. Se dice así, sin prometer de más.
+    $("#textoEnvio").textContent = data.enviado
+      ? "Enviamos un código a " + correo + ". Si no aparece, revisa la carpeta de spam."
+      : "No pudimos enviar el correo a " + correo + ".";
+    if(codigoDemo) $("#btnRellenar").hidden = false;
+  }catch{
+    $("#textoEnvio").textContent = "No pudimos emitir el código. Vuelve a intentarlo.";
+  }
+}
+
+$("#btnRellenar").addEventListener("click",()=>{
+  $("#inputCodigo").value = codigoDemo || "";
+  $("#errorCodigo").textContent = "";
 });
 
 $("#btnVolverForm").addEventListener("click",()=>{
@@ -661,28 +673,43 @@ $("#btnVolverForm").addEventListener("click",()=>{
   irA(1);
 });
 
-$("#btnFirmar").addEventListener("click",()=>{
+$("#btnFirmar").addEventListener("click", async ()=>{
   const val = $("#inputCodigo").value.trim();
-  if(val !== codigoEsperado){
-    $("#errorCodigo").textContent = val ? "Ese código no coincide. Revísalo e inténtalo de nuevo."
-                                        : "Escribe el código para poder firmar.";
+  if(!val){ $("#errorCodigo").textContent = "Escribe el código para poder firmar."; return; }
+  if(!tokenFirma){ $("#errorCodigo").textContent = "El código venció. Vuelve atrás y pídelo otra vez."; return; }
+
+  const btn = $("#btnFirmar");
+  btn.disabled = true;
+  try{
+    const r = await fetch("/api/casilla", {method:"POST",
+      headers:{"content-type":"application/json"},
+      body: JSON.stringify({accion:"validar-codigo", email:datos.correo, codigo:val, token:tokenFirma})});
+    const data = await r.json().catch(()=>null);
+    if(!r.ok || !data || !data.valido){
+      $("#errorCodigo").textContent = "Ese código no coincide o ya venció. Revísalo e inténtalo de nuevo.";
+      return;
+    }
+  }catch{
+    $("#errorCodigo").textContent = "No pudimos verificar el código. Reintenta en unos segundos.";
     return;
-  }
+  }finally{ btn.disabled = false; }
+
   $("#errorCodigo").textContent = "";
   mostrarResultado();
 });
 
 
 async function mostrarResultado(){
-  const {correo, nombre, sel, archivos, periodo, mandatoTexto} = datos;
+  const {correo, nombre, sel, archivos, periodo, mandatoTexto, noSeCentros: sinCentrosClaros} = datos;
   let casilla = nombre.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
                     .replace(/[^a-z\s]/g,"").trim().split(/\s+/).slice(0,2).join(".") + "@chiledao.cl";
   let casillaEsDemo = true;
   // Se intenta provisionar una casilla real vía el servicio de Mauro. Si no responde, si viene
   // desactivado, o si algo no calza, seguimos con el cálculo sintético de siempre: el flujo
-  // visible nunca se bloquea por esto.
+  // visible nunca se bloquea por esto. La casilla espejo se necesita igual cuando la persona
+  // marcó "no sé": sin ella no hay dónde reconstruir dónde se ha atendido.
   try{
-    if(!sel.length) throw new Error("sin centros marcados: no hay para qué provisionar casilla");
+    if(!sel.length && !sinCentrosClaros) throw new Error("sin centros marcados ni 'no sé': no hay para qué provisionar casilla");
     const r = await fetch("/api/casilla", {method:"POST",
       headers:{"content-type":"application/json"},
       body: JSON.stringify({
@@ -707,33 +734,40 @@ async function mostrarResultado(){
   const paso = t => pasos.push([String(pasos.length+1), t]);
 
   paso("<b>Poder firmado</b> a las " + new Date().toLocaleTimeString("es-CL") + ". Se generó su "+
-       "constancia de autenticidad: código validado, tu cédula, el texto que leíste, el hash del "+
-       "documento y el sello de tiempo. Te llega una copia íntegra a <code>"+correo+"</code>.");
+       "constancia de autenticidad: código validado, tu verificación de identidad, el texto que "+
+       "leíste, el hash del documento y el sello de tiempo. Te llega una copia íntegra a "+
+       "<code>"+correo+"</code>.");
   if(archivos.length){
     paso("<b>"+archivos.length+" documento"+(archivos.length>1?"s":"")+"</b> que adelantaste, "+
          "leyéndose ahora: "+archivos.map(a=>"<code>"+a.name+"</code>").join(", ")+".");
   }
-  if(sel.length){
+  if(sel.length || sinCentrosClaros){
     paso("Se creó tu <b>casilla espejo</b> <code>"+casilla+"</code>"+
          (casillaEsDemo ? " <span class=\"hint\">(casilla de demostración)</span>" : "")+
          ". Es la dirección que se declara ante cada centro, y todo lo que llegue ahí se te "+
          "reenvía íntegro.");
+  }
+  if(sel.length){
     paso("<b>"+sel.length+" solicitud"+(sel.length>1?"es":"")+"</b> preparada"+(sel.length>1?"s":"")+
          ", invocando el art. 13 de la Ley 20.584 y exigiendo <b>formato digital legible</b>."+
          (auto.length?" <b>"+auto.length+"</b> sale por correo ahora mismo.":"")+
          (asist.length?" <b>"+asist.length+"</b> "+(asist.length>1?"van":"va")+" por el canal propio "+
           "de cada centro ("+asist.map(p=>p.nombre).join(", ")+"), que no admite envío automático: "+
           "lo hace una persona del equipo hoy mismo.":""));
+  } else if(sinCentrosClaros){
+    paso("Vamos a <b>ayudarte a reconstruir dónde te has atendido</b>. Con tu previsión y tu casilla "+
+         "espejo ya provisionadas, apenas esa consulta esté disponible retomamos desde ahí.");
   }
   $("#pasos").innerHTML = pasos.map(([i,t])=>
     `<div class="fila"><span class="ic">${i}</span><span>${t}</span></div>`).join("");
 
   $("#seguimiento").innerHTML =
     (archivos.length ? `<div class="fila"><span class="ic">✓</span><span><b>Tus documentos</b><br>
-      <span class="hint">Listos en minutos: ya están en el expediente.</span></span></div>` : "") +
+      <span class="hint">Listos en minutos: ya están en la Carpeta de Salud.</span></span></div>` : "") +
     sel.map(p=>`<div class="fila"><span class="ic">◷</span><span><b>${p.nombre}</b><br>
-      <span class="hint">${p.demora} (${p.fuente}). Te avisamos por correo apenas conteste.</span>
-      </span></div>`).join("") +
+      <span class="hint">Te avisamos por correo apenas conteste.</span></span></div>`).join("") +
+    (sinCentrosClaros ? `<div class="fila"><span class="ic">◷</span><span><b>Reconstruir tu historial</b><br>
+      <span class="hint">Te avisamos por correo apenas tengamos algo para mostrarte.</span></span></div>` : "") +
     `<p class="hint" style="margin:16px 0 0">Si quieres detener el proceso, respondes cualquiera de
      esos correos con “revoco” y borramos todo el mismo día.</p>`;
 
@@ -821,10 +855,53 @@ function resumen(regs){
   return `<div style="margin-top:12px">${chips}</div>`;
 }
 
-// ---------- el expediente, armado en el navegador ----------
+// ---------- documentos imprimibles: PDF sin librerias ----------
+// Sin CDN ni libreria de generacion de PDF (CSP estricta): se abre el HTML en una
+// ventana nueva y se deja que el propio navegador lo imprima a PDF. La barra superior
+// no se imprime (@media print) y el boton dispara window.print(); el dialogo tambien
+// se dispara solo al cargar, como atajo.
+const CSS_IMPRIMIBLE = `
+  .barra-pdf{position:sticky;top:0;background:#0f5c46;color:#fff;padding:11px 22px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;font-size:.83rem;
+    z-index:10;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+  .barra-pdf button{background:#fff;color:#0f5c46;border:0;border-radius:8px;padding:9px 16px;
+    font-weight:700;cursor:pointer;font-size:.83rem;flex:none}
+  @media print{
+    .barra-pdf{display:none}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    @page{margin:16mm 14mm}
+  }`;
+const barraPdf = texto => `
+<div class="barra-pdf">
+  <span>${texto} En el diálogo de impresión, elige destino <b>“Guardar como PDF”</b>.</span>
+  <button type="button" onclick="window.print()">Guardar como PDF</button>
+</div>`;
+const SCRIPT_AUTOPRINT = `<script>
+  window.addEventListener("load", ()=>{ setTimeout(()=>{ try{ window.print(); }catch(e){} }, 350); });
+<\/script>`;
+function abrirImprimible(html, nombreArchivo){
+  // window.open va sincrono dentro del click, que es lo que el bloqueador de
+  // ventanas exige para dejarlo pasar. Aun asi puede fallar (politica estricta,
+  // navegador embebido), y ahi la persona no puede quedarse sin su documento:
+  // se descarga el archivo, que abierto en el navegador imprime igual.
+  let w = null;
+  try{ w = window.open("", "_blank"); }catch{ /* bloqueado */ }
+  if(w){
+    w.document.open(); w.document.write(html); w.document.close();
+    return;
+  }
+  const url = URL.createObjectURL(new Blob([html], {type:"text/html;charset=utf-8"}));
+  const a = document.createElement("a");
+  a.href = url; a.download = nombreArchivo;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 4000);
+}
+
+// ---------- la Carpeta de Salud, armada en el navegador ----------
 // Se construye aca y no en el servidor a proposito: el nombre y el RUT que la
 // persona escribio nunca viajan. Es la misma promesa del producto, cumplida en
 // el unico lugar donde se puede comprobar.
+const BARRA_PDF = barraPdf("Esta es tu Carpeta de Salud.");
 function construirWiki(){
   const hoy = new Date().toLocaleDateString("es-CL");
   const rut = $("#rut").value.trim();
@@ -882,8 +959,9 @@ function construirWiki(){
   const ileg = registros.flatMap(r=>(r.campos_ilegibles||[]).map(c=>`${esc(c)} (${esc(r.centro)})`));
 
   return `<!doctype html><html lang="es"><head><meta charset="utf-8">
-<title>Expediente de salud — ${esc(nombre)}</title>
+<title>Carpeta de Salud — ${esc(nombre)}</title>
 <style>
+${CSS_IMPRIMIBLE}
  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
    max-width:880px;margin:0 auto;padding:32px 22px 70px;color:#17201d;line-height:1.55}
  .cab{border-bottom:3px solid #0f5c46;padding-bottom:18px;margin-bottom:8px}
@@ -891,20 +969,26 @@ function construirWiki(){
  .id{background:#e9f2ee;border-radius:10px;padding:14px 18px;margin:18px 0;font-size:.92rem;
    display:grid;grid-template-columns:1fr 1fr;gap:5px 24px}
  h2{font-size:1rem;color:#0f5c46;text-transform:uppercase;letter-spacing:.06em;
-   border-bottom:1px solid #e4e0d7;padding-bottom:6px;margin:34px 0 4px}
+   border-bottom:1px solid #e4e0d7;padding-bottom:6px;margin:34px 0 4px;break-after:avoid}
  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:.86rem}
  th{text-align:left;padding:8px 9px;background:#f4f2ec;border-bottom:2px solid #e4e0d7;
    font-size:.72rem;text-transform:uppercase;letter-spacing:.05em;color:#6b7570}
  td{padding:9px;border-bottom:1px solid #eeece5;vertical-align:top}
  .orig{color:#6b7570;font-size:.8rem}
- .src{color:#6b7570;font-size:.78rem;white-space:nowrap}
+ .src{color:#6b7570;font-size:.78rem;max-width:15ch;word-break:break-word}
  .nota{background:#fdf4e3;border-left:3px solid #8a5a00;padding:14px 17px;margin:24px 0;
-   font-size:.86rem;border-radius:0 8px 8px 0}
+   font-size:.86rem;border-radius:0 8px 8px 0;break-inside:avoid}
  .pie{margin-top:44px;padding-top:16px;border-top:1px solid #e4e0d7;color:#6b7570;font-size:.8rem}
- @media print{body{padding:0}.nota{break-inside:avoid}}
+ @media print{
+   body{padding:0}
+   table{page-break-inside:auto}
+   tr,.nota{break-inside:avoid;page-break-inside:avoid}
+   thead{display:table-header-group}
+ }
 </style></head><body>
+${BARRA_PDF}
 <div class="cab">
-  <h1>Expediente de salud</h1>
+  <h1>Carpeta de Salud</h1>
   <p style="margin:0;color:#6b7570">Historial reunido desde ${fuentes.length} centro${fuentes.length>1?"s":""}
   y normalizado a un vocabulario común.</p>
 </div>
@@ -936,45 +1020,80 @@ ${ileg.length ? `<h2>No se pudo leer</h2><div class="nota" style="background:#fd
   Este documento se armó en tu navegador. Tu nombre y tu RUT nunca salieron de tu dispositivo.<br>
   <b>Contenido clínico 100% sintético</b>, con fines de demostración.
 </div>
+${SCRIPT_AUTOPRINT}
 </body></html>`;
 }
 
-function bajar(nombreArchivo, contenido, tipo="text/html;charset=utf-8"){
-  const url = URL.createObjectURL(new Blob([contenido], {type:tipo}));
-  const a = document.createElement("a");
-  a.href = url; a.download = nombreArchivo;
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+// Reescribe los selectores de un bloque CSS simple (sin @-reglas) para dejarlos
+// acotados a un contenedor: asi cada ficha conserva su propio look (tipografia,
+// colores) tal como llego de su centro, sin que una pise a la otra al concatenarlas.
+function acotarCss(css, alcance){
+  return css.replace(/([^{}]+)\{/g, (m, selectores) =>
+    selectores.split(",").map(s => `${alcance} ${s.trim()}`).join(", ") + "{");
 }
-const slug = s => s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
-  .replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"") || "titular";
 
-$("#dlWiki").addEventListener("click", ()=>
-  bajar(`expediente-${slug($("#nombre").value)}.html`, construirWiki()));
-
-$("#dlFichas").addEventListener("click", ()=>{
-  // Un indice mas las tres fichas tal como las mando cada centro: el original
-  // siempre viaja con el expediente, si no la trazabilidad es una promesa vacia.
-  const nombres = {centro_a:"Centro Médico San Rafael",
+// ---------- las fichas originales, en un solo documento imprimible ----------
+function construirFichas(){
+  const nombre = $("#nombre").value.trim();
+  const hoy = new Date().toLocaleDateString("es-CL");
+  const nombresCentro = {centro_a:"Centro Médico San Rafael",
     centro_b:"Hospital Regional de Ñuble", centro_c:"Red de Salud Cordillera"};
-  Object.entries(originales).forEach(([id, html], i)=>
-    setTimeout(()=>bajar(`ficha-original-${id}.html`, html), i * 400));
-  setTimeout(()=>bajar("indice-de-mis-documentos.html", `<!doctype html>
-<html lang="es"><head><meta charset="utf-8"><title>Índice de mis documentos</title>
-<style>body{font-family:system-ui,sans-serif;max-width:640px;margin:40px auto;padding:0 20px;
-line-height:1.6}h1{color:#0f5c46}li{margin:8px 0}</style></head><body>
-<h1>Índice de mis documentos</h1>
-<p>Tu expediente y las fichas tal como las entregó cada centro. Cada dato del expediente
-proviene de uno de estos documentos: siempre puedes contrastarlo.</p>
-<ul>
-  <li><b>expediente-${slug($("#nombre").value)}.html</b> — tu historial unificado</li>
-  ${Object.keys(originales).map(id=>
-    `<li><b>ficha-original-${id}.html</b> — ${nombres[id]}, como la entregaron</li>`).join("")}
-</ul>
-<p style="color:#6b7570;font-size:.85rem">Contenido clínico sintético, con fines de
-demostración. Generado el ${new Date().toLocaleDateString("es-CL")}.</p>
-</body></html>`), Object.keys(originales).length * 400 + 200);
-});
+  const ids = Object.keys(originales);
+
+  const hojas = ids.map(id => {
+    const html = originales[id];
+    const estilo = (html.match(/<style>([\s\S]*?)<\/style>/) || [,""])[1];
+    const cuerpo = (html.match(/<body[^>]*>([\s\S]*?)<\/body>/) || [,""])[1];
+    const alcance = `#ficha-${id}`;
+    return `<style>${acotarCss(estilo, alcance)}</style>
+<section id="ficha-${id}" class="hoja-ficha">
+  <p class="etiqueta-ficha">Ficha original — ${esc(nombresCentro[id] || id)}</p>
+  ${cuerpo}
+</section>`;
+  }).join("\n");
+
+  const indice = `<section class="indice-fichas">
+  <h1>Índice de fichas originales</h1>
+  <p>Tal como las entregó cada centro, sin editar. Cada dato de tu Carpeta de Salud
+  proviene de uno de estos documentos: siempre puedes contrastarlo.</p>
+  <ol>${ids.map(id=>`<li><a href="#ficha-${id}">${esc(nombresCentro[id] || id)}</a></li>`).join("")}</ol>
+</section>`;
+
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8">
+<title>Fichas originales — ${esc(nombre)}</title>
+<style>
+${CSS_IMPRIMIBLE}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    color:#17201d;margin:0}
+  .indice-fichas{max-width:760px;margin:0 auto;padding:32px 22px}
+  .indice-fichas h1{color:#0f5c46;font-size:1.5rem;margin:0 0 10px}
+  .indice-fichas ol{margin-top:16px}
+  .indice-fichas li{margin:6px 0}
+  .indice-fichas a{color:#0f5c46}
+  .etiqueta-ficha{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:#8a5a00;
+    background:#fdf4e3;display:inline-block;padding:4px 10px;border-radius:99px;margin:18px auto 0;
+    max-width:760px}
+  .hoja-ficha{break-before:page;page-break-before:always;padding-top:6px}
+  @media print{ body{padding:0} }
+</style></head><body>
+${BARRA_PDF.replace("Esta es tu Carpeta de Salud.", "Estas son las fichas originales de cada centro.")}
+${indice}
+${hojas}
+${SCRIPT_AUTOPRINT}
+</body></html>`;
+}
+
+const nombreArchivo = base => {
+  const quien = ($("#nombre").value.trim() || "titular")
+    .normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-zA-Z0-9]+/g,"-")
+    .replace(/^-|-$/g,"");
+  return `${base}-${quien}.html`;
+};
+$("#dlWiki").addEventListener("click",
+  ()=> abrirImprimible(construirWiki(), nombreArchivo("Carpeta-de-Salud")));
+$("#dlFichas").addEventListener("click",
+  ()=> abrirImprimible(construirFichas(), nombreArchivo("Fichas-originales")));
 
 // ---------- sello de version ----------
 // El sello fijo dice cuando se desplego esta version y viaja dentro del HTML;

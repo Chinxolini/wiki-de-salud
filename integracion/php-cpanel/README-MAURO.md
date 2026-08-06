@@ -1,5 +1,12 @@
 # api_agente.php — instrucciones para Mauro
 
+## ⚠️ v2 disponible — hay que volver a subir el archivo al cPanel
+
+Se agregaron dos acciones nuevas: `notificar` (envía código de verificación o copia del
+acuerdo firmado por correo) y `correos` (lee los últimos 10 mensajes de una casilla espejo
+vía IMAP, para que el agente los consuma sin tocar contraseñas). Detalle abajo, después del
+punto 4. **Copia de nuevo `api_agente.php` al servidor** — el archivo cambió.
+
 ## 1. Copiar el archivo
 
 Copia `api_agente.php` a la **raíz** del repo (junto a `api.php`, `config.php`, `autoload.php`).
@@ -86,6 +93,26 @@ Invoke-RestMethod -Uri "https://TU_HOST/api_agente.php?action=eliminar" -Method 
 
 Borra la casilla en cPanel (si existía) y elimina el registro completo (y su cédula, si tenía) del store.
 Devuelve `{guid, borrado:true}`.
+
+## 4.1. Acciones nuevas (v2)
+
+**notificar** (POST JSON) — envía un correo corto, `tipo` = `"codigo"` o `"acuerdo"`:
+
+```powershell
+$body = @{ email = "paciente@ejemplo.cl"; tipo = "codigo"; datos = @{ codigo = "123456" } } | ConvertTo-Json
+Invoke-RestMethod -Uri "https://TU_HOST/api_agente.php?action=notificar" -Method POST -Headers $headers -Body $body
+```
+
+Para `tipo = "acuerdo"`, `datos.texto` lleva el texto del mandato firmado (máx 12KB). Devuelve `{enviado:true|false}`.
+
+**correos** (GET) — lee la casilla espejo vía IMAP (requiere la extensión `imap` de PHP habilitada en cPanel; si no está, responde 501):
+
+```powershell
+Invoke-RestMethod -Uri "https://TU_HOST/api_agente.php?action=correos&casilla=NOMBRE_USUARIO" -Headers $headers
+```
+
+Devuelve los últimos 10 mensajes (`de, asunto, fecha, texto, adjuntos`) de esa casilla. La contraseña IMAP
+se lee del propio `data/requests.json` (campo `correo.password_temporal`) y nunca viaja en la respuesta.
 
 ## 5. Pendiente — reactivar el gate de CLI en `run_provisioning.php`
 
