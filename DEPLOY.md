@@ -42,6 +42,27 @@ Cada click del demo ≈ 3.500 tokens de entrada + ~600 de salida en Haiku ≈ **
 dólar**. Con los ~$4.85 restantes alcanza para ~1.000 clicks. Aun así: la URL no se publica en
 ningún lado masivo; es para la demo y el video.
 
+## Sello de versión
+
+Antes de commitear lo que se va a desplegar:
+
+```powershell
+python tools/sellar_version.py
+```
+
+Escribe la fecha y hora en el pie de la web. Al lado, la página muestra el commit que
+responde `/api/version` — ese viene del despliegue vivo, así que no puede salir de una
+copia cacheada del navegador.
+
+Para verificar desde afuera que arriba está lo nuestro:
+
+```powershell
+git rev-parse --short HEAD
+curl -s https://wiki-de-salud.vercel.app/api/version
+```
+
+Si el `sha_corto` de la respuesta es igual al `HEAD` local, producción sirve esta versión.
+
 ## Integración casillas (cPanel)
 
 `api/casilla.js` llama al servicio PHP de Mauro (dominio `chiledao.cl`) para provisionar la
