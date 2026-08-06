@@ -364,7 +364,7 @@
     <div class="card">
       <div class="aviso">
         <p style="margin:0 0 10px"><strong>Esto no es un diagnóstico ni una indicación médica.</strong> Lo que te entregamos es <b>tu propia información</b>, transcrita y ordenada por un sistema automatizado con inteligencia artificial, junto con los documentos originales de cada centro para que puedas contrastar cada dato.</p>
-        <p style="margin:0 0 10px">No interpretamos tus resultados, no te decimos qué tienes, no te indicamos tratamientos ni te decimos a quién consultar. <b>Cualquier decisión sobre tu salud es tuya y de los profesionales que te atienden</b>, sobre los documentos originales, que van incluidos.</p>
+        <p style="margin:0 0 10px">No interpretamos tus resultados, no te decimos qué tienes ni te indicamos exámenes o tratamientos. Si más adelante eliges el acompañamiento de salud, te derivamos a una médica: <b>quien evalúa es ella, no el sistema</b>. Cualquier decisión sobre tu salud es tuya y de los profesionales que te atienden, sobre los documentos originales, que van incluidos.</p>
         <p style="margin:0">Un sistema automatizado puede equivocarse al transcribir. Por eso cada valor de la Carpeta de Salud <b>queda enlazado al documento del que salió</b>: siempre puedes verificar.</p>
       </div>
       <label class="check">
@@ -381,6 +381,53 @@
     Datos 100% sintéticos. Ningún dato real se envía a ningún centro desde este formulario.</p>
   </section>
 </form>
+
+<!-- CORTE: fin del proceso de hoy -->
+<section id="cierreHoy" class="paso">
+  <div class="card" style="text-align:center;background:var(--soft);border-color:var(--accent)">
+    <span class="kicker">◆ Fin de lo de hoy</span>
+    <h2 class="h2" style="margin-bottom:10px">Listo. Esto es todo lo que tenías que hacer hoy.</h2>
+    <p class="bajada" style="margin:0 auto 22px">Tu poder quedó firmado y tu casilla, provisionada.
+    Lo que sigue —elegir si quieres acompañamiento y esperar las respuestas de cada centro— ya no
+    depende de que hagas nada más ahora mismo: te avisamos por correo.</p>
+    <button type="button" id="btnACierrePaso5" style="max-width:280px;margin:0 auto">Continuar →</button>
+  </div>
+</section>
+
+<!-- PASO 5: acompañamiento opcional -->
+<section id="paso5" class="paso">
+  <h2 class="h2">Tu acompañamiento, opcional</h2>
+  <p class="bajada">Pedimos tu ficha igual, gratis, elijas lo que elijas: obtenerla es un derecho
+  (art. 13, Ley 20.584), no depende de que contrates algo. Esto es sobre si quieres compañía en
+  el camino, no sobre el derecho mismo.</p>
+  <div class="card">
+    <label class="opt">
+      <input type="checkbox" id="chkAcompLegal">
+      <span><span class="nm">Acompañamiento legal — $50.000 mensuales</span>
+        <span class="ch">Seguimiento del proceso: si un prestador se atrasa, niega la copia o la
+        entrega incompleta, nosotros lo gestionamos, reclamamos y, si corresponde, vamos a la vía
+        sancionatoria.</span></span>
+    </label>
+    <label class="opt">
+      <input type="checkbox" id="chkAcompSalud">
+      <span><span class="nm">Acompañamiento de salud</span>
+        <span class="ch">Hoy el modelo es reactivo: las molestias se acumulan, dispersas entre
+        centros, hasta que algo se diagnostica y ya toca tratarlo. Reunir tu historia da vuelta
+        esa lógica — por primera vez toda tu información está en un solo lugar, ordenada y
+        comparable entre centros, lista para mirar hacia adelante y no solo hacia atrás. Ahí
+        trabaja la medicina de precisión: personalizada, predictiva, preventiva y participativa,
+        con evaluaciones como bioimpedanciometría, edad biológica, epigenética, perfil metabólico o
+        microbiota. Con tu historia ya ordenada, agenda una consulta y una médica evalúa contigo
+        qué corresponde en tu caso — costo según su plan.</span></span>
+    </label>
+    <p class="por" style="margin-top:14px">El acompañamiento es sobre la gestión del conflicto y
+    la derivación, no sobre el derecho a tu ficha: eso ya está en marcha, elijas o no elijas algo aquí.</p>
+  </div>
+  <div class="nav">
+    <button type="button" class="link" id="btnSinAcomp">Seguir sin acompañamiento</button>
+    <button type="button" id="btnFinPaso5">Continuar</button>
+  </div>
+</section>
 
 <!-- RESULTADO -->
 <section id="salida" class="paso">
@@ -452,7 +499,7 @@
      el commit vivo lo pregunta a /api/version, para saber si lo que esta arriba es
      efectivamente esta version y no un despliegue anterior. -->
 <p class="sello" id="sello">
-  <span id="selloFecha">versión 2026-08-06 00:43</span><span id="selloSha"></span>
+  <span id="selloFecha">versión 2026-08-06 00:58</span><span id="selloSha"></span>
 </p>
 
 <script>
@@ -802,6 +849,19 @@ $("#btnSimular").addEventListener("click", async ()=>{
     narrarOff();
     $("#f").requestSubmit();
 
+    // Esperar a que aparezca el corte de "esto es todo lo de hoy".
+    for(let i = 0; i < 40 && !$("#cierreHoy").classList.contains("activo"); i++) await pausa(250);
+    await pausa(900);
+    $("#btnACierrePaso5").click();
+
+    narrar("Paso 5 — Tu acompañamiento, opcional");
+    await pausa(600);
+    await marcarOpcion($("#chkAcompLegal"));
+    await marcarOpcion($("#chkAcompSalud"));
+    await pausa(900);
+    narrarOff();
+    $("#btnFinPaso5").click();
+
     // Esperar a que la pantalla final este montada, no un tiempo fijo: provisionar la
     // casilla real puede demorar varios segundos y arrancar la demo antes desordena el
     // timeline.
@@ -817,6 +877,33 @@ $("#btnSimular").addEventListener("click", async ()=>{
 // ---------- firma ----------
 let datos = null;
 
+// Entre firmar y que lleguen los datos hay dos pantallas que NO son parte del
+// stepper de 4 pasos: el corte visual de "esto es todo lo de hoy" y el paso 5
+// (acompañamiento opcional). Se controlan aparte, no con irA().
+function mostrarCierre(){
+  document.querySelectorAll(".paso[data-paso]").forEach(s=>s.classList.remove("activo"));
+  $("#paso5").classList.remove("activo");
+  $("#salida").classList.remove("activo");
+  $("#barra").hidden = true;
+  $("#cierreHoy").classList.add("activo");
+  window.scrollTo({top:0});
+}
+function mostrarPaso5(){
+  $("#cierreHoy").classList.remove("activo");
+  $("#paso5").classList.add("activo");
+  window.scrollTo({top:0});
+}
+function finalizarAcompanamiento(seguirSinNada){
+  if(seguirSinNada){ $("#chkAcompLegal").checked = false; $("#chkAcompSalud").checked = false; }
+  datos.acompLegal = $("#chkAcompLegal").checked;
+  datos.acompSalud = $("#chkAcompSalud").checked;
+  $("#paso5").classList.remove("activo");
+  mostrarResultado();
+}
+$("#btnACierrePaso5").addEventListener("click", mostrarPaso5);
+$("#btnFinPaso5").addEventListener("click", ()=>finalizarAcompanamiento(false));
+$("#btnSinAcomp").addEventListener("click", ()=>finalizarAcompanamiento(true));
+
 $("#f").addEventListener("submit", e=>{
   e.preventDefault();
   if(!validarPaso(4)) return;
@@ -829,7 +916,7 @@ $("#f").addEventListener("submit", e=>{
   datos = { correo:$("#correo").value.trim(), nombre:$("#nombre").value.trim(),
             sel, archivos:getArchivos(), periodo, mandatoTexto, prevision,
             noSeCentros: noSeCentros.checked };
-  mostrarResultado();
+  mostrarCierre();
 });
 
 async function mostrarResultado(){
@@ -909,7 +996,8 @@ async function mostrarResultado(){
     .catch(()=>{ /* fire-and-forget: sin efecto visible si falla */ });
 
   estadoTimeline = { casilla, nCentros: sel.length, sinCentrosClaros,
-                     nombresCentros: sel.map(p=>p.nombre) };
+                     nombresCentros: sel.map(p=>p.nombre),
+                     acompLegal: !!datos.acompLegal, acompSalud: !!datos.acompSalud };
   renderTimeline();
 
   $("#salida").classList.add("activo");
@@ -941,7 +1029,8 @@ function resumenRegistro(r){
 // semanas, todavia pendiente). Mezclarlos en una sola lista hacia parecer que firmar el
 // poder y recibir la Carpeta de Salud tomaban el mismo tiempo.
 function renderTimeline(){
-  const {casilla, nCentros, sinCentrosClaros, nombresCentros = []} = estadoTimeline;
+  const {casilla, nCentros, sinCentrosClaros, nombresCentros = [],
+         acompLegal = false, acompSalud = false} = estadoTimeline;
   const horaFirma = new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
   const ahora = [];
   const despues = [];
@@ -973,12 +1062,17 @@ function renderTimeline(){
       || "Te avisamos por correo apenas llegue la primera."});
 
   // Si todos respondieron, este hito no puede seguir diciendo que uno no respondio.
+  // Si eligio acompañamiento legal, el hito lo dice: es justo donde vive ese servicio.
   const faltanRespuestas = !carpetaLista || n === 0;
   despues.push(faltanRespuestas
     ? {hecho:false, fecha:"Semana 3", titulo:"Si un centro no responde, reclamamos por ti",
-       detalle:"Si algún prestador se atrasa o niega la copia, lo gestionamos nosotros; tú no vuelves a escribirle."}
+       detalle: acompLegal
+         ? "Si algún prestador se atrasa o niega la copia, lo gestionamos nosotros, con tu acompañamiento legal activo: reclamamos y, si corresponde, vamos a la vía sancionatoria."
+         : "Si algún prestador se atrasa o niega la copia, lo gestionamos nosotros; tú no vuelves a escribirle."}
     : {hecho:true, fecha: respuestasRecibidas[n-1].fecha, titulo:"Todos los centros respondieron",
-       detalle:"No hubo que reclamar. Si alguno se hubiera atrasado o negado la copia, lo gestionábamos nosotros."});
+       detalle: acompLegal
+         ? "No hubo que reclamar. Si alguno se hubiera atrasado o negado la copia, lo gestionábamos nosotros, con tu acompañamiento legal activo."
+         : "No hubo que reclamar. Si alguno se hubiera atrasado o negado la copia, lo gestionábamos nosotros."});
 
   // La Carpeta no puede estar lista "hoy" si la ultima respuesta llega en dos semanas:
   // se fecha dos dias despues de lo ultimo que llego.
@@ -988,6 +1082,16 @@ function renderTimeline(){
   despues.push({hecho: carpetaLista, fecha: fechaCarpeta,
     titulo:"Tu Carpeta de Salud está lista",
     detalle:"Se te avisa por correo para descargarla, junto con los documentos originales."});
+  // Va ANTES del borrado: primero se usa la Carpeta, despues se cierra el caso.
+  // Solo aparece si eligió el acompañamiento de salud: no es parte del servicio base.
+  if(acompSalud){
+    despues.push({hecho:false, fecha:"Con la Carpeta ya lista",
+      titulo:"Consulta con la profesional para revisar tu historia ya ordenada",
+      detalle:"De reaccionar a prevenir: con tu historia completa y comparable entre centros, "+
+        "agendas con una médica y ella evalúa contigo qué corresponde (medicina de precisión: "+
+        "bioimpedanciometría, edad biológica, epigenética, perfil metabólico, microbiota). Ella decide contigo; "+
+        "nosotros no interpretamos tus datos ni indicamos exámenes."});
+  }
   despues.push({hecho:false, fecha:"Al cerrar el caso", titulo:"Todo se borra y te llega la constancia",
     detalle:"Se suprime tu casilla y tus documentos; queda solo estadística sin datos personales."});
 
@@ -1045,6 +1149,13 @@ $("#btnDemo").addEventListener("click", async ()=>{
       respuestasRecibidas.push({centro: NOMBRES_CENTRO_DEMO[id] || id,
         fecha: fechaSim(7*(i+1)), resumen: resumenRegistro(data.registro)});
       renderTimeline();
+      // Pausa visible entre una respuesta y la siguiente: sin esto las 3 llegan casi
+      // seguidas y no se percibe que en la realidad son semanas de por medio.
+      if(i < CENTROS_DEMO.length - 1){
+        narrar(`Avanzando en el tiempo… semana ${i+2}`);
+        await pausa(2800);
+        narrarOff();
+      }
     }
     est.textContent = `Listo — ${registros.length} centros unificados · claude-haiku-4-5 · `+
       `${tokIn.toLocaleString("es-CL")} tokens de entrada, ${tokOut.toLocaleString("es-CL")} de salida.`;
