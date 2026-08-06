@@ -52,7 +52,7 @@ Variables nuevas (Vercel → Settings → Environment Variables, o por CLI):
 
 | Name | Value |
 |---|---|
-| `CASILLAS_API_URL` | `https://chiledao.cl/api_agente.php` |
+| `CASILLAS_API_URL` | `https://losinmortales.chiledao.cl/api_agente.php` |
 | `CASILLAS_API_KEY` | la key del servicio de Mauro |
 | `PROVISION_ACTIVA` | `1` para activar; cualquier otro valor (u omitirla) la deja apagada |
 
@@ -65,6 +65,11 @@ vercel env add PROVISION_ACTIVA production
 ```
 
 Y luego `vercel --prod` (o Redeploy desde el dashboard) para que tomen efecto.
+
+**Validado end-to-end el 5-ago 20:20**: el formulario provisiona la casilla real
+(`nombre@chiledao.cl`), `estado` la consulta sin exponer password ni RUN, y `borrar_caso.py`
+la elimina del cPanel y del registro. La app de Mauro vive en el subdominio
+`losinmortales.chiledao.cl`, no en la raíz del dominio.
 
 ## Después del Lab
 
