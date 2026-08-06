@@ -158,6 +158,24 @@
   .sello{color:var(--muted);font-size:.72rem;text-align:center;opacity:.55;margin:34px 0 18px;
     font-variant-numeric:tabular-nums;letter-spacing:.02em}
 
+  /* ---------- resaltado y narrador del simulador ---------- */
+  .demo-foco{outline:2.5px solid var(--accent)!important;outline-offset:2px;
+    background:var(--soft)!important;border-radius:8px;transition:outline .2s,background .2s}
+  .narrador{position:fixed;top:64px;left:50%;transform:translateX(-50%) translateY(-6px);
+    z-index:40;background:var(--accent);color:var(--bg);padding:9px 18px;border-radius:99px;
+    font-size:.8rem;font-weight:700;box-shadow:var(--shadow);opacity:0;pointer-events:none;
+    max-width:min(92vw,480px);text-align:center;transition:opacity .25s ease,transform .25s ease}
+  .narrador.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ---------- timeline: dos actos ---------- */
+  .timeline-grupo + .timeline-grupo{margin-top:24px;padding-top:20px;border-top:1px dashed var(--line)}
+  .rotulo-grupo{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;margin:0 0 14px}
+  .rotulo-grupo .tit{font-size:.74rem;font-weight:800;text-transform:uppercase;
+    letter-spacing:.08em;color:var(--accent)}
+  .rotulo-grupo .ctx{font-size:.8rem;color:var(--muted)}
+  .timeline.despues .hito:not(.hecho)::before{background:none;border-left:2px dashed var(--line)}
+  .timeline.despues .hito:not(.hecho) .punto{border-style:dashed}
+
   dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);
     max-width:640px;width:calc(100% - 32px);padding:0;box-shadow:0 24px 70px rgba(0,0,0,.3)}
   dialog::backdrop{background:rgba(10,14,12,.55);backdrop-filter:blur(3px)}
@@ -172,6 +190,8 @@
 </style>
 </head>
 <body>
+
+<div class="narrador" id="narrador" aria-live="polite"></div>
 
 <div class="wrap">
   <div class="hero" id="hero">
@@ -432,7 +452,7 @@
      el commit vivo lo pregunta a /api/version, para saber si lo que esta arriba es
      efectivamente esta version y no un despliegue anterior. -->
 <p class="sello" id="sello">
-  <span id="selloFecha">versión 2026-08-06 00:31</span><span id="selloSha"></span>
+  <span id="selloFecha">versión 2026-08-06 00:43</span><span id="selloSha"></span>
 </p>
 
 <script>
@@ -682,36 +702,104 @@ document.querySelectorAll("[name=periodo]").forEach(r=>r.addEventListener("chang
 $("#verPoder").addEventListener("click",()=>dlgPoder.showModal());
 
 // ---------- simular caso completo: un clic para que un juez vea todo el viaje ----------
-// Datos 100% sinteticos. Avanza paso a paso con una pausa visible (no es instantaneo a
-// proposito: que se vea que es el mismo formulario, no un atajo que salta la UI) y al
-// final dispara la demo de Claude sola.
+// Datos 100% sinteticos. Se ve el llenado campo por campo (tecleo, marcado uno a uno,
+// resaltado de donde esta ocurriendo la accion) porque el punto de este boton es que un
+// juez entienda QUE se pide, no solo que llegue rapido al resultado. Al final dispara la
+// demo de Claude sola.
 const pausa = ms => new Promise(res=>setTimeout(res, ms));
+const narradorEl = $("#narrador");
+function narrar(msg){ narradorEl.textContent = msg; narradorEl.classList.add("on"); }
+function narrarOff(){ narradorEl.classList.remove("on"); }
+
+function enfocarDemo(el){
+  el.scrollIntoView({behavior:"smooth", block:"center"});
+  el.classList.add("demo-foco");
+  return () => el.classList.remove("demo-foco");
+}
+
+// Tecleo caracter a caracter en un input de texto simple (sin formateo propio).
+async function escribirEnCampo(input, texto, msPorChar){
+  const quitar = enfocarDemo(input);
+  input.value = "";
+  await pausa(200);
+  for(const ch of texto){
+    input.value += ch;
+    input.dispatchEvent(new Event("input"));
+    await pausa(msPorChar + Math.random()*10);
+  }
+  await pausa(300);
+  quitar();
+}
+
+// El RUT tiene su propio formateador (puntos y guion) enganchado al evento "input":
+// se reusa tal cual, solo que alimentado un digito a la vez para que se vea el tecleo.
+async function escribirRut(digitos, msPorChar){
+  const quitar = enfocarDemo(rutInput);
+  rutInput.value = "";
+  await pausa(200);
+  for(const d of digitos){
+    rutInput.value = rutInput.value.replace(/[^0-9kK]/g,"") + d;
+    rutInput.dispatchEvent(new Event("input"));
+    await pausa(msPorChar + Math.random()*10);
+  }
+  await pausa(300);
+  quitar();
+}
+
+// Marca un checkbox/radio de a uno, resaltando la opcion completa (la etiqueta, no solo
+// el cuadradito) para que se note cual se esta marcando.
+async function marcarOpcion(input, msVisible = 350){
+  const contenedor = input.closest("label") || input;
+  const quitar = enfocarDemo(contenedor);
+  await pausa(180);
+  input.checked = true;
+  input.dispatchEvent(new Event("change"));
+  await pausa(msVisible);
+  quitar();
+}
+
 $("#btnSimular").addEventListener("click", async ()=>{
   const boton = $("#btnSimular");
+  if(boton.disabled) return; // ya esta corriendo: un segundo clic no hace nada
   boton.disabled = true;
   try{
-    $("#nombre").value = "Paciente de Demostración";
-    rutInput.value = "11111111-1";
-    rutInput.dispatchEvent(new Event("input"));
-    $("#correo").value = "demo@wiki-de-salud.cl";
-    $("#btnSimularFoto").click();
-    await pausa(600);
+    irA(1);
+    narrar("Paso 1 de 4 — Identidad: esto es lo único que pedimos");
+    await pausa(500);
+    await escribirEnCampo($("#nombre"), "Paciente de Demostración", 30);
+    await escribirRut("111111111", 30);
+    await escribirEnCampo($("#correo"), "demo@wiki-de-salud.cl", 27);
+
+    const fotoBtn = $("#btnSimularFoto");
+    const quitarFoto = enfocarDemo(fotoBtn);
+    await pausa(500);
+    fotoBtn.click();
+    await pausa(800); // pausa despues del click para que se aprecie la miniatura
+    quitarFoto();
+    await pausa(1100);
+
     irA(2);
-
-    document.querySelector("[name=prevision][value=fonasa]").checked = true;
+    narrar("Paso 2 — Dónde te has atendido");
+    await pausa(500);
+    await marcarOpcion(document.querySelector("[name=prevision][value=fonasa]"));
     const centros = document.querySelectorAll("[name=prestador]");
-    if(centros[0]) centros[0].checked = true;
-    if(centros[1]) centros[1].checked = true;
-    await pausa(600);
+    if(centros[0]) await marcarOpcion(centros[0]);
+    if(centros[1]) await marcarOpcion(centros[1]);
+    await pausa(1100);
+
     irA(3);
+    narrar("Paso 3 — El poder que nos autoriza");
+    await pausa(500);
+    await marcarOpcion($("[name=poder]"));
+    await marcarOpcion($("[name=veracidad]"));
+    await pausa(1100);
 
-    $("[name=poder]").checked = true;
-    $("[name=veracidad]").checked = true;
-    await pausa(600);
     irA(4);
-
-    $("[name=disclaimer]").checked = true;
-    await pausa(600);
+    narrar("Paso 4 — Qué recibes y qué no");
+    await pausa(500);
+    await marcarOpcion($("[name=disclaimer]"));
+    await pausa(1100);
+    narrarOff();
     $("#f").requestSubmit();
 
     // Esperar a que la pantalla final este montada, no un tiempo fijo: provisionar la
@@ -721,6 +809,7 @@ $("#btnSimular").addEventListener("click", async ()=>{
     await pausa(400);
     $("#btnDemo")?.click();
   } finally {
+    narrarOff();
     boton.disabled = false;
   }
 });
@@ -847,28 +936,35 @@ function resumenRegistro(r){
     .filter(Boolean);
   return partes.length ? partes.join(", ") : "sin hallazgos nuevos";
 }
+// El timeline se separa en dos actos: AHORA es el registro que la persona acaba de hacer
+// (dura minutos, todo hecho); DESPUES es la espera del tramite en los centros (dura
+// semanas, todavia pendiente). Mezclarlos en una sola lista hacia parecer que firmar el
+// poder y recibir la Carpeta de Salud tomaban el mismo tiempo.
 function renderTimeline(){
   const {casilla, nCentros, sinCentrosClaros, nombresCentros = []} = estadoTimeline;
   const horaFirma = new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
-  const hitos = [];
-  hitos.push({hecho:true, fecha:"Hoy", titulo:"Firmaste el poder",
+  const ahora = [];
+  const despues = [];
+
+  ahora.push({hecho:true, fecha:"Hoy", titulo:"Firmaste el poder",
     detalle:`A las ${horaFirma}. Copia del mandato enviada a tu correo.`});
-  hitos.push({hecho:true, fecha:"Hoy", titulo:"Se creó tu casilla administradora",
+  ahora.push({hecho:true, fecha:"Hoy", titulo:"Se creó tu casilla administradora",
     detalle:`<code>${esc(casilla)}</code> — se comunica con cada centro, recibe la información y te la reenvía cuando corresponde.`});
   if(nCentros){
-    hitos.push({hecho:true, fecha:"Hoy", titulo:`Solicitudes enviadas a ${nCentros} centro${nCentros>1?"s":""}`,
+    ahora.push({hecho:true, fecha:"Hoy", titulo:`Solicitudes enviadas a ${nCentros} centro${nCentros>1?"s":""}`,
       detalle:`Invocando el art. 13 de la Ley 20.584.` +
         (nombresCentros.length ? ` <span class="orig">${nombresCentros.map(esc).join(" · ")}</span>` : "")});
   } else if(sinCentrosClaros){
-    hitos.push({hecho:true, fecha:"Hoy", titulo:"Empezamos a reconstruir dónde te has atendido",
+    ahora.push({hecho:true, fecha:"Hoy", titulo:"Empezamos a reconstruir dónde te has atendido",
       detalle:"Con tu previsión y tu casilla ya provisionadas."});
   }
+
   // Las respuestas se acumulan bajo un solo hito. El titulo cambia con el conteo: decir
   // "primera respuesta" cuando ya llegaron tres seria mentirle al que esta mirando.
   const n = respuestasRecibidas.length;
   const respHtml = respuestasRecibidas.map(r=>
     `<div class="subhito">El <b>${r.fecha}</b> llegó la respuesta de <b>${esc(r.centro)}</b>: ${esc(r.resumen)}.</div>`).join("");
-  hitos.push({hecho: n>0,
+  despues.push({hecho: n>0,
     fecha: respuestasRecibidas[0]?.fecha || "Semana 1",
     titulo: n>1 ? `Respuestas recibidas (${n})` : "Primera respuesta recibida",
     detalle: (respHtml && respHtml +
@@ -878,7 +974,7 @@ function renderTimeline(){
 
   // Si todos respondieron, este hito no puede seguir diciendo que uno no respondio.
   const faltanRespuestas = !carpetaLista || n === 0;
-  hitos.push(faltanRespuestas
+  despues.push(faltanRespuestas
     ? {hecho:false, fecha:"Semana 3", titulo:"Si un centro no responde, reclamamos por ti",
        detalle:"Si algún prestador se atrasa o niega la copia, lo gestionamos nosotros; tú no vuelves a escribirle."}
     : {hecho:true, fecha: respuestasRecibidas[n-1].fecha, titulo:"Todos los centros respondieron",
@@ -889,18 +985,31 @@ function renderTimeline(){
   const fechaCarpeta = carpetaLista && n
     ? fechaSim(7*n + 2)
     : "Mes 1";
-  hitos.push({hecho: carpetaLista, fecha: fechaCarpeta,
+  despues.push({hecho: carpetaLista, fecha: fechaCarpeta,
     titulo:"Tu Carpeta de Salud está lista",
     detalle:"Se te avisa por correo para descargarla, junto con los documentos originales."});
-  hitos.push({hecho:false, fecha:"Al cerrar el caso", titulo:"Todo se borra y te llega la constancia",
+  despues.push({hecho:false, fecha:"Al cerrar el caso", titulo:"Todo se borra y te llega la constancia",
     detalle:"Se suprime tu casilla y tus documentos; queda solo estadística sin datos personales."});
-  $("#timeline").innerHTML = hitos.map(h=>`
+
+  const pintar = hitos => hitos.map(h=>`
     <div class="hito${h.hecho?" hecho":""}">
       <span class="punto"></span>
       <span class="fecha">${h.fecha}</span>
       <span class="titulo">${h.titulo}</span>
       <div class="detalle">${h.detalle}</div>
     </div>`).join("");
+
+  $("#timeline").innerHTML = `
+    <div class="timeline-grupo">
+      <div class="rotulo-grupo"><span class="tit">Ahora — tu registro, en minutos</span>
+        <span class="ctx">lo que acabas de hacer</span></div>
+      <div class="timeline">${pintar(ahora)}</div>
+    </div>
+    <div class="timeline-grupo">
+      <div class="rotulo-grupo"><span class="tit">Después — la espera, en semanas</span>
+        <span class="ctx">de aquí en adelante no tienes que hacer nada: te avisamos</span></div>
+      <div class="timeline despues">${pintar(despues)}</div>
+    </div>`;
 }
 
 // ---------- demo en vivo: los tres centros -> un expediente ----------
