@@ -63,8 +63,12 @@ const RE_CODIGO = /^\d{6}$/;
 
 // Cuotas — mismo espíritu que extraer.js: freno razonable, no defensa dura (la instancia
 // serverless se recicla). "estado" es de solo lectura, así que es más laxa que "crear-y-provisionar".
-const LIMITE_PROVISION_POR_IP = 5;
-const LIMITE_PROVISION_GLOBAL = 50;
+// Generoso a proposito: los jueces evaluan desde el wifi del evento, todos detras del
+// mismo NAT, y el boton "Simular caso completo" provisiona una casilla real por clic.
+// Con un tope bajo, el sexto juez veria un 429 en vez de la demo — el peor resultado
+// posible. Mismo criterio que ya se aplico en extraer.js.
+const LIMITE_PROVISION_POR_IP = 30;
+const LIMITE_PROVISION_GLOBAL = 200;
 const LIMITE_ESTADO_POR_IP = 30;
 // "enviar-codigo" / "enviar-acuerdo" comparten un cupo propio: son envíos de correo real
 // (no creación de casillas), pero igual de sensibles a abuso (spam) — mismo orden de magnitud

@@ -97,6 +97,9 @@
   .subir{border:1.5px dashed var(--line);border-radius:11px;padding:18px;text-align:center;
     cursor:pointer;background:var(--bg);font-weight:650;font-size:.9rem;transition:.15s}
   .subir:hover,.subir.over{border-color:var(--accent);background:var(--soft);color:var(--accent)}
+  .camara{border-radius:11px;overflow:hidden}
+  .camara video, .camara img{width:100%;max-height:280px;object-fit:cover;border-radius:11px;
+    display:block;background:#000}
   .arch{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 12px;
     border:1px solid var(--line);border-radius:8px;margin-top:8px;font-size:.85rem;background:var(--bg)}
   .arch .x{color:var(--muted);cursor:pointer;font-weight:700;flex:none;background:none;border:0;
@@ -123,15 +126,28 @@
   .link{background:none;border:0;color:var(--accent);text-decoration:underline;cursor:pointer;
     font:inherit;font-weight:650;font-size:.86rem;padding:0;width:auto;margin:0;flex:0}
 
-  .codigo{font-size:1.6rem!important;letter-spacing:.45em;text-align:center;
-    font-family:ui-monospace,Menlo,Consolas,monospace;padding:16px 13px!important}
-  .sim{display:inline-block;font-size:.66rem;font-weight:800;letter-spacing:.08em;padding:3px 9px;
-    border-radius:99px;background:var(--warn);color:var(--warn-soft);text-transform:uppercase}
-
   .fila{display:flex;gap:13px;padding:14px 0;border-bottom:1px solid var(--line);font-size:.9rem}
   .fila:last-child{border:0;padding-bottom:0}
   .fila .ic{flex:none;width:24px;height:24px;border-radius:50%;background:var(--soft);
     color:var(--accent);display:grid;place-items:center;font-size:.75rem;font-weight:800}
+
+  /* ---------- timeline del caso ---------- */
+  .timeline{position:relative}
+  .hito{position:relative;padding:0 0 22px 28px}
+  .hito:last-child{padding-bottom:0}
+  .hito::before{content:"";position:absolute;left:5px;top:14px;bottom:-6px;width:2px;background:var(--line)}
+  .hito:last-child::before{display:none}
+  .hito .punto{position:absolute;left:0;top:3px;width:12px;height:12px;border-radius:50%;
+    background:var(--card);border:2px solid var(--line);transition:.2s}
+  .hito.hecho .punto{background:var(--accent);border-color:var(--accent)}
+  .hito .fecha{display:block;font-size:.68rem;font-weight:800;text-transform:uppercase;
+    letter-spacing:.07em;color:var(--muted);margin-bottom:2px}
+  .hito.hecho .fecha{color:var(--accent-2)}
+  .hito .titulo{display:block;font-weight:650;font-size:.92rem;color:var(--muted)}
+  .hito.hecho .titulo{color:var(--ink)}
+  .hito .detalle{font-size:.83rem;color:var(--muted);margin-top:4px;line-height:1.5}
+  .hito .subhito{margin-top:6px}
+  .hito .subhito:first-child{margin-top:0}
   code{background:var(--soft);color:var(--accent);padding:2px 7px;border-radius:5px;font-size:.85em;
     word-break:break-all;font-family:ui-monospace,Menlo,Consolas,monospace}
   table{width:100%;border-collapse:collapse;font-size:.82rem;margin-top:12px}
@@ -170,6 +186,9 @@
       <span class="flecha">→</span>
       <span class="uno">Una Carpeta de Salud</span>
     </div>
+    <p style="margin:20px 0 0">
+      <button type="button" class="link" id="btnSimular">▶ Simular caso completo (para jueces)</button>
+    </p>
   </div>
 </div>
 
@@ -208,14 +227,20 @@
       <span class="err" id="e-correo"></span>
 
       <label style="margin-top:20px">Una selfie tuya</label>
-      <p class="por">Es verificación por reconocimiento facial, igual que en tu banco. En el producto real esto se complementa con la foto de tu cédula; aquí basta tu rostro.</p>
-      <div class="subir" id="subirCedula" role="button" tabindex="0">Tomar o elegir la foto</div>
-      <input type="file" id="cedula" accept="image/*" capture="user" hidden>
+      <p class="por">Prueba de vida fotográfica: te fotografías ahí mismo, en tu navegador. Nunca viaja al servidor. En esta demo se simula; en el producto real es biométrica.</p>
+      <div class="camara" id="camaraBox">
+        <video id="selfieVideo" autoplay playsinline muted hidden></video>
+        <img id="selfieFoto" alt="Tu selfie" hidden>
+        <div class="subir" id="activarCamara" role="button" tabindex="0">Activar cámara</div>
+        <input type="file" id="cedula" accept="image/*" capture="user" hidden>
+      </div>
+      <canvas id="selfieCanvas" hidden></canvas>
+      <div class="duo" style="margin-top:10px">
+        <button type="button" class="link" id="btnTomarFoto" hidden>📷 Tomar foto</button>
+        <button type="button" class="link" id="btnRepetirFoto" hidden>↺ Repetir</button>
+        <button type="button" class="link" id="btnSimularFoto">🧪 Simular foto (para jueces)</button>
+      </div>
       <div id="listaCedula"></div>
-      <p style="margin:10px 0 0">
-        <button type="button" class="link" id="saltarSelfie">Prefiero no subir mi foto →</button>
-      </p>
-      <div id="selfiePendiente" class="hint" hidden>⚠ Verificación facial pendiente — en el producto real es obligatoria.</div>
       <span class="err" id="e-cedula"></span>
     </div>
     <div class="nav"><button type="button" data-ir="2">Continuar</button></div>
@@ -291,7 +316,7 @@
         <p><b>Cuarto.</b> Las respuestas llegan a una casilla creada a mi nombre, y todo lo que llegue ahí se reenvía íntegro a mi correo personal.</p>
         <p><b>Quinto.</b> Cumplido el encargo se <b>suprime</b> la casilla y todos mis documentos y datos. Queda solo un registro estadístico sin datos personales sobre cuánto demoró cada centro. Recibo constancia de la supresión con fecha y hora.</p>
         <p><b>Sexto.</b> Puedo <b>revocarlo cuando quiera</b>, sin dar explicaciones, por correo. Desde que se recibe la revocación, se suprime todo de inmediato.</p>
-        <p><b>Séptimo.</b> Se firma por sistema electrónico que garantiza su autenticidad (Ley 19.799). La constancia técnica va adjunta al documento.</p>
+        <p><b>Séptimo.</b> Se firma por sistema electrónico que garantiza su autenticidad (Ley 19.799): identidad declarada, prueba de vida fotográfica, aceptación expresa de este texto, sello de tiempo y trazas técnicas. Recibirás la constancia de firma en tu correo.</p>
       </div>
       <p style="margin:12px 0 0">
         <button type="button" class="link" id="verPoder">Leer el texto legal completo y cómo se acredita la firma →</button>
@@ -337,44 +362,18 @@
   </section>
 </form>
 
-<!-- FIRMA -->
-<section id="verificacion" class="paso">
-  <h2 class="h2">Firma tu poder</h2>
-  <p class="bajada">Te enviamos un código de 6 dígitos a <code id="correoEco"></code>. Escribirlo es lo que convierte esto en firma electrónica: acredita que quien firma controla ese correo.</p>
-  <div class="card">
-    <div class="aviso" style="margin-bottom:18px" id="avisoEnvio">
-      <span class="sim">Demo</span>
-      <p style="margin:9px 0 0" id="textoEnvio">Enviando el código a tu correo…</p>
-    </div>
-    <label for="inputCodigo">Código recibido</label>
-    <input type="text" class="codigo" id="inputCodigo" maxlength="6" inputmode="numeric"
-           placeholder="······" autocomplete="one-time-code">
-    <span class="err" id="errorCodigo"></span>
-    <p style="margin:10px 0 0">
-      <button type="button" class="link" id="btnRellenar">Rellenar por mí →</button>
-    </p>
-    <div class="nav">
-      <button type="button" class="atras" id="btnVolverForm">← Corregir datos</button>
-      <button type="button" id="btnFirmar">Firmar y enviar</button>
-    </div>
-  </div>
-</section>
-
 <!-- RESULTADO -->
 <section id="salida" class="paso">
   <h2 class="h2">Listo. Tu solicitud está en marcha.</h2>
   <p class="bajada">No tienes que hacer nada más ni volver a esta página: todo llega a tu correo.</p>
   <div class="card"><div id="pasos"></div></div>
 
-  <h2 class="h2" style="margin-top:30px">Qué va a pasar ahora</h2>
-  <div class="card"><div id="seguimiento"></div></div>
-
-  <div class="card" style="background:var(--soft);border-color:var(--accent)">
-    <p style="margin:0;font-size:.9rem"><b>Y cuando termine:</b> recibes un paquete descargable con
-    tu Carpeta de Salud y los documentos originales de cada centro. Después borramos tu casilla y tus
-    documentos, y te mandamos la constancia. De ti no queda nada en nuestro sistema, salvo cuánto
-    demoró cada centro en responder — sin tu nombre.</p>
+  <div class="card" style="background:var(--soft);border-color:var(--accent);text-align:center">
+    <p style="margin:0;font-size:1.02rem;font-weight:750;color:var(--accent)">Deslígate del problema: nosotros te avisamos cuando haya novedad.</p>
   </div>
+
+  <h2 class="h2" style="margin-top:30px">Qué va a pasar ahora</h2>
+  <div class="card"><div id="timeline" class="timeline"></div></div>
 
   <div class="card" id="cardDemoVivo" hidden>
     <h2 class="h2" style="font-size:1.1rem">▶ Míralo funcionar ahora</h2>
@@ -418,13 +417,12 @@
     <p><b>ANEXO DE AUTENTICIDAD — qué queda registrado de tu firma</b></p>
     <p>La ley pide un sistema <em>que garantice la autenticidad</em>, sin definir cómo. Esto es lo que registramos y adjuntamos al poder:</p>
     <p>• <b>Identidad declarada</b>: nombre, RUT y correo.<br>
-    • <b>Verificación facial</b>: una selfie, con complemento de cédula en el producto real.<br>
-    • <b>Prueba de control del correo</b>: código de un solo uso enviado y validado, con hora de emisión y de validación. Es el elemento nuclear de la firma electrónica simple.<br>
+    • <b>Prueba de vida fotográfica</b> (simulada en esta demo; biométrica en el producto real).<br>
     • <b>Manifestación de voluntad</b>: el texto íntegro mostrado antes de firmar, más la marca de aceptación expresa, nunca premarcada.<br>
     • <b>Integridad</b>: hash SHA-256 del documento al momento de firmar.<br>
     • <b>Sello de tiempo</b>: fecha y hora UTC de cada paso.<br>
     • <b>Trazas técnicas</b>: IP, navegador, identificador de sesión.<br>
-    • <b>Constancia de envío</b>: copia íntegra del poder firmado, al correo del titular.</p>
+    • <b>Constancia enviada a tu correo</b>: copia íntegra del poder firmado, apenas queda firmado. No es un requisito para firmar — es la prueba de que ya quedó firmado.</p>
     <p class="hint">Esto es firma electrónica <b>simple</b>, hecha bien. No es firma avanzada y no afirmamos que lo sea: la ley no la exige para este trámite.</p>
     <p class="hint"><b>Minimización.</b> No pedimos domicilio ni teléfono: con RUT y verificación facial el titular queda plenamente identificado, y todo lo demás sería un dato personal más que custodiar y borrar sin razón.</p>
   </div>
@@ -434,7 +432,7 @@
      el commit vivo lo pregunta a /api/version, para saber si lo que esta arriba es
      efectivamente esta version y no un despliegue anterior. -->
 <p class="sello" id="sello">
-  <span id="selloFecha">versión 2026-08-05 22:46</span><span id="selloSha"></span>
+  <span id="selloFecha">versión 2026-08-06 00:18</span><span id="selloSha"></span>
 </p>
 
 <script>
@@ -531,7 +529,7 @@ function validarPaso(n){
     ok = marcar("#e-correo", $("#correo"),
       /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test($("#correo").value.trim()) ? "" : "Escribe un correo válido.") && ok;
     ok = marcar("#e-cedula", null,
-      (getCedula().length || selfieOmitida) ? "" : "Sube tu selfie, o marca que prefieres no subirla.") && ok;
+      haySelfie() ? "" : "Tómate una selfie, o usa “Simular foto”.") && ok;
   }
   if(n === 2){
     const marcados = document.querySelectorAll("[name=prestador]:checked").length;
@@ -576,11 +574,7 @@ function gestor(idBoton, idInput, idLista){
   boton.addEventListener("drop", e=>sumar(e.dataTransfer.files));
   return ()=>items;
 }
-const getCedula = gestor("#subirCedula","#cedula","#listaCedula");
 const getArchivos = gestor("#subirDocs","#archivos","#listaArchivos");
-$("#cedula").addEventListener("change",()=>{
-  if(getCedula().length){ selfieOmitida = false; $("#selfiePendiente").hidden = true; }
-});
 
 // ---------- "no sé / no me acuerdo" es exclusivo con los centros marcados ----------
 const noSeCentros = $("#noSeCentros");
@@ -593,12 +587,90 @@ document.querySelectorAll("[name=prestador]").forEach(c=>c.addEventListener("cha
   if(c.checked) noSeCentros.checked = false;
 }));
 
-// ---------- selfie: "prefiero no subir mi foto" salta la exigencia ----------
-let selfieOmitida = false;
-$("#saltarSelfie").addEventListener("click",()=>{
-  selfieOmitida = true;
-  $("#selfiePendiente").hidden = false;
+// ---------- selfie: cámara en vivo, con foto simulada como alternativa para jueces ----------
+// La foto (real o simulada) nunca sale del navegador: se guarda como dataURL en memoria,
+// nunca en un campo del formulario, y no viaja al servidor.
+const selfieVideo = $("#selfieVideo"), selfieFoto = $("#selfieFoto"),
+      activarCamara = $("#activarCamara"), inputCedula = $("#cedula"),
+      selfieCanvas = $("#selfieCanvas"), btnTomarFoto = $("#btnTomarFoto"),
+      btnRepetirFoto = $("#btnRepetirFoto"), btnSimularFoto = $("#btnSimularFoto");
+let streamCamara = null, fotoDataUrl = null, fotoEsSimulada = false;
+const haySelfie = () => !!fotoDataUrl;
+
+function detenerCamara(){
+  if(streamCamara){ streamCamara.getTracks().forEach(t=>t.stop()); streamCamara = null; }
+  selfieVideo.srcObject = null;
+}
+
+async function iniciarCamara(){
+  if(!navigator.mediaDevices?.getUserMedia){ inputCedula.click(); return; }
+  try{
+    streamCamara = await navigator.mediaDevices.getUserMedia({video:{facingMode:"user"}, audio:false});
+    selfieVideo.srcObject = streamCamara;
+    selfieVideo.hidden = false; selfieFoto.hidden = true; activarCamara.hidden = true;
+    btnTomarFoto.hidden = false; btnRepetirFoto.hidden = true;
+  }catch{
+    // Sin cámara o permiso denegado: cae al selector de archivo con capture="user" que ya existe.
+    inputCedula.click();
+  }
+}
+activarCamara.addEventListener("click", iniciarCamara);
+activarCamara.addEventListener("keydown", e=>{
+  if(e.key === "Enter" || e.key === " "){ e.preventDefault(); iniciarCamara(); }
+});
+
+function mostrarFotoCapturada(){
+  selfieFoto.src = fotoDataUrl; selfieFoto.hidden = false; selfieVideo.hidden = true;
+  activarCamara.hidden = true; btnTomarFoto.hidden = true; btnRepetirFoto.hidden = false;
   $("#e-cedula").textContent = "";
+  $("#listaCedula").innerHTML = `<div class="arch"><span>${fotoEsSimulada ? "🧪 Foto simulada — demo" : "📷 Selfie capturada"}
+    <span class="hint">(no se envía al servidor)</span></span></div>`;
+}
+
+btnTomarFoto.addEventListener("click", ()=>{
+  selfieCanvas.width = selfieVideo.videoWidth || 320;
+  selfieCanvas.height = selfieVideo.videoHeight || 240;
+  selfieCanvas.getContext("2d").drawImage(selfieVideo, 0, 0, selfieCanvas.width, selfieCanvas.height);
+  fotoDataUrl = selfieCanvas.toDataURL("image/jpeg", .85);
+  fotoEsSimulada = false;
+  mostrarFotoCapturada();
+  detenerCamara();
+});
+
+btnRepetirFoto.addEventListener("click", ()=>{
+  fotoDataUrl = null; inputCedula.value = "";
+  selfieFoto.hidden = true; $("#listaCedula").innerHTML = "";
+  activarCamara.hidden = false; btnTomarFoto.hidden = true; btnRepetirFoto.hidden = true;
+});
+
+// Silueta claramente sintética, con la marca de "es una demo" bien visible: nadie puede
+// confundirla con una foto real, ni siquiera un juez mirando de lejos.
+function dibujarAvatarSintetico(){
+  selfieCanvas.width = 320; selfieCanvas.height = 240;
+  const ctx = selfieCanvas.getContext("2d");
+  ctx.fillStyle = "#dfe7e3"; ctx.fillRect(0, 0, 320, 240);
+  ctx.fillStyle = "#9fb3ab";
+  ctx.beginPath(); ctx.arc(160, 100, 46, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(80, 240); ctx.quadraticCurveTo(160, 150, 240, 240); ctx.fill();
+  ctx.fillStyle = "rgba(138,90,0,.92)"; ctx.fillRect(0, 200, 320, 26);
+  ctx.fillStyle = "#fff"; ctx.font = "bold 13px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("FOTO SIMULADA — DEMO", 160, 217);
+}
+
+btnSimularFoto.addEventListener("click", ()=>{
+  detenerCamara();
+  dibujarAvatarSintetico();
+  fotoDataUrl = selfieCanvas.toDataURL("image/png");
+  fotoEsSimulada = true;
+  mostrarFotoCapturada();
+});
+
+inputCedula.addEventListener("change", ()=>{
+  const archivo = inputCedula.files[0];
+  if(!archivo) return;
+  const lector = new FileReader();
+  lector.onload = () => { fotoDataUrl = lector.result; fotoEsSimulada = false; mostrarFotoCapturada(); };
+  lector.readAsDataURL(archivo);
 });
 
 document.querySelectorAll("[name=tiene]").forEach(r=>r.addEventListener("change",()=>{
@@ -608,6 +680,46 @@ document.querySelectorAll("[name=periodo]").forEach(r=>r.addEventListener("chang
   $("#bloquePeriodo").hidden = $("[name=periodo]:checked").value !== "acotar";
 }));
 $("#verPoder").addEventListener("click",()=>dlgPoder.showModal());
+
+// ---------- simular caso completo: un clic para que un juez vea todo el viaje ----------
+// Datos 100% sinteticos. Avanza paso a paso con una pausa visible (no es instantaneo a
+// proposito: que se vea que es el mismo formulario, no un atajo que salta la UI) y al
+// final dispara la demo de Claude sola.
+const pausa = ms => new Promise(res=>setTimeout(res, ms));
+$("#btnSimular").addEventListener("click", async ()=>{
+  const boton = $("#btnSimular");
+  boton.disabled = true;
+  try{
+    $("#nombre").value = "Paciente de Demostración";
+    rutInput.value = "11111111-1";
+    rutInput.dispatchEvent(new Event("input"));
+    $("#correo").value = "demo@wiki-de-salud.cl";
+    $("#btnSimularFoto").click();
+    await pausa(600);
+    irA(2);
+
+    document.querySelector("[name=prevision][value=fonasa]").checked = true;
+    const centros = document.querySelectorAll("[name=prestador]");
+    if(centros[0]) centros[0].checked = true;
+    if(centros[1]) centros[1].checked = true;
+    await pausa(600);
+    irA(3);
+
+    $("[name=poder]").checked = true;
+    $("[name=veracidad]").checked = true;
+    await pausa(600);
+    irA(4);
+
+    $("[name=disclaimer]").checked = true;
+    await pausa(600);
+    $("#f").requestSubmit();
+
+    await pausa(900);
+    $("#btnDemo")?.click();
+  } finally {
+    boton.disabled = false;
+  }
+});
 
 // ---------- firma ----------
 let datos = null;
@@ -624,80 +736,8 @@ $("#f").addEventListener("submit", e=>{
   datos = { correo:$("#correo").value.trim(), nombre:$("#nombre").value.trim(),
             sel, archivos:getArchivos(), periodo, mandatoTexto, prevision,
             noSeCentros: noSeCentros.checked };
-  $("#correoEco").textContent = datos.correo;
-  $("#textoEnvio").textContent = "Enviando el código a tu correo…";
-  document.querySelectorAll(".paso[data-paso]").forEach(s=>s.classList.remove("activo"));
-  $("#verificacion").classList.add("activo");
-  $("#barra").hidden = true;
-  window.scrollTo({top:0});
-  $("#inputCodigo").focus();
-  enviarCodigo(datos.correo);
-});
-
-// El código lo genera y lo valida el SERVIDOR. Acá no se conoce: si viviera en el
-// navegador, cualquiera lo leería en las herramientas del navegador y la firma no
-// acreditaría nada — y acreditar que la persona controla ese correo es justo lo que
-// sostiene el poder simple. Lo único que guarda el navegador es un token opaco.
-let tokenFirma = null;
-let codigoDemo = null;   // solo si el servidor está en modo demostración
-
-async function enviarCodigo(correo){
-  tokenFirma = null; codigoDemo = null;
-  $("#btnRellenar").hidden = true;
-  try{
-    const r = await fetch("/api/casilla", {method:"POST",
-      headers:{"content-type":"application/json"},
-      body: JSON.stringify({accion:"emitir-codigo", email:correo})});
-    const data = await r.json().catch(()=>null);
-    if(!r.ok || !data || !data.token) throw new Error("sin token");
-    tokenFirma = data.token;
-    codigoDemo = data.codigo_demo || null;
-    // "enviado" dice que el servidor lo aceptó para envío, no que llegó a la bandeja:
-    // puede caer en spam. Se dice así, sin prometer de más.
-    $("#textoEnvio").textContent = data.enviado
-      ? "Enviamos un código a " + correo + ". Si no aparece, revisa la carpeta de spam."
-      : "No pudimos enviar el correo a " + correo + ".";
-    if(codigoDemo) $("#btnRellenar").hidden = false;
-  }catch{
-    $("#textoEnvio").textContent = "No pudimos emitir el código. Vuelve a intentarlo.";
-  }
-}
-
-$("#btnRellenar").addEventListener("click",()=>{
-  $("#inputCodigo").value = codigoDemo || "";
-  $("#errorCodigo").textContent = "";
-});
-
-$("#btnVolverForm").addEventListener("click",()=>{
-  $("#verificacion").classList.remove("activo");
-  irA(1);
-});
-
-$("#btnFirmar").addEventListener("click", async ()=>{
-  const val = $("#inputCodigo").value.trim();
-  if(!val){ $("#errorCodigo").textContent = "Escribe el código para poder firmar."; return; }
-  if(!tokenFirma){ $("#errorCodigo").textContent = "El código venció. Vuelve atrás y pídelo otra vez."; return; }
-
-  const btn = $("#btnFirmar");
-  btn.disabled = true;
-  try{
-    const r = await fetch("/api/casilla", {method:"POST",
-      headers:{"content-type":"application/json"},
-      body: JSON.stringify({accion:"validar-codigo", email:datos.correo, codigo:val, token:tokenFirma})});
-    const data = await r.json().catch(()=>null);
-    if(!r.ok || !data || !data.valido){
-      $("#errorCodigo").textContent = "Ese código no coincide o ya venció. Revísalo e inténtalo de nuevo.";
-      return;
-    }
-  }catch{
-    $("#errorCodigo").textContent = "No pudimos verificar el código. Reintenta en unos segundos.";
-    return;
-  }finally{ btn.disabled = false; }
-
-  $("#errorCodigo").textContent = "";
   mostrarResultado();
 });
-
 
 async function mostrarResultado(){
   const {correo, nombre, sel, archivos, periodo, mandatoTexto, noSeCentros: sinCentrosClaros} = datos;
@@ -734,7 +774,7 @@ async function mostrarResultado(){
   const paso = t => pasos.push([String(pasos.length+1), t]);
 
   paso("<b>Poder firmado</b> a las " + new Date().toLocaleTimeString("es-CL") + ". Se generó su "+
-       "constancia de autenticidad: código validado, tu verificación de identidad, el texto que "+
+       "constancia de autenticidad: identidad declarada, prueba de vida fotográfica, el texto que "+
        "leíste, el hash del documento y el sello de tiempo. Te llega una copia íntegra a "+
        "<code>"+correo+"</code>.");
   if(archivos.length){
@@ -761,20 +801,78 @@ async function mostrarResultado(){
   $("#pasos").innerHTML = pasos.map(([i,t])=>
     `<div class="fila"><span class="ic">${i}</span><span>${t}</span></div>`).join("");
 
-  $("#seguimiento").innerHTML =
-    (archivos.length ? `<div class="fila"><span class="ic">✓</span><span><b>Tus documentos</b><br>
-      <span class="hint">Listos en minutos: ya están en la Carpeta de Salud.</span></span></div>` : "") +
-    sel.map(p=>`<div class="fila"><span class="ic">◷</span><span><b>${p.nombre}</b><br>
-      <span class="hint">Te avisamos por correo apenas conteste.</span></span></div>`).join("") +
-    (sinCentrosClaros ? `<div class="fila"><span class="ic">◷</span><span><b>Reconstruir tu historial</b><br>
-      <span class="hint">Te avisamos por correo apenas tengamos algo para mostrarte.</span></span></div>` : "") +
-    `<p class="hint" style="margin:16px 0 0">Si quieres detener el proceso, respondes cualquiera de
-     esos correos con “revoco” y borramos todo el mismo día.</p>`;
+  // La confirmación no es un gate para seguir: llega al correo, después, como constancia.
+  // Fire-and-forget: si falla, no hay nada visible que romper — el flujo ya siguió.
+  const textoConstancia = (mandatoTexto || "") +
+    "\n\nLas novedades de tu caso (respuestas de los centros, tu Carpeta de Salud lista, "+
+    "cualquier reclamo que gestionemos por ti) te llegarán a este mismo correo desde tu "+
+    "casilla administradora "+casilla+".";
+  fetch("/api/casilla", {method:"POST", headers:{"content-type":"application/json"},
+    body: JSON.stringify({accion:"enviar-acuerdo", email: correo, texto: textoConstancia})})
+    .catch(()=>{ /* fire-and-forget: sin efecto visible si falla */ });
 
-  $("#verificacion").classList.remove("activo");
+  estadoTimeline = { casilla, nCentros: sel.length, sinCentrosClaros };
+  respuestasRecibidas = []; carpetaLista = false;
+  renderTimeline();
+
   $("#salida").classList.add("activo");
   if(location.protocol.startsWith("http")) $("#cardDemoVivo").hidden = false;
   window.scrollTo({top:0});
+}
+
+// ---------- timeline del caso: hitos reales + proyectados, con fechas simuladas ----------
+let estadoTimeline = { casilla:"", nCentros:0, sinCentrosClaros:false };
+let respuestasRecibidas = [];  // se llena a medida que corre la demo de Claude
+let carpetaLista = false;
+const NOMBRES_CENTRO_DEMO = {centro_a:"Centro Médico San Rafael",
+  centro_b:"Hospital Regional de Ñuble", centro_c:"Red de Salud Cordillera"};
+function fechaSim(diasDesdeHoy){
+  const d = new Date(); d.setDate(d.getDate() + diasDesdeHoy);
+  return d.toLocaleDateString("es-CL",{day:"2-digit",month:"short"});
+}
+function resumenRegistro(r){
+  const partes = [["diagnosticos","diagnóstico consignado","diagnósticos consignados"],
+    ["examenes","examen","exámenes"],["medicamentos","medicamento","medicamentos"],
+    ["alergias","alergia","alergias"],["atenciones","atención","atenciones"],
+    ["procedimientos","procedimiento","procedimientos"],["imagenes","imagen","imágenes"]]
+    .map(([k,s,pl])=>{ const n=(r[k]||[]).length; return n ? `${n} ${n===1?s:pl}` : null; })
+    .filter(Boolean);
+  return partes.length ? partes.join(", ") : "sin hallazgos nuevos";
+}
+function renderTimeline(){
+  const {casilla, nCentros, sinCentrosClaros} = estadoTimeline;
+  const horaFirma = new Date().toLocaleTimeString("es-CL");
+  const hitos = [];
+  hitos.push({hecho:true, fecha:"Hoy", titulo:"Firmaste el poder",
+    detalle:`A las ${horaFirma}. Constancia enviada a tu correo.`});
+  hitos.push({hecho:true, fecha:"Hoy", titulo:"Se creó tu casilla administradora",
+    detalle:`<code>${esc(casilla)}</code> — se comunica con cada centro, recibe la información y te la reenvía cuando corresponde.`});
+  if(nCentros){
+    hitos.push({hecho:true, fecha:"Hoy", titulo:`Solicitudes enviadas a ${nCentros} centro${nCentros>1?"s":""}`,
+      detalle:"Invocando el art. 13 de la Ley 20.584."});
+  } else if(sinCentrosClaros){
+    hitos.push({hecho:true, fecha:"Hoy", titulo:"Empezamos a reconstruir dónde te has atendido",
+      detalle:"Con tu previsión y tu casilla ya provisionadas."});
+  }
+  const respHtml = respuestasRecibidas.map(r=>
+    `<div class="subhito">El <b>${r.fecha}</b> llegó la respuesta de <b>${esc(r.centro)}</b>: ${esc(r.resumen)}.</div>`).join("");
+  hitos.push({hecho: respuestasRecibidas.length>0,
+    fecha: respuestasRecibidas[0]?.fecha || "Semana 1", titulo:"Primera respuesta recibida",
+    detalle: respHtml || "Te avisamos por correo apenas llegue la primera."});
+  hitos.push({hecho:false, fecha:"Semana 3", titulo:"Un centro no responde: reclamamos por ti",
+    detalle:"Si algún prestador se atrasa o niega la copia, lo gestionamos nosotros; tú no vuelves a escribirle."});
+  hitos.push({hecho: carpetaLista, fecha: carpetaLista ? "Hoy" : "Mes 1",
+    titulo:"Tu Carpeta de Salud está lista",
+    detalle:"Se te avisa por correo para descargarla, junto con los documentos originales."});
+  hitos.push({hecho:false, fecha:"Al cerrar el caso", titulo:"Todo se borra y te llega la constancia",
+    detalle:"Se suprime tu casilla y tus documentos; queda solo estadística sin datos personales."});
+  $("#timeline").innerHTML = hitos.map(h=>`
+    <div class="hito${h.hecho?" hecho":""}">
+      <span class="punto"></span>
+      <span class="fecha">${h.fecha}</span>
+      <span class="titulo">${h.titulo}</span>
+      <div class="detalle">${h.detalle}</div>
+    </div>`).join("");
 }
 
 // ---------- demo en vivo: los tres centros -> un expediente ----------
@@ -789,6 +887,7 @@ $("#btnDemo").addEventListener("click", async ()=>{
   const btn = $("#btnDemo"), est = $("#demoEstado"), out = $("#demoResultado");
   btn.disabled = true; out.innerHTML = ""; $("#descargas").hidden = true;
   registros = []; originales = {};
+  respuestasRecibidas = []; carpetaLista = false; renderTimeline();
   let tokIn = 0, tokOut = 0;
   try{
     for(let i = 0; i < CENTROS_DEMO.length; i++){
@@ -804,10 +903,16 @@ $("#btnDemo").addEventListener("click", async ()=>{
       // El original se guarda para que la persona se lo lleve junto al expediente.
       originales[id] = await (await fetch(`/demo/ficha-${id}.html`)).text();
       out.innerHTML = resumen(registros);
+      // El timeline "enciende" el hito de la primera respuesta a medida que llega cada
+      // centro: efecto de que pasó el tiempo, con la fecha simulada y el nombre real.
+      respuestasRecibidas.push({centro: NOMBRES_CENTRO_DEMO[id] || id,
+        fecha: fechaSim(7*(i+1)), resumen: resumenRegistro(data.registro)});
+      renderTimeline();
     }
     est.textContent = `Listo — ${registros.length} centros unificados · claude-haiku-4-5 · `+
       `${tokIn.toLocaleString("es-CL")} tokens de entrada, ${tokOut.toLocaleString("es-CL")} de salida.`;
     $("#descargas").hidden = false;
+    carpetaLista = true; renderTimeline();
   }catch(err){
     est.textContent = "⚠ " + err.message;
   }finally{ btn.disabled = false; }
