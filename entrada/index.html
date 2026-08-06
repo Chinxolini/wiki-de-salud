@@ -543,11 +543,30 @@
   </div>
 </dialog>
 
+<dialog id="dlgCorreo">
+  <div class="dh">
+    <h3>Tu correo, para esta demostración</h3>
+    <button class="cerrar" id="cerrarDlgCorreo" aria-label="Cerrar">×</button>
+  </div>
+  <div class="db">
+    <p>Es el único dato que te pedimos escribir; lo demás se rellena solo y es sintético. Tu correo se usa solo para esta demostración y se borra con el caso.</p>
+    <label for="correoSimulado" style="margin-top:0">Tu correo</label>
+    <input type="email" id="correoSimulado" placeholder="tu@correo.cl" autocomplete="email">
+    <span class="err" id="e-correoSimulado"></span>
+    <div class="nav" style="margin-top:14px">
+      <button type="button" id="btnUsarCorreo">Usar este correo</button>
+    </div>
+    <p style="margin:14px 0 0;text-align:center">
+      <button type="button" class="link" id="btnSeguirSinCorreo">Seguir sin correo</button>
+    </p>
+  </div>
+</dialog>
+
 <!-- Sello de version. El texto fijo lo escribe tools/sellar_version.py al desplegar;
      el commit vivo lo pregunta a /api/version, para saber si lo que esta arriba es
      efectivamente esta version y no un despliegue anterior. -->
 <p class="sello" id="sello">
-  <span id="selloFecha">versión 2026-08-06 01:35</span><span id="selloSha"></span>
+  <span id="selloFecha">versión 2026-08-06 01:53</span><span id="selloSha"></span>
 </p>
 
 <script>
@@ -592,6 +611,10 @@ function irA(n){
   window.scrollTo({top:0});
   const primero = document.querySelector(`.paso[data-paso="${n}"] input:not([type=hidden])`);
   primero && primero.focus({preventScroll:true});
+  // Si el modo simulacion esta activo, el paso al que se acaba de entrar se rellena solo
+  // y se detiene: el juez decide cuando avanzar con el boton "Continuar" propio del paso.
+  // irA() nunca se llama a si misma desde aca.
+  if(modoSimulacion && LLENADORES_SIM[n]) LLENADORES_SIM[n]();
 }
 document.querySelectorAll("[data-ir]").forEach(b=>
   b.addEventListener("click",()=>irA(+b.dataset.ir)));
@@ -939,10 +962,11 @@ document.querySelectorAll("[name=periodo]").forEach(r=>r.addEventListener("chang
 $("#verPoder").addEventListener("click",()=>dlgPoder.showModal());
 
 // ---------- simular caso completo: un clic para que un juez vea todo el viaje ----------
-// Datos 100% sinteticos. Se ve el llenado campo por campo (tecleo, marcado uno a uno,
-// resaltado de donde esta ocurriendo la accion) porque el punto de este boton es que un
-// juez entienda QUE se pide, no solo que llegue rapido al resultado. Al final dispara la
-// demo de Claude sola.
+// Datos 100% sinteticos, salvo el correo: ese lo escribe el juez, porque es el unico
+// dato que hace falta para que reciba los correos reales de la demostracion. Los pasos
+// 1 a 4 se rellenan solos, uno a la vez, pero los avanza el juez con el boton "Continuar"
+// propio de cada paso: mismo modelo que las etapas A-E. irA() nunca se dispara sola.
+let modoSimulacion = false;
 const pausa = ms => new Promise(res=>setTimeout(res, ms));
 const narradorEl = $("#narrador");
 function narrar(msg){
@@ -1018,66 +1042,119 @@ async function marcarOpcion(input, msVisible = 350){
   quitar();
 }
 
+// ---------- correo del juez: el unico dato que no se inventa ----------
+function pedirCorreoJuez(){
+  return new Promise(resolve=>{
+    const dlg = $("#dlgCorreo"), input = $("#correoSimulado"), err = $("#e-correoSimulado");
+    const btnUsar = $("#btnUsarCorreo"), btnSeguir = $("#btnSeguirSinCorreo"),
+          btnCerrar = $("#cerrarDlgCorreo");
+    input.value = ""; err.textContent = ""; input.removeAttribute("aria-invalid");
+    let resuelto = false;
+    function limpiar(){
+      btnUsar.removeEventListener("click", onUsar);
+      btnSeguir.removeEventListener("click", onSeguir);
+      btnCerrar.removeEventListener("click", onSeguir);
+      dlg.removeEventListener("close", onClose);
+    }
+    function terminar(valor){
+      if(resuelto) return; resuelto = true;
+      limpiar(); resolve(valor);
+    }
+    function onUsar(){
+      const v = input.value.trim();
+      if(!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(v)){
+        err.textContent = "Escribe un correo válido."; input.setAttribute("aria-invalid","true");
+        return;
+      }
+      dlg.close(); terminar(v);
+    }
+    function onSeguir(){ dlg.close(); terminar("demo@wiki-de-salud.cl"); }
+    function onClose(){ terminar("demo@wiki-de-salud.cl"); } // Esc tambien cuenta como "seguir sin correo"
+    btnUsar.addEventListener("click", onUsar);
+    btnSeguir.addEventListener("click", onSeguir);
+    btnCerrar.addEventListener("click", onSeguir);
+    dlg.addEventListener("close", onClose);
+    dlg.showModal();
+    input.focus();
+  });
+}
+
+// ---------- relleno por paso: entra, se rellena, se detiene. El juez avanza con el
+// boton "Continuar" que ya existe en cada paso; irA() nunca se llama a si misma. ----------
+async function llenarPaso1(){
+  mostrarEtapa({
+    quePasa: "Te pedimos lo mínimo para que un centro de salud pueda encontrar tu ficha y "+
+      "comprobar que eres tú: nombre, RUT, una foto tuya y tu cédula por ambos lados.",
+    loQueViene: "Elegir dónde te has atendido.",
+  });
+  await pausa(500);
+  await escribirEnCampo($("#nombre"), "Paciente de Demostración", 30);
+  await escribirRut("111111111", 30);
+  // El correo ya lo escribio el juez en el dialogo inicial: no se toca aca.
+
+  const fotoBtn = $("#btnSimularFoto");
+  const quitarFoto = enfocarDemo(fotoBtn);
+  await pausa(500);
+  fotoBtn.click();
+  await pausa(800); // pausa despues del click para que se aprecie la miniatura
+  quitarFoto();
+  await pausa(500);
+
+  const cedulaBtn = $("#btnSimularCedula");
+  const quitarCedula = enfocarDemo(cedulaBtn);
+  await pausa(300);
+  cedulaBtn.click();
+  await pausa(900); // pausa para que se aprecien ambas miniaturas
+  quitarCedula();
+}
+async function llenarPaso2(){
+  mostrarEtapa({
+    quePasa: "Marcas los centros donde recuerdes haberte atendido y qué período quieres pedir.",
+    loQueViene: "El poder que nos autoriza a pedir tu ficha en tu nombre.",
+  });
+  await pausa(500);
+  await marcarOpcion(document.querySelector("[name=prevision][value=fonasa]"));
+  const centros = document.querySelectorAll("[name=prestador]");
+  if(centros[0]) await marcarOpcion(centros[0]);
+  if(centros[1]) await marcarOpcion(centros[1]);
+}
+async function llenarPaso3(){
+  mostrarEtapa({
+    quePasa: "La ley exige un poder simple para que alguien pida tu ficha por ti. Este es el "+
+      "texto que estás firmando.",
+    loQueViene: "Qué recibes y qué no.",
+  });
+  await pausa(500);
+  await marcarOpcion($("[name=poder]"));
+  await marcarOpcion($("[name=veracidad]"));
+}
+async function llenarPaso4(){
+  mostrarEtapa({
+    quePasa: "Lo más importante: esto ordena tu información, no la interpreta.",
+    loQueViene: "Firmar y quedar libre: de ahí en adelante nosotros gestionamos.",
+  });
+  await pausa(500);
+  await marcarOpcion($("[name=disclaimer]"));
+}
+const LLENADORES_SIM = {1: llenarPaso1, 2: llenarPaso2, 3: llenarPaso3, 4: llenarPaso4};
+
+// Quien llena a mano no debe notar ningun cambio: sin el flag, todo funciona igual. Y si
+// el juez toca algo a mano en medio de la simulacion, esta se apaga sola. Se distingue
+// "a mano" de "programatico" por isTrusted: nuestros dispatchEvent(new Event(...)) generan
+// eventos no confiables; el tecleo o clic real del juez si los genera el navegador.
+document.addEventListener("input", e => { if(modoSimulacion && e.isTrusted) modoSimulacion = false; }, true);
+document.addEventListener("change", e => { if(modoSimulacion && e.isTrusted) modoSimulacion = false; }, true);
+
 $("#btnSimular").addEventListener("click", async ()=>{
   const boton = $("#btnSimular");
   if(boton.disabled) return; // ya esta corriendo: un segundo clic no hace nada
   boton.disabled = true;
   try{
-    irA(1);
-    narrar("Paso 1 de 4 — Identidad: esto es lo único que pedimos");
-    await pausa(500);
-    await escribirEnCampo($("#nombre"), "Paciente de Demostración", 30);
-    await escribirRut("111111111", 30);
-    await escribirEnCampo($("#correo"), "demo@wiki-de-salud.cl", 27);
-
-    const fotoBtn = $("#btnSimularFoto");
-    const quitarFoto = enfocarDemo(fotoBtn);
-    await pausa(500);
-    fotoBtn.click();
-    await pausa(800); // pausa despues del click para que se aprecie la miniatura
-    quitarFoto();
-    await pausa(1100);
-
-    narrar("Y tu cédula, por ambos lados: así lo piden los centros de salud");
-    await pausa(500);
-    const cedulaBtn = $("#btnSimularCedula");
-    const quitarCedula = enfocarDemo(cedulaBtn);
-    cedulaBtn.click();
-    await pausa(900); // pausa para que se aprecien ambas miniaturas
-    quitarCedula();
-    await pausa(1100);
-
-    irA(2);
-    narrar("Paso 2 — Dónde te has atendido");
-    await pausa(500);
-    await marcarOpcion(document.querySelector("[name=prevision][value=fonasa]"));
-    const centros = document.querySelectorAll("[name=prestador]");
-    if(centros[0]) await marcarOpcion(centros[0]);
-    if(centros[1]) await marcarOpcion(centros[1]);
-    await pausa(1100);
-
-    irA(3);
-    narrar("Paso 3 — El poder que nos autoriza");
-    await pausa(500);
-    await marcarOpcion($("[name=poder]"));
-    await marcarOpcion($("[name=veracidad]"));
-    await pausa(1100);
-
-    irA(4);
-    narrar("Paso 4 — Qué recibes y qué no");
-    await pausa(500);
-    await marcarOpcion($("[name=disclaimer]"));
-    await pausa(1100);
-    narrarOff();
-    $("#f").requestSubmit();
-
-    // Esperar a que aparezca el corte de "esto es todo lo de hoy" (etapa A). De ahi en
-    // adelante el ritmo lo pone el juez: el simulador se detiene y no avanza mas por su
-    // cuenta. mostrarCierre() ya deja montado el globo de la etapa A.
-    for(let i = 0; i < 40 && !$("#cierreHoy").classList.contains("activo"); i++) await pausa(250);
+    const correoElegido = await pedirCorreoJuez();
+    $("#correo").value = correoElegido;
+    modoSimulacion = true;
+    irA(1); // el propio irA(), al entrar al paso 1, dispara llenarPaso1()
   } finally {
-    // No narrarOff() aca: mostrarCierre() ya dejo montado el globo persistente de la
-    // etapa A, y es justo el que tiene que quedar visible cuando el simulador se detiene.
     boton.disabled = false;
   }
 });
@@ -1089,6 +1166,7 @@ let datos = null;
 // stepper de 4 pasos: el corte visual de "esto es todo lo de hoy" y el paso 5
 // (acompañamiento opcional). Se controlan aparte, no con irA().
 function mostrarCierre(){
+  modoSimulacion = false; // etapa A en adelante, el ritmo lo pone el juez con su propio click
   document.querySelectorAll(".paso[data-paso]").forEach(s=>s.classList.remove("activo"));
   $("#paso5").classList.remove("activo");
   $("#etapaC").classList.remove("activo");
