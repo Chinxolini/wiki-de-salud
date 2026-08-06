@@ -129,15 +129,16 @@ function proyeccionEstado(array $req): array
 function proyeccionListado(array $req): array
 {
     return [
-        'guid'       => $req['guid'] ?? null,
-        'email'      => $req['email'] ?? null,
-        'nombre'     => $req['detalle']['nombre'] ?? null,
-        'centros'    => $req['detalle']['centros'] ?? [],
-        'periodo'    => $req['detalle']['periodo'] ?? null,
-        'status'     => $req['status'] ?? null,
-        'creado'     => $req['timestamp'] ?? null,
-        'expires_at' => $req['expires_at'] ?? null,
-        'direccion'  => $req['correo']['direccion'] ?? null,
+        'guid'            => $req['guid'] ?? null,
+        'email'           => $req['email'] ?? null,
+        'nombre'          => $req['detalle']['nombre'] ?? null,
+        'centros'         => $req['detalle']['centros'] ?? [],
+        'periodo'         => $req['detalle']['periodo'] ?? null,
+        'acompanamiento'  => $req['detalle']['acompanamiento'] ?? ['legal' => false, 'salud' => false],
+        'status'          => $req['status'] ?? null,
+        'creado'          => $req['timestamp'] ?? null,
+        'expires_at'      => $req['expires_at'] ?? null,
+        'direccion'       => $req['correo']['direccion'] ?? null,
     ];
 }
 
@@ -232,18 +233,36 @@ try {
                 out([], 'mandato_texto y firma son obligatorios', false, 400);
             }
 
+            // acompanamiento es opcional: si no viene (o viene mal formado), se guarda en
+            // false/false en vez de rechazar la solicitud completa por un campo accesorio.
+            $acompanamientoIn = $body['acompanamiento'] ?? null;
+            if (is_array($acompanamientoIn)
+                && array_key_exists('legal', $acompanamientoIn)
+                && array_key_exists('salud', $acompanamientoIn)
+                && is_bool($acompanamientoIn['legal'])
+                && is_bool($acompanamientoIn['salud'])
+            ) {
+                $acompanamiento = [
+                    'legal' => $acompanamientoIn['legal'],
+                    'salud' => $acompanamientoIn['salud'],
+                ];
+            } else {
+                $acompanamiento = ['legal' => false, 'salud' => false];
+            }
+
             $ip = $_SERVER['REMOTE_ADDR'] ?? 'desconocida';
 
             $entry = li_create_request($email, $ip);
 
             // Detalle mínimo: sin run, sin teléfono, sin cédula (no aplica en este flujo de agente).
             $detalle = [
-                'nombre'   => $nombre,
-                'run'      => null,
-                'telefono' => null,
-                'cedula'   => 'no aplica',
-                'centros'  => array_values($centros),
-                'periodo'  => $periodo,
+                'nombre'          => $nombre,
+                'run'             => null,
+                'telefono'        => null,
+                'cedula'          => 'no aplica',
+                'centros'         => array_values($centros),
+                'periodo'         => $periodo,
+                'acompanamiento'  => $acompanamiento,
             ];
 
             $mandato = [

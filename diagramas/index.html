@@ -1,0 +1,467 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wiki de salud — Cómo funciona, en cuatro láminas</title>
+<style>
+  :root{
+    --papel:#faf8f4; --tarjeta:#fff; --tinta:#17201d; --musgo:#6b7570;
+    --linea:#e4e0d7; --verde:#0f5c46; --ocre:#c9782f; --suave:#e9f2ee;
+    --sombra:0 1px 2px rgba(23,32,29,.05), 0 10px 30px rgba(23,32,29,.07);
+    --serif:'Iowan Old Style','Palatino Linotype',Palatino,Georgia,'Times New Roman',serif;
+    --sans:ui-sans-serif,-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    --mono:ui-monospace,'SF Mono',SFMono-Regular,Menlo,Consolas,monospace;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --papel:#121614; --tarjeta:#1b211e; --tinta:#e8ece9; --musgo:#98a49e;
+      --linea:#2c3531; --verde:#63c3a2; --ocre:#e0a061; --suave:#182b24;
+      --sombra:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.3);
+    }
+  }
+  :root[data-theme="dark"]{
+    --papel:#121614; --tarjeta:#1b211e; --tinta:#e8ece9; --musgo:#98a49e;
+    --linea:#2c3531; --verde:#63c3a2; --ocre:#e0a061; --suave:#182b24;
+    --sombra:0 1px 2px rgba(0,0,0,.3), 0 10px 30px rgba(0,0,0,.3);
+  }
+  :root[data-theme="light"]{
+    --papel:#faf8f4; --tarjeta:#fff; --tinta:#17201d; --musgo:#6b7570;
+    --linea:#e4e0d7; --verde:#0f5c46; --ocre:#c9782f; --suave:#e9f2ee;
+    --sombra:0 1px 2px rgba(23,32,29,.05), 0 10px 30px rgba(23,32,29,.07);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--papel); color:var(--tinta);
+    font:16px/1.6 var(--sans); -webkit-font-smoothing:antialiased;
+  }
+  .hoja{max-width:1080px; margin:0 auto; padding:56px 24px 96px}
+
+  /* ---------- portada ---------- */
+  .portada{border-bottom:2px solid var(--tinta); padding-bottom:26px; margin-bottom:52px}
+  .sello{
+    display:inline-block; font:600 .68rem/1 var(--mono); letter-spacing:.18em;
+    text-transform:uppercase; color:var(--verde); border:1px solid var(--verde);
+    padding:7px 11px; border-radius:3px; margin-bottom:20px;
+  }
+  h1{
+    font:400 clamp(2rem,5vw,3.1rem)/1.08 var(--serif); margin:0 0 14px;
+    letter-spacing:-.015em; text-wrap:balance;
+  }
+  h1 em{font-style:italic; color:var(--verde)}
+  .bajada{margin:0; max-width:62ch; color:var(--musgo); font-size:1.03rem}
+  .meta{
+    margin-top:22px; display:flex; flex-wrap:wrap; gap:8px 26px;
+    font:.76rem/1.5 var(--mono); color:var(--musgo);
+  }
+  .meta b{color:var(--tinta); font-weight:600}
+
+  /* ---------- lámina ---------- */
+  .lamina{
+    background:var(--tarjeta); border:1px solid var(--linea); border-radius:4px;
+    box-shadow:var(--sombra); margin-bottom:44px; overflow:hidden;
+  }
+  .cajetin{
+    display:flex; align-items:baseline; gap:16px; flex-wrap:wrap;
+    padding:20px 26px; border-bottom:1px solid var(--linea); background:var(--suave);
+  }
+  .num{
+    font:600 .68rem/1 var(--mono); letter-spacing:.16em; text-transform:uppercase;
+    color:var(--verde); white-space:nowrap;
+  }
+  .cajetin h2{font:400 1.42rem/1.2 var(--serif); margin:0; flex:1 1 auto; min-width:240px}
+  .claim{
+    flex:1 1 100%; margin:2px 0 0; font-size:.92rem; color:var(--musgo);
+    max-width:74ch;
+  }
+  .claim b{color:var(--tinta); font-weight:600}
+
+  figure{margin:0; padding:30px 26px 8px}
+  .lienzo{overflow-x:auto; padding-bottom:6px}
+  svg{display:block; max-width:100%; height:auto; margin:0 auto; color:var(--tinta)}
+  figcaption{
+    padding:14px 26px 26px; font-size:.86rem; color:var(--musgo);
+    border-top:1px dashed var(--linea); margin-top:14px; max-width:80ch;
+  }
+  figcaption b{color:var(--tinta); font-weight:600}
+
+  /* marcas dentro de los dibujos */
+  .caja{fill:var(--tarjeta); stroke:currentColor; stroke-width:1.4}
+  .caja-verde{fill:var(--suave); stroke:var(--verde); stroke-width:1.6}
+  .rotulo{font:600 12px var(--mono); fill:currentColor; letter-spacing:.02em}
+  .rotulo-s{font:11px var(--sans); fill:var(--musgo)}
+  .rotulo-v{font:600 12px var(--mono); fill:var(--verde)}
+  .rotulo-o{font:600 11px var(--mono); fill:var(--ocre)}
+  .eje{stroke:currentColor; stroke-width:1.3; fill:none}
+  .eje-o{stroke:var(--ocre); stroke-width:1.6; fill:none}
+  .eje-v{stroke:var(--verde); stroke-width:1.6; fill:none}
+  .punteado{stroke-dasharray:5 4}
+  .tenue{stroke:var(--linea); stroke-width:1}
+  .banda{font:600 10px var(--mono); letter-spacing:.16em; text-transform:uppercase}
+
+  .pie{
+    margin-top:60px; padding-top:22px; border-top:1px solid var(--linea);
+    font-size:.82rem; color:var(--musgo); display:flex; justify-content:space-between;
+    gap:16px; flex-wrap:wrap;
+  }
+  code{font:.86em var(--mono); background:var(--suave); padding:1px 6px; border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="hoja">
+
+  <header class="portada">
+    <span class="sello">Claude Impact Lab · Longevidad 2026</span>
+    <h1>Cada centro guarda un pedazo de tu historia.<br><em>Ninguno la tiene completa.</em></h1>
+    <p class="bajada">Wiki de salud reúne la ficha clínica dispersa entre prestadores, la ordena a
+    un vocabulario común y se la entrega a la persona. Después la borra. Estas cuatro láminas
+    muestran el mecanismo: no lo que promete, sino cómo está hecho.</p>
+    <div class="meta">
+      <span>Equipo <b>LOS INMORTALES</b></span>
+      <span>Línea <b>03 · Continuidad</b></span>
+      <span><b>wiki-de-salud.vercel.app</b></span>
+    </div>
+  </header>
+
+  <!-- ================= LÁMINA 1 ================= -->
+  <section class="lamina">
+    <div class="cajetin">
+      <span class="num">Lámina 1 / 4</span>
+      <h2>El viaje, partido en dos</h2>
+      <p class="claim">Todo lo que la persona hace ocurre <b>hoy y toma minutos</b>. Lo que toma
+      semanas ocurre sin ella. Esa línea vertical es el producto entero.</p>
+    </div>
+    <figure>
+      <div class="lienzo">
+        <svg viewBox="0 0 980 340" role="img" aria-label="El trabajo de la persona termina al firmar; la espera de semanas la gestiona el sistema.">
+          <defs>
+            <marker id="f1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="currentColor"/>
+            </marker>
+            <marker id="f1v" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="var(--verde)"/>
+            </marker>
+          </defs>
+
+          <!-- bandas -->
+          <text x="30" y="34" class="banda" fill="var(--verde)">Hoy · minutos · lo hace la persona</text>
+          <text x="560" y="34" class="banda" fill="var(--ocre)">Después · semanas · lo hacemos nosotros</text>
+
+          <!-- divisoria -->
+          <line x1="536" y1="16" x2="536" y2="316" class="eje-o punteado"/>
+          <text x="546" y="308" class="rotulo-o">firma</text>
+
+          <!-- fila 1: pasos de la persona -->
+          <rect x="30" y="56" width="112" height="52" rx="3" class="caja-verde"/>
+          <text x="44" y="79" class="rotulo-v">Identidad</text>
+          <text x="44" y="96" class="rotulo-s">selfie + cédula</text>
+
+          <rect x="166" y="56" width="112" height="52" rx="3" class="caja-verde"/>
+          <text x="180" y="79" class="rotulo-v">Centros</text>
+          <text x="180" y="96" class="rotulo-s">dónde te atendiste</text>
+
+          <rect x="302" y="56" width="100" height="52" rx="3" class="caja-verde"/>
+          <text x="316" y="79" class="rotulo-v">Poder</text>
+          <text x="316" y="96" class="rotulo-s">art. 13</text>
+
+          <rect x="426" y="56" width="94" height="52" rx="3" class="caja-verde"/>
+          <text x="440" y="79" class="rotulo-v">Firma</text>
+          <text x="440" y="96" class="rotulo-s">y se desliga</text>
+
+          <line x1="142" y1="82" x2="164" y2="82" class="eje-v" marker-end="url(#f1v)"/>
+          <line x1="278" y1="82" x2="300" y2="82" class="eje-v" marker-end="url(#f1v)"/>
+          <line x1="402" y1="82" x2="424" y2="82" class="eje-v" marker-end="url(#f1v)"/>
+
+          <!-- salida hacia la derecha -->
+          <path d="M520 82 L560 82" class="eje-v" marker-end="url(#f1v)"/>
+
+          <!-- fila 2: lo que pasa después -->
+          <rect x="576" y="56" width="126" height="52" rx="3" class="caja"/>
+          <text x="590" y="79" class="rotulo">Casilla</text>
+          <text x="590" y="96" class="rotulo-s">@chiledao.cl</text>
+
+          <rect x="726" y="56" width="126" height="52" rx="3" class="caja"/>
+          <text x="740" y="79" class="rotulo">Solicitudes</text>
+          <text x="740" y="96" class="rotulo-s">a cada prestador</text>
+
+          <line x1="702" y1="82" x2="724" y2="82" class="eje" marker-end="url(#f1)"/>
+
+          <!-- respuestas escalonadas -->
+          <rect x="576" y="140" width="276" height="46" rx="3" class="caja"/>
+          <text x="590" y="162" class="rotulo">Respuestas, de a una</text>
+          <text x="590" y="178" class="rotulo-s">semana 1 · semana 2 · semana 3</text>
+          <path d="M789 108 L789 138" class="eje" marker-end="url(#f1)"/>
+          <text x="798" y="128" class="rotulo-s">llegan por correo</text>
+
+          <rect x="576" y="216" width="276" height="46" rx="3" class="caja"/>
+          <text x="590" y="238" class="rotulo">Si alguno no responde</text>
+          <text x="590" y="254" class="rotulo-s">reclamamos por ti</text>
+          <path d="M714 186 L714 214" class="eje punteado" marker-end="url(#f1)"/>
+
+          <!-- entrega -->
+          <rect x="576" y="286" width="276" height="42" rx="3" class="caja-verde"/>
+          <text x="590" y="313" class="rotulo-v">Carpeta de Salud + constancia</text>
+          <path d="M714 262 L714 284" class="eje-v" marker-end="url(#f1v)"/>
+
+          <!-- vuelta a la persona -->
+          <path d="M576 307 L300 307 L300 120" class="eje-v punteado" marker-end="url(#f1v)"/>
+          <text x="312" y="150" class="rotulo-s">se le avisa por correo</text>
+        </svg>
+      </div>
+      <figcaption>Los cuatro pasos verdes son todo lo que la persona hace. Cruzada la línea de la
+      firma, cada respuesta llega en su propia fecha y el sistema persigue a quien se atrasa.
+      <b>La única vez que vuelve a saber de nosotros es cuando su Carpeta está lista.</b></figcaption>
+    </figure>
+  </section>
+
+  <!-- ================= LÁMINA 2 ================= -->
+  <section class="lamina">
+    <div class="cajetin">
+      <span class="num">Lámina 2 / 4</span>
+      <h2>Dos infraestructuras, una frontera</h2>
+      <p class="claim">Lo que no cruza la línea punteada es tan importante como lo que sí:
+      <b>el RUT, la selfie, la cédula y todo el contenido clínico se quedan en el navegador</b>.</p>
+    </div>
+    <figure>
+      <div class="lienzo">
+        <svg viewBox="0 0 980 400" role="img" aria-label="El RUT, la selfie, la cédula y el contenido clínico nunca salen del navegador; solo el nombre viaja, para crear la casilla.">
+          <defs>
+            <marker id="f2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="currentColor"/>
+            </marker>
+          </defs>
+
+          <!-- navegador -->
+          <rect x="24" y="52" width="250" height="300" rx="4" class="caja-verde"/>
+          <text x="40" y="78" class="rotulo-v">NAVEGADOR</text>
+          <text x="40" y="96" class="rotulo-s">el dispositivo de la persona</text>
+          <line x1="40" y1="110" x2="258" y2="110" class="tenue"/>
+          <text x="40" y="134" class="rotulo-s">Se arma acá y no sale:</text>
+          <text x="40" y="158" class="rotulo-v">· RUT</text>
+          <text x="40" y="180" class="rotulo-v">· selfie y cédula</text>
+          <text x="40" y="202" class="rotulo-v">· contenido clínico</text>
+          <text x="40" y="224" class="rotulo-v">· la Carpeta de Salud</text>
+          <line x1="40" y1="246" x2="258" y2="246" class="tenue"/>
+          <text x="40" y="270" class="rotulo-s">Sí viaja, y solo para</text>
+          <text x="40" y="288" class="rotulo-s">crear la casilla:</text>
+          <text x="40" y="312" class="rotulo-o">· el nombre</text>
+
+          <!-- frontera -->
+          <line x1="300" y1="30" x2="300" y2="370" class="eje-o punteado"/>
+          <text x="308" y="46" class="banda" fill="var(--ocre)">frontera</text>
+
+          <!-- vercel -->
+          <rect x="336" y="76" width="230" height="118" rx="4" class="caja"/>
+          <text x="352" y="102" class="rotulo">VERCEL · Node</text>
+          <text x="352" y="124" class="rotulo-s">api/casilla.js</text>
+          <text x="352" y="142" class="rotulo-s">api/extraer.js</text>
+          <text x="352" y="160" class="rotulo-s">catálogo cerrado + cuotas</text>
+          <text x="352" y="180" class="rotulo-s">clave del caso por HMAC</text>
+
+          <!-- php -->
+          <rect x="336" y="238" width="230" height="112" rx="4" class="caja"/>
+          <text x="352" y="264" class="rotulo">cPANEL · PHP</text>
+          <text x="352" y="286" class="rotulo-s">api_agente.php</text>
+          <text x="352" y="304" class="rotulo-s">crear · provisionar · estado</text>
+          <text x="352" y="322" class="rotulo-s">notificar · correos · listar</text>
+          <text x="352" y="340" class="rotulo-s">eliminar</text>
+
+          <!-- externos -->
+          <rect x="640" y="60" width="200" height="58" rx="4" class="caja"/>
+          <text x="656" y="84" class="rotulo">API de Anthropic</text>
+          <text x="656" y="102" class="rotulo-s">Claude Haiku</text>
+
+          <rect x="640" y="150" width="200" height="58" rx="4" class="caja"/>
+          <text x="656" y="174" class="rotulo">cPanel UAPI</text>
+          <text x="656" y="192" class="rotulo-s">crea y borra casillas</text>
+
+          <rect x="640" y="240" width="200" height="58" rx="4" class="caja"/>
+          <text x="656" y="264" class="rotulo">IMAP / SMTP</text>
+          <text x="656" y="282" class="rotulo-s">mail.chiledao.cl</text>
+
+          <rect x="640" y="330" width="200" height="46" rx="4" class="caja"/>
+          <text x="656" y="358" class="rotulo">Prestadores</text>
+
+          <!-- flechas -->
+          <path d="M274 150 L334 130" class="eje" marker-end="url(#f2)"/>
+          <text x="270" y="118" class="rotulo-s">ficha sintética</text>
+
+          <path d="M274 296 L334 292" class="eje-o" marker-end="url(#f2)"/>
+          <text x="196" y="336" class="rotulo-o">nombre, correo, centros</text>
+
+          <path d="M566 116 L638 92" class="eje" marker-end="url(#f2)"/>
+          <text x="572" y="86" class="rotulo-s">extrae y normaliza</text>
+
+          <path d="M566 268 L638 186" class="eje" marker-end="url(#f2)"/>
+          <text x="574" y="228" class="rotulo-s">provisiona</text>
+
+          <path d="M566 300 L638 276" class="eje" marker-end="url(#f2)"/>
+          <text x="574" y="312" class="rotulo-s">lee y envía</text>
+
+          <path d="M740 298 L740 328" class="eje" marker-end="url(#f2)"/>
+          <text x="748" y="320" class="rotulo-s">responden</text>
+
+          <path d="M566 158 L566 158" class="eje"/>
+          <path d="M336 194 L336 238" class="eje punteado" marker-end="url(#f2)"/>
+          <text x="344" y="220" class="rotulo-s">solo por API</text>
+        </svg>
+      </div>
+      <figcaption>Los dos servicios del equipo se hablan <b>solo por API</b>, sin compartir base de
+      datos ni repositorio. Es lo que permite que el contenido clínico y el RUT nunca lleguen a un
+      servidor: la Carpeta se construye en el navegador, que es el único lugar donde la persona
+      puede comprobarlo.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ================= LÁMINA 3 ================= -->
+  <section class="lamina">
+    <div class="cajetin">
+      <span class="num">Lámina 3 / 4</span>
+      <h2>Qué le pasa al dato, hasta que deja de existir</h2>
+      <p class="claim">La supresión no es una promesa del texto legal: es <b>una fecha calculada al
+      inicio</b>, visible para la persona y ejecutable en cualquier momento.</p>
+    </div>
+    <figure>
+      <div class="lienzo">
+        <svg viewBox="0 0 980 300" role="img" aria-label="El caso pasa por cuatro estados y se suprime a los 90 días del inicio, o antes si la persona revoca.">
+          <defs>
+            <marker id="f3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="currentColor"/>
+            </marker>
+            <marker id="f3o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="var(--ocre)"/>
+            </marker>
+          </defs>
+
+          <text x="24" y="34" class="banda" fill="var(--musgo)">Estados del caso en el servicio</text>
+
+          <rect x="24" y="56" width="150" height="50" rx="3" class="caja"/>
+          <text x="38" y="80" class="rotulo">pendiente_datos</text>
+          <text x="38" y="97" class="rotulo-s">entró al formulario</text>
+
+          <rect x="212" y="56" width="150" height="50" rx="3" class="caja"/>
+          <text x="226" y="80" class="rotulo">en_gestion</text>
+          <text x="226" y="97" class="rotulo-s">poder firmado</text>
+
+          <rect x="400" y="56" width="150" height="50" rx="3" class="caja-verde"/>
+          <text x="414" y="80" class="rotulo-v">correo_creado</text>
+          <text x="414" y="97" class="rotulo-s">casilla operando</text>
+
+          <rect x="400" y="132" width="150" height="42" rx="3" class="caja"/>
+          <text x="414" y="158" class="rotulo">error_correo</text>
+
+          <line x1="174" y1="81" x2="210" y2="81" class="eje" marker-end="url(#f3)"/>
+          <line x1="362" y1="81" x2="398" y2="81" class="eje" marker-end="url(#f3)"/>
+          <path d="M380 81 L380 153 L398 153" class="eje punteado" marker-end="url(#f3)"/>
+
+          <!-- supresión -->
+          <rect x="640" y="56" width="200" height="50" rx="3" class="caja-verde"/>
+          <text x="654" y="80" class="rotulo-v">SUPRIMIDO</text>
+          <text x="654" y="97" class="rotulo-s">+ constancia con hora</text>
+          <line x1="550" y1="81" x2="638" y2="81" class="eje-v" marker-end="url(#f3)"/>
+          <text x="556" y="70" class="rotulo-o">día 90</text>
+
+          <!-- revocación -->
+          <path d="M475 106 L475 210 L740 210 L740 108" class="eje-o" marker-end="url(#f3o)"/>
+          <text x="500" y="228" class="rotulo-o">revocación: «revoco» por correo → supresión inmediata, sin dar explicaciones</text>
+
+          <!-- dónde vive cada cosa -->
+          <line x1="24" y1="252" x2="956" y2="252" class="tenue"/>
+          <text x="24" y="276" class="rotulo-s"><tspan class="rotulo">Dónde vive cada cosa:</tspan>  la Carpeta, en el navegador y su almacenamiento local  ·  el caso y la casilla, en el servicio  ·  al cerrar, queda solo estadística sin datos personales</text>
+        </svg>
+      </div>
+      <figcaption>El plazo se fija <b>al iniciar el encargo</b>, no al terminarlo: la persona ve la
+      fecha exacta y la cuenta regresiva en su enlace. Ese enlace pide además una clave que va en el
+      mismo correo, para que reenviarlo por error no abra el caso.</figcaption>
+    </figure>
+  </section>
+
+  <!-- ================= LÁMINA 4 ================= -->
+  <section class="lamina">
+    <div class="cajetin">
+      <span class="num">Lámina 4 / 4</span>
+      <h2>Por qué tres fichas distintas caben en una Carpeta</h2>
+      <p class="claim">Cada centro escribe distinto. <b>El vocabulario canónico es lo que permite
+      agrupar</b> — sin él la Carpeta muestra doce diagnósticos a quien tiene cuatro.</p>
+    </div>
+    <figure>
+      <div class="lienzo">
+        <svg viewBox="0 0 980 330" role="img" aria-label="Tres centros con vocabularios distintos convergen a un valor canónico que permite agrupar los conceptos repetidos.">
+          <defs>
+            <marker id="f4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="currentColor"/>
+            </marker>
+            <marker id="f4v" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,1 L9,5 L0,9 z" fill="var(--verde)"/>
+            </marker>
+          </defs>
+
+          <text x="24" y="30" class="banda" fill="var(--musgo)">Lo que llega</text>
+          <text x="392" y="30" class="banda" fill="var(--musgo)">Claude Haiku</text>
+          <text x="700" y="30" class="banda" fill="var(--verde)">Lo que se entrega</text>
+
+          <!-- entradas -->
+          <rect x="24" y="48" width="230" height="46" rx="3" class="caja"/>
+          <text x="38" y="70" class="rotulo-s">Centro A · «DM2»</text>
+          <text x="38" y="87" class="rotulo-s">«COZAAR» · 7705 /mm³</text>
+
+          <rect x="24" y="112" width="230" height="46" rx="3" class="caja"/>
+          <text x="38" y="134" class="rotulo-s">Centro B · «Diabetes tipo II»</text>
+          <text x="38" y="151" class="rotulo-s">«Losartán potásico» · 14.2 10³/µL</text>
+
+          <rect x="24" y="176" width="230" height="46" rx="3" class="caja"/>
+          <text x="38" y="198" class="rotulo-s">Centro C · foto del papel</text>
+          <text x="38" y="215" class="rotulo-s">escaneada, torcida</text>
+
+          <!-- proceso -->
+          <rect x="308" y="88" width="200" height="96" rx="3" class="caja"/>
+          <text x="322" y="114" class="rotulo">Extracción</text>
+          <text x="322" y="134" class="rotulo-s">vocabulario canónico</text>
+          <text x="322" y="152" class="rotulo-s">explícito en el prompt</text>
+          <text x="322" y="172" class="rotulo-s">catálogo cerrado + cuotas</text>
+
+          <line x1="254" y1="71" x2="306" y2="112" class="eje" marker-end="url(#f4)"/>
+          <line x1="254" y1="135" x2="306" y2="135" class="eje" marker-end="url(#f4)"/>
+          <line x1="254" y1="199" x2="306" y2="160" class="eje" marker-end="url(#f4)"/>
+
+          <!-- canónico -->
+          <rect x="556" y="88" width="180" height="96" rx="3" class="caja-verde"/>
+          <text x="570" y="114" class="rotulo-v">Valor canónico</text>
+          <text x="570" y="134" class="rotulo-s">Diabetes mellitus tipo 2</text>
+          <text x="570" y="152" class="rotulo-s">Losartán</text>
+          <text x="570" y="170" class="rotulo-s">7.705 y 14.2 en 10³/µL</text>
+          <line x1="508" y1="136" x2="554" y2="136" class="eje-v" marker-end="url(#f4v)"/>
+
+          <!-- carpeta -->
+          <rect x="784" y="88" width="172" height="96" rx="3" class="caja-verde"/>
+          <text x="798" y="114" class="rotulo-v">Carpeta de Salud</text>
+          <text x="798" y="134" class="rotulo-s">agrupada por concepto</text>
+          <text x="798" y="152" class="rotulo-s">«3 centros coinciden»</text>
+          <text x="798" y="170" class="rotulo-s">PDF + originales</text>
+          <line x1="736" y1="136" x2="782" y2="136" class="eje-v" marker-end="url(#f4v)"/>
+
+          <!-- trazabilidad -->
+          <path d="M870 184 L870 236 L139 236 L139 222" class="eje-v punteado" marker-end="url(#f4v)"/>
+          <text x="360" y="256" class="rotulo-s">cada valor de la Carpeta queda enlazado al documento del que salió</text>
+
+          <!-- honestidad sobre la cascada -->
+          <line x1="24" y1="282" x2="956" y2="282" class="tenue"/>
+          <text x="24" y="306" class="rotulo-s"><tspan class="rotulo-o">Aparte, no en la demo:</tspan>  la cascada de verificación (un verificador coteja valor por valor y escala a Sonnet u Opus) corre como pipeline propio, medida contra el dataset sintético.</text>
+        </svg>
+      </div>
+      <figcaption>Sobre fichas digitales la extracción acertó <b>100% en diagnósticos, medicamentos
+      y analitos</b>; sobre fotos degradadas del papel, 100% / 100% / 92%. Son cinco documentos: es
+      señal, no una cifra estadística, y así se presenta.</figcaption>
+    </figure>
+  </section>
+
+  <footer class="pie">
+    <span>Equipo LOS INMORTALES · Romina Nallar, Ignacio Gálvez, Mauro Rojas, Cristian Brown</span>
+    <span>Todo el contenido clínico de la demostración es sintético</span>
+  </footer>
+</div>
+
+</body>
+</html>

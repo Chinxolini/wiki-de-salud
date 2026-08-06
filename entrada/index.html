@@ -587,7 +587,7 @@
      el commit vivo lo pregunta a /api/version, para saber si lo que esta arriba es
      efectivamente esta version y no un despliegue anterior. -->
 <p class="sello" id="sello">
-  <span id="selloFecha">versión 2026-08-06 02:47</span><span id="selloSha"></span>
+  <span id="selloFecha">versión 2026-08-06 03:02</span><span id="selloSha"></span>
 </p>
 
 <script>
@@ -1267,6 +1267,11 @@ async function mostrarResultado(){
   // marcó "no sé": sin ella no hay dónde reconstruir dónde se ha atendido.
   try{
     if(!sel.length && !sinCentrosClaros) throw new Error("sin centros marcados ni 'no sé': no hay para qué provisionar casilla");
+    // mostrarResultado() corre en la etapa D, DESPUES del paso 5 (acompañamiento): el orden
+    // real es paso4 -> mostrarCierre -> paso5(elige acompañamiento) -> etapaC -> etapaD
+    // (aca). Cuando se arma este body, datos.acompLegal/acompSalud ya quedaron fijados en
+    // finalizarAcompanamiento(), asi que la eleccion SI alcanza a viajar en esta misma
+    // llamada — no hizo falta mover la provision ni agregar una segunda llamada.
     const r = await fetch("/api/casilla", {method:"POST",
       headers:{"content-type":"application/json"},
       body: JSON.stringify({
@@ -1277,6 +1282,8 @@ async function mostrarResultado(){
         periodo: periodo || "toda la historia",
         mandato_texto: mandatoTexto || "",
         firma: nombre,
+        // Minimización: solo viajan los dos booleanos de la elección, nunca datos clínicos ni RUT.
+        acompanamiento: {legal: !!datos.acompLegal, salud: !!datos.acompSalud},
       })});
     const data = await r.json().catch(()=>null);
     if(r.ok && data && !data.fallback && data.direccion){

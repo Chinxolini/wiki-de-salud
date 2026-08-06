@@ -202,8 +202,11 @@ function textoCorto(v, max) {
 }
 
 // Valida y devuelve el payload limpio para "crear-y-provisionar", o null si algo no calza.
+// "acompanamiento" es opcional y, si viene, se exige objeto con exactamente {legal, salud}
+// booleanos: no se reenvía crudo al PHP, así que cualquier otra forma se descarta entera
+// (no se recorta a los campos válidos) en vez de dejar pasar valores no booleanos.
 function validarCrear(body) {
-  const { email, nombre, centros, periodo, mandato_texto, firma } = body || {};
+  const { email, nombre, centros, periodo, mandato_texto, firma, acompanamiento } = body || {};
   if (!textoCorto(email, 254) || !RE_EMAIL.test(email.trim())) return null;
   if (!textoCorto(nombre, 80)) return null;
   if (!Array.isArray(centros) || centros.length === 0 || centros.length > 5) return null;
@@ -211,6 +214,14 @@ function validarCrear(body) {
   if (!textoCorto(periodo, 120)) return null;
   if (!textoCorto(mandato_texto, 4000)) return null;
   if (!textoCorto(firma, 80)) return null;
+  let acomp = { legal: false, salud: false };
+  if (acompanamiento !== undefined) {
+    if (
+      typeof acompanamiento !== "object" || acompanamiento === null || Array.isArray(acompanamiento) ||
+      typeof acompanamiento.legal !== "boolean" || typeof acompanamiento.salud !== "boolean"
+    ) return null;
+    acomp = { legal: acompanamiento.legal, salud: acompanamiento.salud };
+  }
   return {
     email: email.trim(),
     nombre: nombre.trim(),
@@ -218,6 +229,7 @@ function validarCrear(body) {
     periodo: periodo.trim(),
     mandato_texto: mandato_texto.trim(),
     firma: firma.trim(),
+    acompanamiento: acomp,
   };
 }
 
