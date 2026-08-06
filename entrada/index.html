@@ -432,7 +432,7 @@
      el commit vivo lo pregunta a /api/version, para saber si lo que esta arriba es
      efectivamente esta version y no un despliegue anterior. -->
 <p class="sello" id="sello">
-  <span id="selloFecha">versión 2026-08-06 00:18</span><span id="selloSha"></span>
+  <span id="selloFecha">versión 2026-08-06 00:31</span><span id="selloSha"></span>
 </p>
 
 <script>
@@ -714,7 +714,11 @@ $("#btnSimular").addEventListener("click", async ()=>{
     await pausa(600);
     $("#f").requestSubmit();
 
-    await pausa(900);
+    // Esperar a que la pantalla final este montada, no un tiempo fijo: provisionar la
+    // casilla real puede demorar varios segundos y arrancar la demo antes desordena el
+    // timeline.
+    for(let i = 0; i < 40 && !$("#salida").classList.contains("activo"); i++) await pausa(250);
+    await pausa(400);
     $("#btnDemo")?.click();
   } finally {
     boton.disabled = false;
@@ -741,6 +745,10 @@ $("#f").addEventListener("submit", e=>{
 
 async function mostrarResultado(){
   const {correo, nombre, sel, archivos, periodo, mandatoTexto, noSeCentros: sinCentrosClaros} = datos;
+  // El timeline se limpia ACA, antes de cualquier await. Si se limpiara despues de
+  // provisionar la casilla, la demo -que puede arrancar mientras esa llamada viaja- ya
+  // habria registrado respuestas y el reinicio se las comeria: el juez veria 2 de 3.
+  respuestasRecibidas = []; carpetaLista = false;
   let casilla = nombre.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"")
                     .replace(/[^a-z\s]/g,"").trim().split(/\s+/).slice(0,2).join(".") + "@chiledao.cl";
   let casillaEsDemo = true;
@@ -811,8 +819,8 @@ async function mostrarResultado(){
     body: JSON.stringify({accion:"enviar-acuerdo", email: correo, texto: textoConstancia})})
     .catch(()=>{ /* fire-and-forget: sin efecto visible si falla */ });
 
-  estadoTimeline = { casilla, nCentros: sel.length, sinCentrosClaros };
-  respuestasRecibidas = []; carpetaLista = false;
+  estadoTimeline = { casilla, nCentros: sel.length, sinCentrosClaros,
+                     nombresCentros: sel.map(p=>p.nombre) };
   renderTimeline();
 
   $("#salida").classList.add("activo");
@@ -840,28 +848,48 @@ function resumenRegistro(r){
   return partes.length ? partes.join(", ") : "sin hallazgos nuevos";
 }
 function renderTimeline(){
-  const {casilla, nCentros, sinCentrosClaros} = estadoTimeline;
-  const horaFirma = new Date().toLocaleTimeString("es-CL");
+  const {casilla, nCentros, sinCentrosClaros, nombresCentros = []} = estadoTimeline;
+  const horaFirma = new Date().toLocaleTimeString("es-CL",{hour:"2-digit",minute:"2-digit"});
   const hitos = [];
   hitos.push({hecho:true, fecha:"Hoy", titulo:"Firmaste el poder",
-    detalle:`A las ${horaFirma}. Constancia enviada a tu correo.`});
+    detalle:`A las ${horaFirma}. Copia del mandato enviada a tu correo.`});
   hitos.push({hecho:true, fecha:"Hoy", titulo:"Se creó tu casilla administradora",
     detalle:`<code>${esc(casilla)}</code> — se comunica con cada centro, recibe la información y te la reenvía cuando corresponde.`});
   if(nCentros){
     hitos.push({hecho:true, fecha:"Hoy", titulo:`Solicitudes enviadas a ${nCentros} centro${nCentros>1?"s":""}`,
-      detalle:"Invocando el art. 13 de la Ley 20.584."});
+      detalle:`Invocando el art. 13 de la Ley 20.584.` +
+        (nombresCentros.length ? ` <span class="orig">${nombresCentros.map(esc).join(" · ")}</span>` : "")});
   } else if(sinCentrosClaros){
     hitos.push({hecho:true, fecha:"Hoy", titulo:"Empezamos a reconstruir dónde te has atendido",
       detalle:"Con tu previsión y tu casilla ya provisionadas."});
   }
+  // Las respuestas se acumulan bajo un solo hito. El titulo cambia con el conteo: decir
+  // "primera respuesta" cuando ya llegaron tres seria mentirle al que esta mirando.
+  const n = respuestasRecibidas.length;
   const respHtml = respuestasRecibidas.map(r=>
     `<div class="subhito">El <b>${r.fecha}</b> llegó la respuesta de <b>${esc(r.centro)}</b>: ${esc(r.resumen)}.</div>`).join("");
-  hitos.push({hecho: respuestasRecibidas.length>0,
-    fecha: respuestasRecibidas[0]?.fecha || "Semana 1", titulo:"Primera respuesta recibida",
-    detalle: respHtml || "Te avisamos por correo apenas llegue la primera."});
-  hitos.push({hecho:false, fecha:"Semana 3", titulo:"Un centro no responde: reclamamos por ti",
-    detalle:"Si algún prestador se atrasa o niega la copia, lo gestionamos nosotros; tú no vuelves a escribirle."});
-  hitos.push({hecho: carpetaLista, fecha: carpetaLista ? "Hoy" : "Mes 1",
+  hitos.push({hecho: n>0,
+    fecha: respuestasRecibidas[0]?.fecha || "Semana 1",
+    titulo: n>1 ? `Respuestas recibidas (${n})` : "Primera respuesta recibida",
+    detalle: (respHtml && respHtml +
+        `<div class="subhito orig">Las fichas de esta demostración son sintéticas, de tres centros
+         de ejemplo: no corresponden a los que marcaste ni a ninguna persona real.</div>`)
+      || "Te avisamos por correo apenas llegue la primera."});
+
+  // Si todos respondieron, este hito no puede seguir diciendo que uno no respondio.
+  const faltanRespuestas = !carpetaLista || n === 0;
+  hitos.push(faltanRespuestas
+    ? {hecho:false, fecha:"Semana 3", titulo:"Si un centro no responde, reclamamos por ti",
+       detalle:"Si algún prestador se atrasa o niega la copia, lo gestionamos nosotros; tú no vuelves a escribirle."}
+    : {hecho:true, fecha: respuestasRecibidas[n-1].fecha, titulo:"Todos los centros respondieron",
+       detalle:"No hubo que reclamar. Si alguno se hubiera atrasado o negado la copia, lo gestionábamos nosotros."});
+
+  // La Carpeta no puede estar lista "hoy" si la ultima respuesta llega en dos semanas:
+  // se fecha dos dias despues de lo ultimo que llego.
+  const fechaCarpeta = carpetaLista && n
+    ? fechaSim(7*n + 2)
+    : "Mes 1";
+  hitos.push({hecho: carpetaLista, fecha: fechaCarpeta,
     titulo:"Tu Carpeta de Salud está lista",
     detalle:"Se te avisa por correo para descargarla, junto con los documentos originales."});
   hitos.push({hecho:false, fecha:"Al cerrar el caso", titulo:"Todo se borra y te llega la constancia",
