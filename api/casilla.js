@@ -97,6 +97,56 @@ const RE_CASILLA = /^[a-z0-9._-]+$/;
 // Clave única compartida por el equipo (no una por caso, como claveCaso): el panel es
 // una vista de gestión interna, no algo que reciba cada titular por correo. Se compara
 // contra process.env.PANEL_CLAVE en tiempo constante, igual que el resto del archivo.
+// Enmascarado de datos personales para el panel abierto. Deja legible lo que sirve para
+// la gestión (de qué dominio es, la inicial del nombre) y oculta lo que identifica.
+function ocultarCorreo(correo) {
+  if (typeof correo !== "string" || !correo.includes("@")) return correo || null;
+  const [usuario, dominio] = correo.split("@");
+  const visible = usuario.slice(0, 1);
+  return `${visible}${"•".repeat(Math.max(3, usuario.length - 1))}@${dominio}`;
+}
+
+function ocultarNombre(nombre) {
+  if (typeof nombre !== "string" || !nombre.trim()) return nombre || null;
+  // Nexos como "de", "del", "la" no aportan inicial y afean el resultado ("Paciente d. D.").
+  const NEXOS = new Set(["de", "del", "la", "las", "los", "y", "da", "van", "von"]);
+  const partes = nombre.trim().split(/\s+/).filter(p => !NEXOS.has(p.toLowerCase()));
+  if (partes.length === 0) return null;
+  return partes[0] + (partes.length > 1 ? " " + partes[partes.length - 1][0].toUpperCase() + "." : "");
+}
+
+// La casilla se deriva del correo de la persona (ignacio.galvez -> ignacio.galvez4@…),
+// así que mostrarla entera delata la identidad aunque el correo vaya enmascarado.
+function ocultarCasilla(direccion) {
+  if (typeof direccion !== "string" || !direccion.includes("@")) return direccion || null;
+  const [usuario, dominio] = direccion.split("@");
+  const sufijo = (usuario.match(/\d+$/) || [""])[0];   // el número que la hace única sí sirve
+  return `${usuario.slice(0, 1)}${"•".repeat(Math.max(3, usuario.length - 1 - sufijo.length))}${sufijo}@${dominio}`;
+}
+
+function enmascararCasos(data) {
+  if (!data || !Array.isArray(data.casos)) return data;
+  return {
+    ...data,
+    casos: data.casos.map(c => ({
+      ...c,
+      nombre: ocultarNombre(c.nombre),
+      email: ocultarCorreo(c.email),
+      direccion: ocultarCasilla(c.direccion),
+    })),
+    enmascarado: true,
+  };
+}
+
+function enmascararCorreos(data) {
+  if (!data || !Array.isArray(data.mensajes)) return data;
+  return {
+    ...data,
+    mensajes: data.mensajes.map(m => ({ ...m, de: ocultarCorreo(m.de) })),
+    enmascarado: true,
+  };
+}
+
 function panelClaveValida(clave) {
   const esperada = process.env.PANEL_CLAVE || "";
   if (!esperada || typeof clave !== "string") return false;
@@ -274,13 +324,13 @@ export default async function handler(req, res) {
   // en cPanel. Si dependiera del flag, apagar la provisión para el público del evento
   // dejaría también ciego al equipo justo cuando más necesita mirar el panel.
   if (accion === "panel-listar" || accion === "panel-correos") {
+    // El panel es abierto: el equipo entra sin fricción y el juez lo ve al final del
+    // recorrido. Pero lista casos de personas reales -quien pruebe la demo escribe su
+    // correo-, así que sin clave los datos personales van enmascarados. La operación
+    // completa (estados, qué llegó, qué vence) se ve igual: es lo que el panel debe
+    // mostrar. Con la clave del equipo se ve el dato sin enmascarar.
     const { clave } = req.body || {};
-    if (!process.env.PANEL_CLAVE) {
-      return res.status(500).json({ error: "Falta configurar la clave del panel en el servidor." });
-    }
-    if (!panelClaveValida(clave)) {
-      return res.status(401).json({ error: "Clave incorrecta." });
-    }
+    const completo = panelClaveValida(clave);
 
     const base = process.env.CASILLAS_API_URL;
     const apiKey = process.env.CASILLAS_API_KEY;
@@ -300,7 +350,7 @@ export default async function handler(req, res) {
         if (!r.ok || !sobre || sobre.ok === false) {
           return res.status(502).json({ error: "No se pudo obtener el listado de casos.", fallback: true });
         }
-        return res.status(200).json(sobre.data);
+        return res.status(200).json(completo ? sobre.data : enmascararCasos(sobre.data));
       } catch {
         return res.status(502).json({ error: "El servicio de casillas no respondió.", fallback: true });
       } finally {
@@ -309,6 +359,14 @@ export default async function handler(req, res) {
     }
 
     // accion === "panel-correos"
+    // Leer el buzón de alguien es lo más sensible que hace el panel: el listado puede ser
+    // abierto (estados y plazos, con los datos personales enmascarados), pero el contenido
+    // de los correos exige la clave del equipo.
+    if (!completo) {
+      return res.status(401).json({
+        error: "El contenido de una casilla solo se abre con la clave del equipo.",
+      });
+    }
     const { casilla } = req.body || {};
     if (typeof casilla !== "string" || !RE_CASILLA.test(casilla)) {
       return res.status(400).json({ error: "Casilla no válida." });
@@ -327,7 +385,7 @@ export default async function handler(req, res) {
       if (!r.ok || !sobre || sobre.ok === false) {
         return res.status(502).json({ error: "No se pudo consultar la casilla.", fallback: true });
       }
-      return res.status(200).json(sobre.data);
+      return res.status(200).json(completo ? sobre.data : enmascararCorreos(sobre.data));
     } catch {
       return res.status(502).json({ error: "El servicio de casillas no respondió.", fallback: true });
     } finally {

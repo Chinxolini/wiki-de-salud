@@ -103,8 +103,11 @@
     <div>
       <h1>Panel de seguimiento</h1>
       <p class="lede" style="margin-bottom:14px">Qué casos hay, en qué estado, y a quién hay que reclamar.</p>
+      <p class="lede" id="avisoEnmascarado" hidden style="margin-bottom:14px;font-size:.85rem">
+        Los nombres y correos van <b>enmascarados</b>: para gestionar un caso basta saber en qué
+        va, no quién es. El equipo los ve completos con la clave del panel.</p>
     </div>
-    <button class="sec" id="btnSalir">Cerrar sesión del panel</button>
+    <button class="sec" id="btnSalir" hidden>Salir de la vista completa</button>
   </div>
 
   <div class="resumen" id="resumen"></div>
@@ -232,13 +235,12 @@ async function cargarPanel(){
 
   const res = await llamar("panel-listar");
 
-  if(res.status === 401){
-    mostrarPedirClave("Esa clave no es correcta.");
-    return false;
-  }
   if(res.status === 500){
-    mostrarPedirClave(res.datos?.error || "El panel no está configurado en el servidor.");
-    return false;
+    $("#cargando").hidden = true;
+    $("#panel").hidden = false;
+    $("#errorPanel").hidden = false;
+    $("#errorPanel").textContent = res.datos?.error || "El panel no está configurado en el servidor.";
+    return true;
   }
   if(!res.ok || !res.datos){
     $("#cargando").hidden = true;
@@ -250,6 +252,11 @@ async function cargarPanel(){
 
   CASOS = Array.isArray(res.datos.casos) ? res.datos.casos : [];
   RESUMEN = res.datos.resumen || null;
+  // El servidor avisa si entregó los datos enmascarados; el aviso y el botón de salir
+  // de la vista completa se muestran en consecuencia.
+  const enmascarado = res.datos.enmascarado === true;
+  $("#avisoEnmascarado").hidden = !enmascarado;
+  $("#btnSalir").hidden = enmascarado;
 
   $("#cargando").hidden = true;
   $("#panel").hidden = false;
@@ -349,7 +356,9 @@ async function abrirDetalle(caso){
   const res = await llamar("panel-correos", { casilla });
 
   if(res.status === 401){
-    $("#dMensajes").innerHTML = `<p class="hint">La sesión del panel expiró. Vuelve a entrar.</p>`;
+    $("#dMensajes").innerHTML = `<p class="hint">El contenido de una casilla solo se abre con la
+      clave del equipo: es correo de una persona. El estado del caso y sus plazos se ven igual
+      en la tabla.</p>`;
     return;
   }
   if(res.status === 501){
@@ -382,15 +391,15 @@ async function abrirDetalle(caso){
 $("#btnCerrarDetalle").addEventListener("click", () => { $("#detalle").hidden = true; });
 
 // ---------- arranque ----------
+// El panel es abierto: se entra sin clave y se ve la gestión completa, con los datos
+// personales enmascarados. La clave (por ?clave= o guardada en la sesión) solo sirve
+// para verlos sin enmascarar; nunca es un requisito para entrar.
 (async () => {
-  const clave = sessionStorage.getItem(CLAVE_KEY);
-  if(clave){
-    $("#pedirClave").hidden = true;
-    $("#cargando").hidden = false;
-    await cargarPanel();
-  }else{
-    mostrarPedirClave();
-  }
+  const claveEnlace = new URLSearchParams(location.search).get("clave");
+  if(claveEnlace) sessionStorage.setItem(CLAVE_KEY, claveEnlace);
+  $("#pedirClave").hidden = true;
+  $("#cargando").hidden = false;
+  await cargarPanel();
 })();
 </script>
 </body>
