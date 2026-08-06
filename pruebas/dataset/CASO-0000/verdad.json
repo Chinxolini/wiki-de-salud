@@ -1,0 +1,280 @@
+{
+  "caso_id": "CASO-0000",
+  "paciente_ref": "PAC-9000",
+  "centros": [
+    "centro_a",
+    "centro_c"
+  ],
+  "descripcion": "Casos difíciles presentes: conversión de unidades de leucocitos (si incluye centro_a y centro_c), nombre comercial vs. principio activo (losartán), mismo analito con nombre distinto por centro, valor ilegible en centro_a (creatinina).",
+  "documentos": {
+    "ficha-centro_a.html": {
+      "paciente_ref": "PAC-9000",
+      "centro_origen": "Centro Médico San Rafael",
+      "documento_ref": "ficha-centro_a.html",
+      "extraccion_fallida": false,
+      "diagnosticos": [
+        {
+          "fecha": null,
+          "nombre_original": "DM2",
+          "nombre_canonico": "Diabetes mellitus tipo 2",
+          "estado": "activo",
+          "confianza": "alta"
+        },
+        {
+          "fecha": null,
+          "nombre_original": "HTA esencial",
+          "nombre_canonico": "Hipertensión arterial esencial",
+          "estado": "activo",
+          "confianza": "alta"
+        }
+      ],
+      "alergias": [],
+      "medicamentos": [
+        {
+          "nombre_original": "COZAAR 50 mg",
+          "principio_activo": "Losartán",
+          "dosis": "50 mg",
+          "frecuencia": "1 comp. al día",
+          "vigente": true,
+          "confianza": "alta"
+        },
+        {
+          "nombre_original": "METFORMINA LCH 850 mg",
+          "principio_activo": "Metformina",
+          "dosis": "850 mg",
+          "frecuencia": "1 comp. c/12 h",
+          "vigente": true,
+          "confianza": "alta"
+        }
+      ],
+      "atenciones": [],
+      "procedimientos": [],
+      "imagenes": [],
+      "examenes": [
+        {
+          "fecha": null,
+          "tipo_examen": "Laboratorio general",
+          "analitos": [
+            {
+              "nombre_original": "Glicemia en ayunas",
+              "nombre_canonico": "Glucosa en ayunas",
+              "valor": 96,
+              "unidad": "mg/dL",
+              "valor_canonico": 96,
+              "unidad_canonica": "mg/dL",
+              "rango_referencia": "70 – 100",
+              "fuera_de_rango": false,
+              "confianza": "alta"
+            },
+            {
+              "nombre_original": "Hemoglobina",
+              "nombre_canonico": "Hemoglobina",
+              "valor": 12.0,
+              "unidad": "g/dL",
+              "valor_canonico": 12.0,
+              "unidad_canonica": "g/dL",
+              "rango_referencia": "12.0 – 16.0",
+              "fuera_de_rango": false,
+              "confianza": "alta"
+            },
+            {
+              "nombre_original": "Colesterol total",
+              "nombre_canonico": "Colesterol total",
+              "valor": 234,
+              "unidad": "mg/dL",
+              "valor_canonico": 234,
+              "unidad_canonica": "mg/dL",
+              "rango_referencia": "< 200",
+              "fuera_de_rango": true,
+              "confianza": "alta"
+            },
+            {
+              "nombre_original": "Creatinina sérica",
+              "nombre_canonico": "Creatinina",
+              "valor": null,
+              "unidad": null,
+              "valor_canonico": null,
+              "unidad_canonica": null,
+              "rango_referencia": "0.6 – 1.3",
+              "fuera_de_rango": null,
+              "confianza": "baja"
+            },
+            {
+              "nombre_original": "Recuento de leucocitos",
+              "nombre_canonico": "Leucocitos",
+              "valor": 12435,
+              "unidad": "/mm³",
+              "valor_canonico": 12.44,
+              "unidad_canonica": "10³/µL",
+              "rango_referencia": "4.500 – 11.000",
+              "fuera_de_rango": true,
+              "confianza": "alta"
+            }
+          ]
+        }
+      ],
+      "campos_ilegibles": [
+        "Creatinina sérica (Centro Médico San Rafael) — valor ilegible en el documento original"
+      ],
+      "notas_extraccion": ""
+    },
+    "ficha-centro_c.html": {
+      "paciente_ref": "PAC-9000",
+      "centro_origen": "Red de Salud Cordillera",
+      "documento_ref": "ficha-centro_c.html",
+      "extraccion_fallida": false,
+      "diagnosticos": [
+        {
+          "fecha": null,
+          "nombre_original": "diabetes tipo II",
+          "nombre_canonico": "Diabetes mellitus tipo 2",
+          "estado": "activo",
+          "confianza": "alta"
+        },
+        {
+          "fecha": null,
+          "nombre_original": "HTA",
+          "nombre_canonico": "Hipertensión arterial esencial",
+          "estado": "activo",
+          "confianza": "alta"
+        }
+      ],
+      "alergias": [],
+      "medicamentos": [
+        {
+          "nombre_original": "losartan potasico 50",
+          "principio_activo": "Losartán",
+          "dosis": "50 mg",
+          "frecuencia": "1 al día",
+          "vigente": true,
+          "confianza": "alta"
+        },
+        {
+          "nombre_original": "metformina 850",
+          "principio_activo": "Metformina",
+          "dosis": "850 mg",
+          "frecuencia": "1 cada 12 hrs",
+          "vigente": true,
+          "confianza": "alta"
+        }
+      ],
+      "atenciones": [],
+      "procedimientos": [],
+      "imagenes": [],
+      "examenes": [
+        {
+          "fecha": null,
+          "tipo_examen": "Laboratorio general",
+          "analitos": [
+            {
+              "nombre_original": "GLUCOSA (ayuno)",
+              "nombre_canonico": "Glucosa en ayunas",
+              "valor": 96,
+              "unidad": "mg/dL",
+              "valor_canonico": 96,
+              "unidad_canonica": "mg/dL",
+              "rango_referencia": "70-99",
+              "fuera_de_rango": false,
+              "confianza": "alta"
+            },
+            {
+              "nombre_original": "HGB",
+              "nombre_canonico": "Hemoglobina",
+              "valor": 12.0,
+              "unidad": "g/dL",
+              "valor_canonico": 12.0,
+              "unidad_canonica": "g/dL",
+              "rango_referencia": "13.0-17.0 (H) / 12.0-15.0 (M)",
+              "fuera_de_rango": false,
+              "confianza": "alta"
+            },
+            {
+              "nombre_original": "COL-TOTAL",
+              "nombre_canonico": "Colesterol total",
+              "valor": 234,
+              "unidad": "mg/dL",
+              "valor_canonico": 234,
+              "unidad_canonica": "mg/dL",
+              "rango_referencia": "Deseable: <200",
+              "fuera_de_rango": true,
+              "confianza": "alta"
+            },
+            {
+              "nombre_original": "CREA",
+              "nombre_canonico": "Creatinina",
+              "valor": 0.6,
+              "unidad": "mg/dL",
+              "valor_canonico": 0.6,
+              "unidad_canonica": "mg/dL",
+              "rango_referencia": "0.7-1.4",
+              "fuera_de_rango": false,
+              "confianza": "alta"
+            },
+            {
+              "nombre_original": "WBC",
+              "nombre_canonico": "Leucocitos",
+              "valor": 12.4,
+              "unidad": "10^3/uL",
+              "valor_canonico": 12.44,
+              "unidad_canonica": "10³/µL",
+              "rango_referencia": "4.5-11.0",
+              "fuera_de_rango": true,
+              "confianza": "alta"
+            }
+          ]
+        }
+      ],
+      "campos_ilegibles": [],
+      "notas_extraccion": ""
+    }
+  },
+  "canonico_esperado": {
+    "diagnosticos": [
+      {
+        "nombre_canonico": "Diabetes mellitus tipo 2",
+        "presente_en_centros": 2
+      },
+      {
+        "nombre_canonico": "Hipertensión arterial esencial",
+        "presente_en_centros": 2
+      }
+    ],
+    "medicamentos": [
+      {
+        "principio_activo": "Losartán",
+        "presente_en_centros": 2
+      },
+      {
+        "principio_activo": "Metformina",
+        "presente_en_centros": 2
+      }
+    ],
+    "examenes_analitos": [
+      {
+        "nombre_canonico": "Glucosa en ayunas",
+        "unidad_canonica": "mg/dL",
+        "valor_canonico": 96
+      },
+      {
+        "nombre_canonico": "Hemoglobina",
+        "unidad_canonica": "g/dL",
+        "valor_canonico": 12.0
+      },
+      {
+        "nombre_canonico": "Colesterol total",
+        "unidad_canonica": "mg/dL",
+        "valor_canonico": 234
+      },
+      {
+        "nombre_canonico": "Creatinina",
+        "unidad_canonica": "mg/dL",
+        "valor_canonico": null
+      },
+      {
+        "nombre_canonico": "Leucocitos",
+        "unidad_canonica": "10³/µL",
+        "valor_canonico": 12.44
+      }
+    ]
+  }
+}

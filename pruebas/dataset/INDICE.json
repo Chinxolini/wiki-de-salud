@@ -1,0 +1,96 @@
+{
+  "seed": 42,
+  "n": 6,
+  "casos": [
+    {
+      "caso_id": "CASO-0000",
+      "paciente_ref": "PAC-9000",
+      "centros": [
+        "centro_a",
+        "centro_c"
+      ],
+      "archivos": [
+        "ficha-centro_a.html",
+        "ficha-centro_c.html"
+      ],
+      "tiene_ilegible": true,
+      "carpeta": "CASO-0000"
+    },
+    {
+      "caso_id": "CASO-0001",
+      "paciente_ref": "PAC-9001",
+      "centros": [
+        "centro_a",
+        "centro_c",
+        "centro_b"
+      ],
+      "archivos": [
+        "ficha-centro_a.html",
+        "ficha-centro_c.html",
+        "ficha-centro_b.html"
+      ],
+      "tiene_ilegible": false,
+      "carpeta": "CASO-0001"
+    },
+    {
+      "caso_id": "CASO-0002",
+      "paciente_ref": "PAC-9002",
+      "centros": [
+        "centro_a",
+        "centro_b",
+        "centro_c"
+      ],
+      "archivos": [
+        "ficha-centro_a.html",
+        "ficha-centro_b.html",
+        "ficha-centro_c.html"
+      ],
+      "tiene_ilegible": true,
+      "carpeta": "CASO-0002"
+    },
+    {
+      "caso_id": "CASO-0003",
+      "paciente_ref": "PAC-9003",
+      "centros": [
+        "centro_b",
+        "centro_a"
+      ],
+      "archivos": [
+        "ficha-centro_b.html",
+        "ficha-centro_a.html"
+      ],
+      "tiene_ilegible": false,
+      "carpeta": "CASO-0003"
+    },
+    {
+      "caso_id": "CASO-0004",
+      "paciente_ref": "PAC-9004",
+      "centros": [
+        "centro_c",
+        "centro_a",
+        "centro_b"
+      ],
+      "archivos": [
+        "ficha-centro_c.html",
+        "ficha-centro_a.html",
+        "ficha-centro_b.html"
+      ],
+      "tiene_ilegible": false,
+      "carpeta": "CASO-0004"
+    },
+    {
+      "caso_id": "CASO-0005",
+      "paciente_ref": "PAC-9005",
+      "centros": [
+        "centro_a",
+        "centro_c"
+      ],
+      "archivos": [
+        "ficha-centro_a.html",
+        "ficha-centro_c.html"
+      ],
+      "tiene_ilegible": false,
+      "carpeta": "CASO-0005"
+    }
+  ]
+}

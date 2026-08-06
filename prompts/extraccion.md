@@ -25,12 +25,31 @@ Cada analito lleva dos nombres:
 - `nombre_original`: exactamente como aparece escrito en el documento.
 - `nombre_canonico`: el nombre normalizado.
 
-Ejemplos: "Glicemia en ayunas" y "Glucosa basal" → ambos `nombre_canonico:
-"glucosa_ayunas"`. "Hemoglobina glicosilada", "HbA1c" y "Hb glicada" →
-`"hemoglobina_glicosilada"`.
-
 Conservar el original es lo que hace la trazabilidad auditable. Normalizar es lo
 que permite comparar dos centros distintos en el mismo eje.
+
+**CRÍTICO — procesas un documento a la vez, sin ver los demás, pero tu salida se une
+con la de otros centros.** Por eso el valor canónico NO puede depender de cómo venga
+escrito en este documento: tiene que ser idéntico al que produzcas para el mismo
+concepto en cualquier otro. Usa exactamente este vocabulario, con estas mayúsculas y
+tildes, en texto legible (nunca en minúscula_con_guiones):
+
+DIAGNÓSTICOS:
+- "Diabetes mellitus tipo 2" ← DM2, DM tipo 2, diabetes tipo II, diabetes mellitus 2
+- "Hipertensión arterial esencial" ← HTA, HTA esencial, hipertensión esencial
+- "Dislipidemia" ← dislipidemia mixta, hipercolesterolemia, DLP
+- "Artrosis" ← artrosis, gonartrosis, espondiloartrosis (la región va en el original)
+
+MEDICAMENTOS — `principio_activo` es SIEMPRE el principio activo solo, sin sal, sin
+dosis, sin marca y en singular. Nunca el nombre comercial:
+- "Losartán" ← COZAAR, Losartán potásico, losartan potasico
+- "Metformina" ← METFORMINA LCH, Glafornil, metformina clorhidrato
+- "Atorvastatina", "Paracetamol" ← ídem, forma simple
+
+EXÁMENES — `analito_canonico` en texto legible:
+- "Glucosa en ayunas" ← Glicemia en ayunas, Glucosa basal, GLUCOSA (ayuno)
+- "Hemoglobina glicosilada" ← HbA1c, Hb glicada, Hemoglobina A1c
+- "Hemoglobina" · "Colesterol total" · "Creatinina" · "Leucocitos"
 
 ## Unidades
 
@@ -41,12 +60,17 @@ distintas. Por eso cada analito lleva también:
 - `valor_canonico` y `unidad_canonica`: el mismo dato convertido a la unidad
   canónica del analito.
 
-Ejemplo: leucocitos informados como `7200 /mm³` en un centro y `6.8 10^3/uL` en
-otro son, en unidad canónica, `7.2` y `6.8` en `10^3/uL`. Recién ahí son
+Ejemplo: leucocitos informados como `7200 /mm³` en un centro y `6.8 10³/µL` en
+otro son, en unidad canónica, `7.2` y `6.8` en `10³/µL`. Recién ahí son
 comparables.
 
-Unidades canónicas a usar: glucosa `mg/dL` · hemoglobina `g/dL` · leucocitos
-`10^3/uL` · creatinina `mg/dL` · colesterol `mg/dL`.
+Unidades canónicas a usar, con esta grafía exacta: glucosa `mg/dL` ·
+hemoglobina `g/dL` · leucocitos `10³/µL` · creatinina `mg/dL` · colesterol `mg/dL`.
+La grafía importa: `mg/dl` y `mg/dL` son la misma unidad para una persona y dos
+claves distintas para el sistema que agrupa.
+
+**Leucocitos**: si vienen en `/mm³` o `/µL`, DIVIDE POR 1000 (7705 /mm³ = 7.705
+10³/µL). Es la conversión más frecuente y la que más importa.
 
 Si el valor no es numérico ("no informado", "hemolizado"), o si no sabes cómo
 convertir la unidad, deja `valor_canonico` y `unidad_canonica` en `null`.

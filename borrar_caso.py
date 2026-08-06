@@ -24,7 +24,10 @@ Salidas:
 import argparse
 import hashlib
 import json
+import os
 import shutil
+import urllib.error
+import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -92,6 +95,38 @@ def conservar_aprendizaje(caso: dict, ts: str) -> list[dict]:
     return filas
 
 
+def eliminar_casilla(guid: str) -> bool:
+    """Llama al servicio PHP de Mauro para borrar la casilla espejo del caso.
+
+    Si las variables de entorno no están definidas (caso normal en la demo, donde el
+    mail-service es local), no se intenta nada: se deja constancia de que quedó pendiente
+    y el borrado del resto del caso sigue su curso igual.
+    """
+    base = os.environ.get("CASILLAS_API_URL")
+    api_key = os.environ.get("CASILLAS_API_KEY")
+    if not base or not api_key or not guid:
+        print("Eliminación de casilla remota: pendiente (sin CASILLAS_API_URL/CASILLAS_API_KEY o sin guid).")
+        return False
+
+    peticion = urllib.request.Request(
+        f"{base}?action=eliminar",
+        data=json.dumps({"guid": guid}).encode("utf-8"),
+        headers={"Content-Type": "application/json", "X-Api-Key": api_key},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(peticion, timeout=20) as resp:
+            sobre = json.loads(resp.read().decode("utf-8"))
+        if not sobre.get("ok") or not sobre.get("data", {}).get("borrado"):
+            print(f"El servicio de casillas no confirmó el borrado del guid {guid}.")
+            return False
+        print(f"Casilla remota eliminada (guid {guid}).")
+        return True
+    except (urllib.error.URLError, TimeoutError, ValueError) as err:
+        print(f"No se pudo eliminar la casilla remota (guid {guid}): {err}")
+        return False
+
+
 def constancia(caso_id: str, motivo: str, ts: str, borrado: list[str]) -> str:
     return f"""CONSTANCIA DE SUPRESIÓN DE DATOS PERSONALES
 
@@ -157,9 +192,10 @@ def main():
     if directorio.exists():
         shutil.rmtree(directorio)
     # La casilla espejo y los adjuntos subidos se eliminan por sus respectivas
-    # APIs. En la demo el mail-service es local, así que queda como registro.
-    # TODO(producto): llamar al endpoint de Mauro para eliminar la casilla y a
-    # la Files API para eliminar los adjuntos subidos.
+    # APIs. En la demo el mail-service es local, así que si no hay credenciales
+    # configuradas queda como registro pendiente (ver eliminar_casilla).
+    eliminar_casilla(caso.get("guid_casilla") or caso.get("guid"))
+    # TODO(producto): eliminar también los adjuntos subidos a la Files API de Anthropic.
 
     # 4. El log de supresiones: seudónimo, no caso_id.
     with (REGISTRO / "supresiones.jsonl").open("a", encoding="utf-8") as f:

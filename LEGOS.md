@@ -11,7 +11,7 @@ Cada pieza se cambia sin tocar las otras. Si algo se discute con el equipo, se d
 | L5 | **Schema wiki de salud** | `schemas/wiki-salud.schema.json` | **El contrato central.** Todo lo demás se acomoda a él | ✅ |
 | L6 | **System prompt orquestador** | `prompts/orquestador.md` | Usa L7 | ✅ |
 | L7 | **Tools schema** | `tools/schema.json` | 5 tools. Las implementaciones son intercambiables | ✅ |
-| L8 | **Mail-service** | credenciales en `raw/Credenciales mock chiledao.txt` | IMAP 993 lectura + SMTP 465 envío sobre `mail.chiledao.cl`. **Ya no depende del endpoint HTTP de Mauro**: las credenciales cubren ida y vuelta | ✅ |
+| L8 | **Mail-service** | credenciales en `raw/Credenciales mock chiledao.txt` · `api/casilla.js` | IMAP 993 lectura + SMTP 465 envío sobre `mail.chiledao.cl`. La provisión de la casilla ahora se integra vía API al servicio PHP de Mauro (`api/casilla.js` → `CASILLAS_API_URL`/`CASILLAS_API_KEY`, tras flag `PROVISION_ACTIVA`), con fallback al cálculo sintético si no responde | ✅ |
 | L9 | **Cascada de verificación** | `extraccion/verificar.py` | Haiku extrae → verificador coteja valor por valor contra el original → escala a Sonnet (discrepancia) u Opus (manuscrito/ilegible). Sin humano en el ciclo; **el médico tratante verifica el dossier final** contra los originales de L11 | ✅ |
 | L10 | **Render del wiki** | `render/render_wiki.py` | Entrada: L5 · Salida: `wiki-salud.html`, cada valor linkea a su original | ✅ |
 | L11 | **Paquete del titular** | `empaquetar.py` | Entrada: L10 + originales · Salida: ZIP con wiki + `originales/` | ✅ |

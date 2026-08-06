@@ -68,6 +68,25 @@ def bloque_documento(client, ruta: Path):
     return {"type": "text", "text": ruta.read_text(encoding="utf-8")}, ruta.name
 
 
+def recortar_json(texto: str) -> str:
+    """Devuelve solo el objeto JSON de la respuesta.
+
+    El esquema completo excede el límite de gramática compilada de structured output
+    (uniones nullable y enums anidados), así que el JSON se pide por prompt —igual que
+    hace la función serverless de la web— y se recorta acá. La conformidad con L5 se
+    valida después, contra el esquema, no en la llamada.
+    """
+    t = texto.strip()
+    if t.startswith("```"):
+        t = t.split("```")[1]
+        if t.startswith("json"):
+            t = t[4:]
+    inicio, fin = t.find("{"), t.rfind("}")
+    if inicio == -1 or fin == -1:
+        raise ValueError(f"La respuesta no contiene un objeto JSON: {texto[:200]}")
+    return t[inicio:fin + 1]
+
+
 def extraer(client, ruta: Path, centro: str, paciente_ref: str, modelo: str = MODELO) -> dict:
     """Una llamada a Claude por documento. Devuelve el registro `wiki_salud`."""
     prompt, schema = cargar_legos()
@@ -76,7 +95,10 @@ def extraer(client, ruta: Path, centro: str, paciente_ref: str, modelo: str = MO
     contexto = (
         f"Centro de origen: {centro}\n"
         f"Referencia del titular: {paciente_ref}\n"
-        f"Referencia del documento: {doc_ref}\n"
+        f"Referencia del documento: {doc_ref}\n\n"
+        "Responde ÚNICAMENTE con el objeto JSON conforme al esquema, sin texto alrededor "
+        "y sin cercas de código.\n\n"
+        f"Esquema al que debe conformar la respuesta:\n{json.dumps(schema, ensure_ascii=False)}"
     )
 
     respuesta = client.beta.messages.create(
@@ -92,11 +114,10 @@ def extraer(client, ruta: Path, centro: str, paciente_ref: str, modelo: str = MO
             }
         ],
         messages=[{"role": "user", "content": [{"type": "text", "text": contexto}, bloque]}],
-        output_config={"format": {"type": "json_schema", "schema": schema}},
     )
 
     texto = "".join(b.text for b in respuesta.content if b.type == "text")
-    registro = json.loads(texto)
+    registro = json.loads(recortar_json(texto))
 
     # Log de uso: sirve para el screenshot de consola y para el control de costo.
     uso = respuesta.usage

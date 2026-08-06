@@ -135,7 +135,9 @@ export default async function handler(req, res) {
   }
 
   // El documento se lee del propio despliegue, no de lo que mande el cliente.
-  const base = `https://${req.headers.host}`;
+  // El protocolo se toma de la petición: en `vercel dev` es http y con https fijo el fetch cae.
+  const proto = req.headers["x-forwarded-proto"] || "https";
+  const base = `${proto}://${req.headers.host}`;
   const doc = await fetch(`${base}/demo/${elegida.archivo}`);
   if (!doc.ok) {
     return res.status(500).json({ error: `No se pudo leer la ficha de demo (${doc.status}).` });
