@@ -251,8 +251,15 @@ try {
             $actualizada = li_find_by_guid($guid);
 
             if (!$resultado || !isset($actualizada['correo']['direccion'])) {
+                // El motivo real (credenciales de cPanel, envio de correo, cuota) se devuelve
+                // tal como lo dejo el provisioner: sin esto, diagnosticar exige leer los logs
+                // del servidor por FTP.
                 out(
-                    ['guid' => $guid, 'status' => $actualizada['status'] ?? 'error_correo'],
+                    [
+                        'guid'    => $guid,
+                        'status'  => $actualizada['status'] ?? 'error_correo',
+                        'detalle' => $actualizada['correo_error'] ?? 'sin detalle registrado',
+                    ],
                     'No se pudo aprovisionar la casilla',
                     false,
                     500

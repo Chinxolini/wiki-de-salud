@@ -77,7 +77,7 @@ async function llamarPHP(base, apiKey, action, payload) {
     const sobre = await r.json().catch(() => null);
     if (!r.ok || !sobre || sobre.ok === false) {
       const msg = sobre?.message || `El servicio de casillas respondió ${r.status}.`;
-      return { ok: false, error: msg };
+      return { ok: false, error: msg, detalle: sobre?.data?.detalle };
     }
     return { ok: true, data: sobre.data };
   } catch (err) {
@@ -165,7 +165,7 @@ export default async function handler(req, res) {
 
   const provisionar = await llamarPHP(base, apiKey, "provisionar", { guid });
   if (!provisionar.ok) {
-    return res.status(502).json({ error: provisionar.error, fallback: true });
+    return res.status(502).json({ error: provisionar.error, detalle: provisionar.detalle, fallback: true });
   }
 
   const { direccion, status } = provisionar.data || {};
