@@ -198,6 +198,21 @@
   .cerrar{background:none;border:0;color:var(--muted);font-size:1.5rem;cursor:pointer;width:auto;
     margin:0;padding:0 4px;flex:0}
   @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+  /* ---------- etapa D: carga y avance parcial ---------- */
+  .spinner{display:inline-block;width:15px;height:15px;border:2.5px solid var(--line);
+    border-top-color:var(--accent);border-radius:50%;animation:girar .7s linear infinite;
+    flex:none}
+  @keyframes girar{to{transform:rotate(360deg)}}
+  .demo-cargando{display:flex;align-items:center;gap:10px;background:var(--soft);
+    border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-weight:700;
+    color:var(--ink);font-size:.9rem}
+  @keyframes pulso-boton{
+    0%{box-shadow:0 0 0 0 rgba(255,255,255,.55)}
+    70%{box-shadow:0 0 0 11px rgba(255,255,255,0)}
+    100%{box-shadow:0 0 0 0 rgba(255,255,255,0)}}
+  .narrador.etapa button{animation:pulso-boton 1.8s ease-out infinite}
+  #btnEmpezarNuevo:disabled{opacity:.35}
 </style>
 </head>
 <body>
@@ -498,6 +513,7 @@
     <button type="button" id="btnDemo" hidden>Reunir mi Carpeta de Salud con Claude</button>
     <div id="demoEstado" class="hint" style="margin-top:12px"></div>
     <div id="demoResultado"></div>
+    <div id="demoParcial" class="aviso" style="margin-top:14px" hidden></div>
     <div id="descargas" hidden style="margin-top:18px">
       <p class="por" style="margin-bottom:10px"><b>Tu Carpeta de Salud está lista.</b> Se armó aquí, en tu
       navegador: tu contenido clínico y tu RUT nunca salieron de este dispositivo. Al servidor solo
@@ -509,7 +525,11 @@
       </div>
     </div>
   </div>
-  <p class="foot"><button type="button" class="link" onclick="location.reload()">← Empezar de nuevo</button></p>
+  <p class="foot" style="margin-top:26px">
+    <a href="/panel/" target="_blank" rel="noopener" class="link">Ver el panel de seguimiento del equipo →</a><br>
+    <span class="hint">Es la vista interna con la que el equipo controla todos los casos.</span>
+  </p>
+  <p class="foot"><button type="button" class="link" id="btnEmpezarNuevo" onclick="location.reload()">← Empezar de nuevo</button></p>
 </section>
 </div>
 
@@ -567,7 +587,7 @@
      el commit vivo lo pregunta a /api/version, para saber si lo que esta arriba es
      efectivamente esta version y no un despliegue anterior. -->
 <p class="sello" id="sello">
-  <span id="selloFecha">versión 2026-08-06 02:25</span><span id="selloSha"></span>
+  <span id="selloFecha">versión 2026-08-06 02:47</span><span id="selloSha"></span>
 </p>
 
 <script>
@@ -1464,10 +1484,28 @@ async function correrExtraccionFondo(){
   }
 }
 
+// Mientras quedan respuestas por revelar, el globo #narrador es el unico control activo:
+// "Empezar de nuevo" se atenua y se deshabilita para que el ojo no se vaya para alla, y
+// la tarjeta de la demo deja explicito que lo que se ve es una vista parcial, no el final.
+function marcarEsperaContinuar(activo){
+  const btnNuevo = $("#btnEmpezarNuevo");
+  if(btnNuevo) btnNuevo.disabled = activo;
+}
+function actualizarAvanceParcial(leidos, total){
+  const aviso = $("#demoParcial");
+  if(!aviso) return;
+  if(leidos >= total){ aviso.hidden = true; return; }
+  aviso.hidden = false;
+  aviso.innerHTML = `<b>Vista previa parcial — ${leidos} de ${total} centros leídos.</b> `+
+    `Todavía no es tu Carpeta final: sigue apretando <b>“Continuar”</b> en el aviso verde de `+
+    `abajo para completarla. Las descargas se habilitan recién al terminar.`;
+}
+
 async function revelarRespuesta(i){
   const est = $("#demoEstado"), out = $("#demoResultado");
   if(!extraccionDatos[i]){
-    est.textContent = `Claude está leyendo la ficha ${i+1} de ${CENTROS_DEMO.length}…`;
+    est.innerHTML = `<div class="demo-cargando"><span class="spinner" aria-hidden="true"></span>`+
+      `Claude está leyendo la ficha ${i+1} de ${CENTROS_DEMO.length}… esto tarda unos segundos.</div>`;
     mostrarEtapa({
       quePasa: `Esperando la respuesta del centro ${i+1} de ${CENTROS_DEMO.length}…`,
       loQueViene: "Se revela en el timeline apenas esté lista.",
@@ -1485,6 +1523,7 @@ async function revelarRespuesta(i){
       fecha: fechaSim(7*(i+1)), resumen: resumenRegistro(d.registro)});
     renderTimeline();
     out.innerHTML = resumen(registros);
+    actualizarAvanceParcial(i+1, CENTROS_DEMO.length);
     const tokIn = extraccionDatos.slice(0,i+1).reduce((a,x)=>a+(x?.uso?.tokens_entrada||0),0);
     const tokOut = extraccionDatos.slice(0,i+1).reduce((a,x)=>a+(x?.uso?.tokens_salida||0),0);
     est.textContent = `${i+1} de ${CENTROS_DEMO.length} centros leídos · claude-haiku-4-5 · `+
@@ -1510,6 +1549,8 @@ async function revelarRespuesta(i){
 
 function finalizarEtapaD(){
   carpetaLista = true; renderTimeline();
+  actualizarAvanceParcial(CENTROS_DEMO.length, CENTROS_DEMO.length);
+  marcarEsperaContinuar(false);
   $("#descargas").hidden = false;
   // Etapa E — sin boton: aca terminan las etapas y quedan las descargas.
   mostrarEtapa({
@@ -1566,6 +1607,8 @@ async function iniciarEtapaD(){
   await mostrarResultado();
   registros = []; originales = {};
   extraccionDatos = []; extraccionResolvers = [];
+  marcarEsperaContinuar(true); // hasta que finalizarEtapaD la reactive
+  actualizarAvanceParcial(0, CENTROS_DEMO.length);
   correrExtraccionFondo(); // fire-and-forget: corre atras mientras el juez lee el globo
   revelarRespuesta(0);
 }
