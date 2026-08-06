@@ -772,6 +772,36 @@ $("#btnDemo").addEventListener("click", async ()=>{
 
 const junta = k => registros.flatMap(r => (r[k] || []).map(x => ({...x, _centro: r.centro})));
 
+// Agrupa por la clave canonica: si tres centros consignan la misma diabetes, es UNA
+// diabetes confirmada por tres, no tres diabetes. Sin esto el expediente le muestra a
+// la persona 12 diagnosticos cuando tiene 4, que es justo lo contrario de lo que
+// promete el producto. La trazabilidad no se pierde: cada fila conserva de que centro
+// vino cada version, y como la escribio cada uno.
+function agrupar(items, clave){
+  const mapa = new Map();
+  for(const it of items){
+    const k = String(clave(it) || "").toLowerCase().trim();
+    if(!mapa.has(k)) mapa.set(k, {...it, _centros:[], _originales:[]});
+    const g = mapa.get(k);
+    if(!g._centros.includes(it._centro)) g._centros.push(it._centro);
+    const orig = it.nombre_original || it.analito_original || it.tipo_original;
+    if(orig && !g._originales.includes(orig)) g._originales.push(orig);
+    // Se conserva el dato mas completo entre los centros que lo reportaron.
+    for(const campo of ["fecha","dosis","frecuencia","reaccion","severidad","estado"]){
+      if(!g[campo] && it[campo]) g[campo] = it[campo];
+    }
+  }
+  return [...mapa.values()];
+}
+
+// "Hospital A, Hospital B y Hospital C" — y cuando son varios, lo dice.
+const fuenteTxt = g => g._centros.length > 1
+  ? `<b>${g._centros.length} centros coinciden</b><br><span class="orig">${g._centros.map(esc).join(" · ")}</span>`
+  : esc(g._centros[0]);
+
+const origenTxt = (g, verbo) => g._originales.length
+  ? `<br><span class="orig">${verbo} ${g._originales.map(o=>`“${esc(o)}”`).join(" · ")}</span>` : "";
+
 function resumen(regs){
   const n = k => regs.reduce((a,r)=>a + (r[k]?.length || 0), 0);
   const chips = [["diagnosticos","diagnósticos"],["alergias","alergias"],
@@ -797,19 +827,21 @@ function construirWiki(){
     <table><thead><tr>${cabeceras.map(c=>`<th>${c}</th>`).join("")}</tr></thead>
     <tbody>${filas.join("")}</tbody></table>` : "";
 
-  const dg = junta("diagnosticos").map(d=>`<tr><td>${esc(d.fecha)||"—"}</td>
-    <td><b>${esc(d.nombre_canonico)}</b><br><span class="orig">consignado como
-    “${esc(d.nombre_original)}”</span></td><td>${esc(d.estado)}</td>
-    <td class="src">${esc(d._centro)}</td></tr>`);
+  const dg = agrupar(junta("diagnosticos"), d=>d.nombre_canonico)
+    .map(d=>`<tr><td>${esc(d.fecha)||"—"}</td>
+    <td><b>${esc(d.nombre_canonico)}</b>${origenTxt(d,"consignado como")}</td>
+    <td>${esc(d.estado)}</td>
+    <td class="src">${fuenteTxt(d)}</td></tr>`);
 
-  const al = junta("alergias").map(a=>`<tr><td><b>${esc(a.sustancia)}</b></td>
+  const al = agrupar(junta("alergias"), a=>a.sustancia)
+    .map(a=>`<tr><td><b>${esc(a.sustancia)}</b></td>
     <td>${esc(a.reaccion)||"—"}</td><td>${esc(a.severidad)}</td>
-    <td class="src">${esc(a._centro)}</td></tr>`);
+    <td class="src">${fuenteTxt(a)}</td></tr>`);
 
-  const md = junta("medicamentos").map(m=>`<tr><td><b>${esc(m.principio_activo)}</b><br>
-    <span class="orig">registrado como “${esc(m.nombre_original)}”</span></td>
+  const md = agrupar(junta("medicamentos"), m=>m.principio_activo)
+    .map(m=>`<tr><td><b>${esc(m.principio_activo)}</b>${origenTxt(m,"registrado como")}</td>
     <td>${esc(m.dosis)||"—"}</td><td>${esc(m.frecuencia)||"—"}</td>
-    <td class="src">${esc(m._centro)}</td></tr>`);
+    <td class="src">${fuenteTxt(m)}</td></tr>`);
 
   const at = junta("atenciones")
     .sort((a,b)=>String(b.fecha||"").localeCompare(String(a.fecha||"")))
@@ -817,19 +849,26 @@ function construirWiki(){
     <td>${esc(a.motivo_consulta)}${a.hallazgos?`<br><span class="orig">${esc(a.hallazgos)}</span>`:""}</td>
     <td class="src">${esc(a._centro)}</td></tr>`);
 
-  const pr = junta("procedimientos").map(p=>`<tr><td>${esc(p.fecha)||"—"}</td>
-    <td><b>${esc(p.nombre_canonico)}</b><br><span class="orig">“${esc(p.nombre_original)}”</span></td>
-    <td class="src">${esc(p._centro)}</td></tr>`);
+  const pr = agrupar(junta("procedimientos"), p=>`${p.nombre_canonico}|${p.fecha||""}`)
+    .map(p=>`<tr><td>${esc(p.fecha)||"—"}</td>
+    <td><b>${esc(p.nombre_canonico)}</b>${origenTxt(p,"")}</td>
+    <td class="src">${fuenteTxt(p)}</td></tr>`);
 
-  const im = junta("imagenes").map(i=>`<tr><td>${esc(i.fecha)||"—"}</td>
+  const im = agrupar(junta("imagenes"), i=>`${i.tipo_canonico}|${i.region||""}|${i.fecha||""}`)
+    .map(i=>`<tr><td>${esc(i.fecha)||"—"}</td>
     <td><b>${esc(i.tipo_canonico)}</b>${i.region?` · ${esc(i.region)}`:""}</td>
-    <td>${esc(i.conclusion_informe)}</td><td class="src">${esc(i._centro)}</td></tr>`);
+    <td>${esc(i.conclusion_informe)}</td><td class="src">${fuenteTxt(i)}</td></tr>`);
 
-  const ex = junta("examenes").map(e=>`<tr><td>${esc(e.fecha)||"—"}</td>
-    <td><b>${esc(e.analito_canonico)}</b><br><span class="orig">“${esc(e.analito_original)}”</span></td>
+  // Los examenes se agrupan por analito Y fecha: dos centros que informan la misma
+  // glicemia del mismo dia son una medicion confirmada, no dos. Distinta fecha es
+  // otra medicion y se conserva aparte: ahi esta la serie en el tiempo.
+  const ex = agrupar(junta("examenes"), e=>`${e.analito_canonico}|${e.fecha||""}`)
+    .sort((a,b)=>String(b.fecha||"").localeCompare(String(a.fecha||"")))
+    .map(e=>`<tr><td>${esc(e.fecha)||"—"}</td>
+    <td><b>${esc(e.analito_canonico)}</b>${e._originales.length?`<br><span class="orig">${e._originales.map(o=>`“${esc(o)}”`).join(" · ")}</span>`:""}</td>
     <td><b>${esc(e.valor_canonico)} ${esc(e.unidad_canonica)}</b><br>
     <span class="orig">original: ${esc(e.valor_original)} ${esc(e.unidad_original)}</span></td>
-    <td>${esc(e.rango_referencia)||"—"}</td><td class="src">${esc(e._centro)}</td></tr>`);
+    <td>${esc(e.rango_referencia)||"—"}</td><td class="src">${fuenteTxt(e)}</td></tr>`);
 
   const ileg = registros.flatMap(r=>(r.campos_ilegibles||[]).map(c=>`${esc(c)} (${esc(r.centro)})`));
 
