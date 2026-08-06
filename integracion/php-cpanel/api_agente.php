@@ -157,6 +157,27 @@ function eliminarCasillaCpanel(CPanelClient $cpanel, string $domain, string $loc
     ]);
 }
 
+/**
+ * Envía un correo de texto plano usando mail() nativo, con los mismos headers
+ * que MailSender::enviarCredenciales() (MailSender no expone un método genérico,
+ * así que se replica aquí el mismo patrón en vez de tocar ese módulo).
+ */
+function enviarCorreoTexto(string $destinatario, string $asunto, string $cuerpo): bool
+{
+    $fromAddress = Config::get('MAIL_FROM', 'soporte@chiledao.cl');
+    $fromName = Config::get('MAIL_FROM_NAME', 'Los Inmortales');
+
+    $headers = [
+        'MIME-Version: 1.0',
+        'Content-Type: text/plain; charset=UTF-8',
+        'From: ' . $fromName . ' <' . $fromAddress . '>',
+        'Reply-To: ' . $fromAddress,
+        'X-Mailer: LosInmortales-EmailProvisioner',
+    ];
+
+    return mail($destinatario, $asunto, $cuerpo, implode("\r\n", $headers));
+}
+
 // --- Ruteo -------------------------------------------------------------------
 
 $action = $_GET['action'] ?? 'ping';
@@ -328,6 +349,172 @@ try {
             li_write_all($restantes);
 
             out(['guid' => $guid, 'borrado' => true]);
+            break;
+        }
+
+        case 'notificar': {
+            $body = leerBodyJson();
+
+            $email = trim($body['email'] ?? '');
+            $tipo = trim($body['tipo'] ?? '');
+            $datos = $body['datos'] ?? [];
+
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                out([], 'email inválido', false, 400);
+            }
+            if (!is_array($datos)) {
+                out([], 'datos debe ser un objeto', false, 400);
+            }
+
+            if ($tipo === 'codigo') {
+                $codigo = trim((string)($datos['codigo'] ?? ''));
+                if (!preg_match('/^\d{6}$/', $codigo)) {
+                    out([], 'datos.codigo debe ser un código de 6 dígitos', false, 400);
+                }
+
+                $asunto = 'Código de verificación para la firma de tu mandato';
+                $cuerpo = <<<TEXT
+Hola,
+
+Tu código de verificación para firmar el mandato en Los Inmortales es:
+
+    {$codigo}
+
+Este código es de un solo uso. Si no solicitaste esta firma, ignora este correo.
+
+— Equipo Los Inmortales
+TEXT;
+
+                $enviado = enviarCorreoTexto($email, $asunto, $cuerpo);
+                out(['enviado' => $enviado]);
+                break;
+            }
+
+            if ($tipo === 'acuerdo') {
+                $texto = trim((string)($datos['texto'] ?? ''));
+                if ($texto === '') {
+                    out([], 'datos.texto no puede estar vacío', false, 400);
+                }
+                if (strlen($texto) > 12 * 1024) {
+                    out([], 'datos.texto supera el máximo permitido (12KB)', false, 400);
+                }
+
+                $fechaHora = date('Y-m-d H:i:s');
+                $asunto = 'Copia del acuerdo firmado — Los Inmortales';
+                $cuerpo = <<<TEXT
+Hola,
+
+Adjuntamos la copia del acuerdo (mandato) que firmaste el {$fechaHora}.
+
+--------------------------------------------------------------------
+{$texto}
+--------------------------------------------------------------------
+
+Conserva este correo como respaldo de la firma.
+
+— Equipo Los Inmortales
+TEXT;
+
+                $enviado = enviarCorreoTexto($email, $asunto, $cuerpo);
+                out(['enviado' => $enviado]);
+                break;
+            }
+
+            out([], "tipo debe ser 'codigo' o 'acuerdo'", false, 400);
+            break;
+        }
+
+        case 'correos': {
+            if (!function_exists('imap_open')) {
+                out([], 'La extensión imap de PHP no está disponible en este servidor', false, 501);
+            }
+
+            $casilla = $_GET['casilla'] ?? '';
+            if (!is_string($casilla) || !preg_match('/^[a-z0-9._-]+$/', $casilla)) {
+                out([], 'casilla inválida', false, 400);
+            }
+
+            // Ubica la solicitud que tiene esta casilla asignada, para recuperar su password.
+            $request = null;
+            foreach (li_read_all() as $req) {
+                if (($req['correo']['usuario'] ?? null) === $casilla) {
+                    $request = $req;
+                    break;
+                }
+            }
+            if (!$request) {
+                out([], 'No existe una casilla asignada con ese nombre de usuario', false, 404);
+            }
+
+            $password = $request['correo']['password_temporal'] ?? null;
+            if (!$password) {
+                out([], 'La casilla no tiene credenciales registradas', false, 404);
+            }
+
+            $domain = Config::get('CPANEL_DOMAIN', 'chiledao.cl');
+            $direccionCompleta = $casilla . '@' . $domain;
+            $mailbox = '{mail.chiledao.cl:993/imap/ssl}INBOX';
+
+            $conexion = @imap_open($mailbox, $direccionCompleta, (string)$password, OP_READONLY, 1);
+            if ($conexion === false) {
+                $detalleImap = imap_last_error();
+                error_log('[api_agente] imap_open falló para ' . $casilla . ': ' . $detalleImap);
+                out([], 'No se pudo conectar a la casilla de correo', false, 502);
+            }
+
+            $total = imap_num_msg($conexion);
+            $mensajes = [];
+
+            // Los últimos 10, del más reciente al más antiguo.
+            $inicio = max(1, $total - 9);
+            for ($i = $total; $i >= $inicio; $i--) {
+                $overview = imap_fetch_overview($conexion, (string)$i, 0);
+                $cabecera = $overview[0] ?? null;
+
+                $estructura = imap_fetchstructure($conexion, $i);
+                $adjuntos = [];
+                if ($estructura && isset($estructura->parts) && is_array($estructura->parts)) {
+                    foreach ($estructura->parts as $indiceParte => $parte) {
+                        $nombreAdjunto = null;
+                        if (isset($parte->dparameters)) {
+                            foreach ($parte->dparameters as $param) {
+                                if (strtolower($param->attribute) === 'filename') {
+                                    $nombreAdjunto = $param->value;
+                                }
+                            }
+                        }
+                        if (!$nombreAdjunto && isset($parte->parameters)) {
+                            foreach ($parte->parameters as $param) {
+                                if (strtolower($param->attribute) === 'name') {
+                                    $nombreAdjunto = $param->value;
+                                }
+                            }
+                        }
+                        if ($nombreAdjunto) {
+                            $adjuntos[] = $nombreAdjunto;
+                        }
+                    }
+                }
+
+                $textoPlano = @imap_fetchbody($conexion, $i, '1');
+                if (!is_string($textoPlano) || $textoPlano === '') {
+                    $textoPlano = @imap_body($conexion, $i) ?: '';
+                }
+                // Decodifica quoted-printable/base64 de forma best-effort antes de recortar.
+                $textoPlano = quoted_printable_decode($textoPlano);
+
+                $mensajes[] = [
+                    'de'       => $cabecera->from ?? null,
+                    'asunto'   => isset($cabecera->subject) ? imap_utf8($cabecera->subject) : null,
+                    'fecha'    => $cabecera->date ?? null,
+                    'texto'    => mb_substr($textoPlano, 0, 2000),
+                    'adjuntos' => $adjuntos,
+                ];
+            }
+
+            imap_close($conexion);
+
+            out(['casilla' => $direccionCompleta, 'mensajes' => $mensajes]);
             break;
         }
 
