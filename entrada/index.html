@@ -475,7 +475,7 @@
      el commit vivo lo pregunta a /api/version, para saber si lo que esta arriba es
      efectivamente esta version y no un despliegue anterior. -->
 <p class="sello" id="sello">
-  <span id="selloFecha">versión 2026-08-05 22:44</span><span id="selloSha"></span>
+  <span id="selloFecha">versión 2026-08-05 22:45</span><span id="selloSha"></span>
 </p>
 
 <script>
@@ -982,7 +982,7 @@ demostración. Generado el ${new Date().toLocaleDateString("es-CL")}.</p>
 // esta sirviendo el despliegue vivo. Si el navegador tiene cacheada una copia vieja,
 // el commit no calza con el sellado, y eso se avisa en vez de disimularlo.
 (async () => {
-  const SHA_SELLADO = "PENDIENTE";
+  const SHA_SELLADO = "589a370";
   try{
     const r = await fetch("/api/version", {cache:"no-store"});
     if(!r.ok) return;
