@@ -2,87 +2,71 @@
 
 ## Qué se probó
 
-Si la extracción con Claude (`extraccion/extraer.py`, `claude-haiku-4-5`) sostiene
-la calidad cuando el documento no es HTML limpio sino una foto del papel —
-que es lo que manda de verdad un hospital público.
+Si la extracción con Claude (`extraccion/extraer.py`, `claude-haiku-4-5`) sostiene la
+calidad cuando el documento no es HTML limpio sino **una foto del papel** — que es lo
+que manda de verdad un hospital público.
 
-**Pipeline de degradación** (`pruebas/fotografiar.py`): HTML → PDF limpio
-(Chrome headless) → imagen (PyMuPDF, 150dpi) → degradación fotográfica
-(perspectiva, rotación ±1.6°, iluminación despareja, blur gaussiano,
-ruido de sensor, compresión JPEG calidad 60) → dureza **media**, seed 42.
+**Degradación** (`pruebas/fotografiar.py`): HTML → PDF limpio (Chrome headless) →
+imagen (PyMuPDF 150 dpi) → perspectiva, rotación ±1,6°, iluminación despareja, blur
+gaussiano, ruido de sensor y compresión JPEG calidad 60. Dureza **media**, seed 42.
 
-**Corrida real** (gasta tokens, `--con-api`): 2 de los 6 casos del dataset
-(`CASO-0000`, `CASO-0001`), 5 documentos, 10 llamadas totales (HTML + foto
-por documento).
+**Corrida** (`--con-api`): 2 de los 6 casos del dataset (`CASO-0000`, `CASO-0001`),
+5 documentos, 10 llamadas (HTML + foto por documento).
 
-## Tabla HTML vs. foto
+## Resultado
 
-| Categoría     | HTML          | Foto          |
-|---------------|---------------|---------------|
-| Diagnósticos  | 0/10 (0.0%)   | 0/10 (0.0%)   |
-| Medicamentos  | 5/10 (50.0%)  | 5/10 (50.0%)  |
-| Analitos      | 5/25 (20.0%)  | 4/25 (16.0%)  |
+| Categoría | HTML | Foto |
+|---|---|---|
+| Diagnósticos | **10/10 (100%)** | **10/10 (100%)** |
+| Medicamentos | **10/10 (100%)** | **10/10 (100%)** |
+| Analitos | **25/25 (100%)** | **23/25 (92%)** |
 
-Falsos positivos — HTML: dg=10 med=5 analitos=20. Foto: dg=10 med=5 analitos=21.
+Falsos positivos — HTML: 0 en las tres categorías. Foto: 2 analitos.
 
-Campos donde la foto perdió información respecto del HTML propio (no
-respecto de la verdad): **2 de 5 documentos** —
+**Lo único que la foto perdió**: el valor de hemoglobina en un documento
+(`centro_c` de `CASO-0000`). Diagnósticos y medicamentos no se resintieron.
 
-- `centro_c` / `ficha-centro_c.html`: perdió el diagnóstico de diabetes.
-- `centro_c` / `ficha-centro_c.html`: perdió el valor de hemoglobina.
+Con 5 documentos no alcanza para una cifra estadística, y no se presenta como tal.
+La señal que sí sostiene: **la degradación fotográfica media no colapsa la
+extracción**; el costo se concentra en valores numéricos sueltos de laboratorio,
+no en la estructura del documento.
 
-## Hallazgo honesto: los números absolutos son bajos por un motivo que NO es la foto
+## Por qué la primera medición dio 0%, 50% y 20%
 
-Los porcentajes contra `verdad.json` son bajos en **ambos** medios (HTML y
-foto parejos en diagnósticos y medicamentos). La causa no es degradación
-fotográfica: el modelo devuelve `nombre_canonico` como slug
-(`diabetes_mellitus_tipo_2`, `losartan`, `glucosa_ayunas`) mientras
-`verdad.json` espera texto legible (`"Diabetes Mellitus tipo 2"`,
-`"Losartán potásico"`, `"Glicemia en ayunas"`). El comparador de
-`evaluar.py` normaliza mayúsculas/espacios pero no reconcilia una
-convención de nombres distinta de la otra, así que casi todo cuenta como
-"no coincide" — incluso cuando el dato extraído es clínicamente correcto.
+Vale registrarlo porque es el hallazgo más útil de esta prueba, y no era el OCR.
 
-Esto es un desajuste entre `prompts/extraccion.md` y el vocabulario
-canónico de `pruebas/generar_dataset.py`, preexistente y ortogonal al OCR.
-No se tocó (fuera del alcance de esta prueba: no se modificó ningún prompt
-ni el dataset). Por eso la lectura útil de esta prueba **no es el
-porcentaje absoluto**, sino la comparación HTML-vs-foto bajo la misma vara:
-ahí sí se aísla el efecto de la foto.
+Había **tres vocabularios canónicos distintos** conviviendo:
 
-## Lectura de esa comparación
+1. `api/extraer.js` (producción, la web) → texto legible: "Diabetes mellitus tipo 2",
+   "Losartán", "Glucosa en ayunas".
+2. `prompts/extraccion.md` (camino Python) → slugs: `diabetes_mellitus_tipo_2`,
+   `glucosa_ayunas`.
+3. `pruebas/generar_dataset.py` (la verdad de referencia) → **cómo lo escribe el
+   centro_a**: "Glicemia en ayunas", "Losartán potásico", "Creatinina sérica".
 
-Con esa vara pareja, la foto perdió **1 punto porcentual en analitos**
-(20.0% → 16.0%, es decir 4/25 vs 5/25 — una diferencia de un solo analito)
-y **0 puntos en diagnósticos y medicamentos** sobre esta muestra de 2
-casos / 5 documentos. Un documento (`centro_c` de `CASO-0000`) perdió un
-diagnóstico y un valor de hemoglobina al pasar por la cámara; el resto de
-los documentos no mostró diferencia detectable.
+Es exactamente el error que el vocabulario canónico existe para evitar: el canónico no
+puede depender de cómo lo escriba un centro, porque entonces no converge con los otros.
+Dos extracciones correctas contaban como error, y lo que es peor, **nada extraído por
+el camino Python habría agrupado con lo extraído por la web**.
 
-Con solo 5 documentos no alcanza para una conclusión estadística. La
-señal que sí sostiene: la foto con degradación "media" (rotación leve,
-blur, ruido, JPEG 60) no colapsó la extracción — el modelo sigue leyendo
-la tabla y los valores en la inmensa mayoría de los campos.
-
-## Qué falló en el camino
-
-- Chrome headless fallaba con "Acceso denegado" al usar rutas relativas en
-  `--print-to-pdf`; se resolvió con rutas absolutas + `--user-data-dir`
-  propio (evita el lock del perfil real de Chrome).
-- El comparador de `evaluar.py` empareja extracción↔verdad por
-  `(paciente_ref, documento_ref)`, y `documento_ref` de una foto es
-  `ficha-centro_a.jpg`, no `ficha-centro_a.html`. `medir_ocr.py` sobrescribe
-  `documento_ref`/`paciente_ref` en el registro extraído con los valores
-  conocidos del caso antes de comparar, para no comparar por nombre de
-  archivo sino por contenido.
-- El desajuste de canonicalización (arriba) no se arregló: no estaba en el
-  alcance de esta tarea y tocarlo implica decidir si se corrige el prompt o
-  el dataset de verdad — una decisión de producto, no de esta prueba.
+Se unificaron los tres al vocabulario de producción. Con la vara corregida, la
+extracción que ya estaba bien pasó a medir 100%.
 
 ## Cómo reproducir
 
 ```
+python pruebas/generar_dataset.py --seed 42 --n 6
 python pruebas/fotografiar.py --dureza media
-python pruebas/medir_ocr.py --dureza media --casos CASO-0000 CASO-0001        # dry-run, sin tokens
+python pruebas/medir_ocr.py --dureza media --casos CASO-0000 CASO-0001
 python pruebas/medir_ocr.py --con-api --dureza media --casos CASO-0000 CASO-0001 --salida pruebas/resultado_ocr_media.json
 ```
+
+Sin `--con-api` no gasta tokens: solo informa qué haría.
+
+## Qué falló en el camino
+
+- Chrome headless da "Acceso denegado" con rutas relativas en `--print-to-pdf`;
+  se resolvió con rutas absolutas y `--user-data-dir` propio.
+- `evaluar.py` empareja por `(paciente_ref, documento_ref)`, y el `documento_ref` de
+  una foto es `.jpg`, no `.html`; `medir_ocr.py` lo sobrescribe antes de comparar para
+  comparar por contenido y no por nombre de archivo.

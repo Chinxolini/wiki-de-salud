@@ -55,11 +55,11 @@ SALIDA_DEFAULT = AQUI / "dataset"
 # perfecta debe converger, sea cual sea el centro de origen).
 # ---------------------------------------------------------------------------
 ANALITOS_CANONICOS = {
-    "glicemia": {"nombre_canonico": "Glicemia en ayunas", "unidad_canonica": "mg/dL", "rango": (70, 100)},
+    "glicemia": {"nombre_canonico": "Glucosa en ayunas", "unidad_canonica": "mg/dL", "rango": (70, 100)},
     "hemoglobina": {"nombre_canonico": "Hemoglobina", "unidad_canonica": "g/dL", "rango": (12.0, 16.0)},
     "colesterol_total": {"nombre_canonico": "Colesterol total", "unidad_canonica": "mg/dL", "rango": (0, 200)},
-    "creatinina": {"nombre_canonico": "Creatinina sérica", "unidad_canonica": "mg/dL", "rango": (0.6, 1.3)},
-    "leucocitos": {"nombre_canonico": "Recuento de leucocitos", "unidad_canonica": "10³/µL", "rango": (4.5, 11.0)},
+    "creatinina": {"nombre_canonico": "Creatinina", "unidad_canonica": "mg/dL", "rango": (0.6, 1.3)},
+    "leucocitos": {"nombre_canonico": "Leucocitos", "unidad_canonica": "10³/µL", "rango": (4.5, 11.0)},
 }
 
 # Analito que se usa como "campo ilegible" cuando el caso lo requiere.
@@ -71,7 +71,7 @@ ANALITO_ILEGIBLE = "creatinina"
 # ---------------------------------------------------------------------------
 DIAGNOSTICOS = {
     "dm2": {
-        "canonico": "Diabetes Mellitus tipo 2",
+        "canonico": "Diabetes mellitus tipo 2",
         "estado": "activo",
         "por_centro": {
             "centro_a": "DM2",
@@ -96,7 +96,7 @@ DIAGNOSTICOS = {
 # ---------------------------------------------------------------------------
 MEDICAMENTOS = {
     "losartan": {
-        "principio_activo": "Losartán potásico",
+        "principio_activo": "Losartán",
         "por_centro": {
             "centro_a": {"nombre": "COZAAR 50 mg", "dosis": "50 mg", "frecuencia": "1 comp. al día"},
             "centro_b": {"nombre": "Losartán potásico 50 mg", "dosis": "50 mg", "frecuencia": "al día"},

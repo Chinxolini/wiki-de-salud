@@ -17,7 +17,7 @@
         {
           "fecha": null,
           "nombre_original": "diabetes tipo II",
-          "nombre_canonico": "Diabetes Mellitus tipo 2",
+          "nombre_canonico": "Diabetes mellitus tipo 2",
           "estado": "activo",
           "confianza": "alta"
         },
@@ -33,7 +33,7 @@
       "medicamentos": [
         {
           "nombre_original": "losartan potasico 50",
-          "principio_activo": "Losartán potásico",
+          "principio_activo": "Losartán",
           "dosis": "50 mg",
           "frecuencia": "1 al día",
           "vigente": true,
@@ -58,7 +58,7 @@
           "analitos": [
             {
               "nombre_original": "GLUCOSA (ayuno)",
-              "nombre_canonico": "Glicemia en ayunas",
+              "nombre_canonico": "Glucosa en ayunas",
               "valor": 75,
               "unidad": "mg/dL",
               "valor_canonico": 75,
@@ -91,7 +91,7 @@
             },
             {
               "nombre_original": "CREA",
-              "nombre_canonico": "Creatinina sérica",
+              "nombre_canonico": "Creatinina",
               "valor": 1.3,
               "unidad": "mg/dL",
               "valor_canonico": 1.3,
@@ -102,7 +102,7 @@
             },
             {
               "nombre_original": "WBC",
-              "nombre_canonico": "Recuento de leucocitos",
+              "nombre_canonico": "Leucocitos",
               "valor": 9.4,
               "unidad": "10^3/uL",
               "valor_canonico": 9.43,
@@ -126,7 +126,7 @@
         {
           "fecha": null,
           "nombre_original": "DM2",
-          "nombre_canonico": "Diabetes Mellitus tipo 2",
+          "nombre_canonico": "Diabetes mellitus tipo 2",
           "estado": "activo",
           "confianza": "alta"
         },
@@ -142,7 +142,7 @@
       "medicamentos": [
         {
           "nombre_original": "COZAAR 50 mg",
-          "principio_activo": "Losartán potásico",
+          "principio_activo": "Losartán",
           "dosis": "50 mg",
           "frecuencia": "1 comp. al día",
           "vigente": true,
@@ -167,7 +167,7 @@
           "analitos": [
             {
               "nombre_original": "Glicemia en ayunas",
-              "nombre_canonico": "Glicemia en ayunas",
+              "nombre_canonico": "Glucosa en ayunas",
               "valor": 75,
               "unidad": "mg/dL",
               "valor_canonico": 75,
@@ -200,7 +200,7 @@
             },
             {
               "nombre_original": "Creatinina sérica",
-              "nombre_canonico": "Creatinina sérica",
+              "nombre_canonico": "Creatinina",
               "valor": 1.3,
               "unidad": "mg/dL",
               "valor_canonico": 1.3,
@@ -211,7 +211,7 @@
             },
             {
               "nombre_original": "Recuento de leucocitos",
-              "nombre_canonico": "Recuento de leucocitos",
+              "nombre_canonico": "Leucocitos",
               "valor": 9425,
               "unidad": "/mm³",
               "valor_canonico": 9.43,
@@ -235,7 +235,7 @@
         {
           "fecha": null,
           "nombre_original": "Diabetes Mellitus tipo 2",
-          "nombre_canonico": "Diabetes Mellitus tipo 2",
+          "nombre_canonico": "Diabetes mellitus tipo 2",
           "estado": "activo",
           "confianza": "alta"
         },
@@ -251,7 +251,7 @@
       "medicamentos": [
         {
           "nombre_original": "Losartán potásico 50 mg",
-          "principio_activo": "Losartán potásico",
+          "principio_activo": "Losartán",
           "dosis": "50 mg",
           "frecuencia": "al día",
           "vigente": true,
@@ -276,7 +276,7 @@
           "analitos": [
             {
               "nombre_original": "Glucosa basal",
-              "nombre_canonico": "Glicemia en ayunas",
+              "nombre_canonico": "Glucosa en ayunas",
               "valor": 75,
               "unidad": "mg/dL",
               "valor_canonico": 75,
@@ -309,7 +309,7 @@
             },
             {
               "nombre_original": "Creatininemia",
-              "nombre_canonico": "Creatinina sérica",
+              "nombre_canonico": "Creatinina",
               "valor": 1.3,
               "unidad": "mg/dL",
               "valor_canonico": 1.3,
@@ -320,7 +320,7 @@
             },
             {
               "nombre_original": "Leucocitos totales",
-              "nombre_canonico": "Recuento de leucocitos",
+              "nombre_canonico": "Leucocitos",
               "valor": 9425,
               "unidad": "cél/mm³",
               "valor_canonico": 9.43,
@@ -339,7 +339,7 @@
   "canonico_esperado": {
     "diagnosticos": [
       {
-        "nombre_canonico": "Diabetes Mellitus tipo 2",
+        "nombre_canonico": "Diabetes mellitus tipo 2",
         "presente_en_centros": 3
       },
       {
@@ -349,7 +349,7 @@
     ],
     "medicamentos": [
       {
-        "principio_activo": "Losartán potásico",
+        "principio_activo": "Losartán",
         "presente_en_centros": 3
       },
       {
@@ -359,7 +359,7 @@
     ],
     "examenes_analitos": [
       {
-        "nombre_canonico": "Glicemia en ayunas",
+        "nombre_canonico": "Glucosa en ayunas",
         "unidad_canonica": "mg/dL",
         "valor_canonico": 75
       },
@@ -374,12 +374,12 @@
         "valor_canonico": 246
       },
       {
-        "nombre_canonico": "Creatinina sérica",
+        "nombre_canonico": "Creatinina",
         "unidad_canonica": "mg/dL",
         "valor_canonico": 1.3
       },
       {
-        "nombre_canonico": "Recuento de leucocitos",
+        "nombre_canonico": "Leucocitos",
         "unidad_canonica": "10³/µL",
         "valor_canonico": 9.43
       }
