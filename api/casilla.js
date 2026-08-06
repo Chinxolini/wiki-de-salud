@@ -14,6 +14,7 @@ import crypto from "node:crypto";
 
 const ACCIONES = new Set([
   "crear-y-provisionar", "estado", "emitir-codigo", "validar-codigo", "enviar-acuerdo",
+  "enviar-aviso",
   "panel-listar", "panel-correos",
 ]);
 
@@ -186,6 +187,18 @@ function validarValidacion(body) {
   return { email: email.trim(), codigo: codigo.trim(), token: token.trim() };
 }
 
+// Valida el body de "enviar-aviso": { email, asunto, texto }. El aviso manda el texto tal
+// cual, sin el preámbulo del mandato que lleva "enviar-acuerdo".
+function validarEnviarAviso(body) {
+  const { email, asunto, texto } = body || {};
+  if (!textoCorto(email, 254) || !RE_EMAIL.test(email.trim())) return null;
+  if (!textoCorto(asunto, 120)) return null;
+  if (typeof texto !== "string" || texto.trim().length === 0) return null;
+  if (Buffer.byteLength(texto.trim(), "utf8") > 12 * 1024) return null;
+  // Sin saltos de linea en el asunto: evita inyeccion de cabeceras en el correo.
+  return { email: email.trim(), asunto: asunto.trim().replace(/\s+/g, " "), texto: texto.trim() };
+}
+
 // Valida el body de "enviar-acuerdo": { email, texto } — texto máx 12KB (igual que el PHP).
 function validarEnviarAcuerdo(body) {
   const { email, texto } = body || {};
@@ -238,7 +251,7 @@ export default async function handler(req, res) {
     const cuota = excedeCuota(usoEstadoPorIP, ip, LIMITE_ESTADO_POR_IP,
       "Demasiadas consultas seguidas. Espera unos minutos e intenta de nuevo.", null, null, null);
     if (cuota) return res.status(429).json({ error: cuota });
-  } else if (accion === "emitir-codigo" || accion === "enviar-acuerdo") {
+  } else if (accion === "emitir-codigo" || accion === "enviar-acuerdo" || accion === "enviar-aviso") {
     const cuota = excedeCuota(usoNotificarPorIP, ip, LIMITE_NOTIFICAR_POR_IP,
       "Demasiados envíos seguidos. Espera unos minutos e intenta de nuevo.",
       LIMITE_NOTIFICAR_GLOBAL, "La demo alcanzó su límite de envíos. Escríbenos y la reactivamos.",
@@ -412,6 +425,22 @@ export default async function handler(req, res) {
     if (process.env.DEMO_CODIGO_VISIBLE === "1") cuerpo.codigo_demo = codigo;
 
     return res.status(200).json(cuerpo);
+  }
+
+  if (accion === "enviar-aviso") {
+    const payload = validarEnviarAviso(req.body);
+    if (!payload) {
+      return res.status(400).json({ error: "Datos incompletos o fuera de los límites permitidos." });
+    }
+    const envio = await llamarPHP(base, apiKey, "notificar", {
+      email: payload.email,
+      tipo: "aviso",
+      datos: { asunto: payload.asunto, texto: payload.texto },
+    });
+    if (!envio.ok) {
+      return res.status(502).json({ error: envio.error, fallback: true });
+    }
+    return res.status(200).json({ enviado: !!envio.data?.enviado });
   }
 
   if (accion === "enviar-acuerdo") {

@@ -500,7 +500,8 @@
     <div id="demoResultado"></div>
     <div id="descargas" hidden style="margin-top:18px">
       <p class="por" style="margin-bottom:10px"><b>Tu Carpeta de Salud está lista.</b> Se armó aquí, en tu
-      navegador: tu nombre y tu RUT nunca salieron de este dispositivo.</p>
+      navegador: tu contenido clínico y tu RUT nunca salieron de este dispositivo. Al servidor solo
+      viajó tu nombre, y únicamente para crear la casilla que se declara ante cada centro.</p>
       <div class="duo" style="flex-direction:column">
         <button type="button" id="dlWiki" style="width:100%">🖨 Generar mi Carpeta de Salud (PDF)</button>
         <button type="button" class="atras" id="dlFichas" style="width:100%;flex:1">
@@ -566,7 +567,7 @@
      el commit vivo lo pregunta a /api/version, para saber si lo que esta arriba es
      efectivamente esta version y no un despliegue anterior. -->
 <p class="sello" id="sello">
-  <span id="selloFecha">versión 2026-08-06 02:09</span><span id="selloSha"></span>
+  <span id="selloFecha">versión 2026-08-06 02:13</span><span id="selloSha"></span>
 </p>
 
 <script>
@@ -1551,8 +1552,12 @@ async function avisarCarpetaLista(){
     "Es un enlace único y personal: no lo compartas.\n\n"+
     "Tus datos se conservan hasta "+hasta+", fecha en la que se suprimen de forma "+
     "automática e irreversible. Recibirás constancia de esa supresión.";
+  // "enviar-aviso" manda el texto tal cual. Con "enviar-acuerdo" el servicio le encajaba
+  // el preambulo del mandato ("Adjuntamos la copia del acuerdo que firmaste el..."), que
+  // en el aviso de "tu Carpeta esta lista" no viene al caso y confundia.
   fetch("/api/casilla", {method:"POST", headers:{"content-type":"application/json"},
-    body: JSON.stringify({accion:"enviar-acuerdo", email: datos.correo, texto})})
+    body: JSON.stringify({accion:"enviar-aviso", email: datos.correo,
+      asunto: "Tu Carpeta de Salud está lista", texto})})
     .catch(()=>{ /* fire-and-forget: sin efecto visible si falla */ });
 }
 
@@ -1650,9 +1655,10 @@ function abrirImprimible(html, nombreArchivo){
 }
 
 // ---------- la Carpeta de Salud, armada en el navegador ----------
-// Se construye aca y no en el servidor a proposito: el nombre y el RUT que la
-// persona escribio nunca viajan. Es la misma promesa del producto, cumplida en
-// el unico lugar donde se puede comprobar.
+// Se construye aca y no en el servidor a proposito: el RUT y el contenido clinico
+// nunca viajan. El nombre si viaja, pero solo a /api/casilla y solo para crear la
+// casilla que se declara ante cada centro; nunca acompana a los datos de salud.
+// Esa es la promesa del producto, cumplida en el unico lugar donde se puede comprobar.
 const BARRA_PDF = barraPdf("Esta es tu Carpeta de Salud.");
 function construirWiki(){
   const hoy = new Date().toLocaleDateString("es-CL");

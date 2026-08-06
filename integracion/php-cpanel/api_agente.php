@@ -480,7 +480,32 @@ TEXT;
                 break;
             }
 
-            out([], "tipo debe ser 'codigo' o 'acuerdo'", false, 400);
+            // Aviso genérico: el asunto y el cuerpo van tal cual los manda quien llama.
+            // Existe porque reusar 'acuerdo' para cualquier notificación le encajaba a todas
+            // el preámbulo del mandato ("Adjuntamos la copia del acuerdo que firmaste…"),
+            // que en un aviso de "tu Carpeta está lista" no viene al caso.
+            if ($tipo === 'aviso') {
+                $asunto = trim((string)($datos['asunto'] ?? ''));
+                $texto = trim((string)($datos['texto'] ?? ''));
+                if ($asunto === '' || mb_strlen($asunto) > 120) {
+                    out([], 'datos.asunto es obligatorio y admite hasta 120 caracteres', false, 400);
+                }
+                if ($texto === '') {
+                    out([], 'datos.texto no puede estar vacío', false, 400);
+                }
+                if (strlen($texto) > 12 * 1024) {
+                    out([], 'datos.texto supera el máximo permitido (12KB)', false, 400);
+                }
+                // Sin saltos de línea en el asunto: evita inyección de cabeceras.
+                $asunto = str_replace(["\r", "\n"], ' ', $asunto);
+
+                $cuerpo = $texto . "\n\n— Equipo Los Inmortales\n";
+                $enviado = enviarCorreoTexto($email, $asunto, $cuerpo);
+                out(['enviado' => $enviado]);
+                break;
+            }
+
+            out([], "tipo debe ser 'codigo', 'acuerdo' o 'aviso'", false, 400);
             break;
         }
 
