@@ -100,6 +100,7 @@
   .camara{border-radius:11px;overflow:hidden}
   .camara video, .camara img{width:100%;max-height:280px;object-fit:cover;border-radius:11px;
     display:block;background:#000}
+  .camara.chica video, .camara.chica img{max-height:150px;object-fit:contain;background:var(--bg)}
   .arch{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:9px 12px;
     border:1px solid var(--line);border-radius:8px;margin-top:8px;font-size:.85rem;background:var(--bg)}
   .arch .x{color:var(--muted);cursor:pointer;font-weight:700;flex:none;background:none;border:0;
@@ -166,6 +167,16 @@
     font-size:.8rem;font-weight:700;box-shadow:var(--shadow);opacity:0;pointer-events:none;
     max-width:min(92vw,480px);text-align:center;transition:opacity .25s ease,transform .25s ease}
   .narrador.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .narrador.etapa{top:auto;bottom:18px;border-radius:16px;text-align:left;font-weight:400;
+    padding:16px 20px;max-width:min(94vw,560px);max-height:70vh;overflow-y:auto;
+    pointer-events:auto;line-height:1.5;transform:translateX(-50%) translateY(8px)}
+  .narrador.etapa.on{opacity:1;transform:translateX(-50%) translateY(0)}
+  .narrador.etapa p{margin:0 0 8px;font-size:.86rem}
+  .narrador.etapa p:last-of-type{margin-bottom:12px}
+  .narrador.etapa b{font-weight:800}
+  .narrador.etapa button{display:block;margin:0 auto;width:auto;background:var(--bg);
+    color:var(--accent);padding:10px 20px;border-radius:9px;font-weight:700;font-size:.85rem;
+    flex:none}
 
   /* ---------- timeline: dos actos ---------- */
   .timeline-grupo + .timeline-grupo{margin-top:24px;padding-top:20px;border-top:1px dashed var(--line)}
@@ -262,6 +273,34 @@
       </div>
       <div id="listaCedula"></div>
       <span class="err" id="e-cedula"></span>
+
+      <label style="margin-top:20px">Tu cédula de identidad, por ambos lados</label>
+      <p class="por">Los centros de salud la piden para asegurarse de que la ficha se la entregan a ti y no a otra persona. Igual que la selfie, estas imágenes se quedan en tu navegador: no viajan a ningún servidor.</p>
+      <div class="grid2">
+        <div>
+          <div class="camara chica" id="cedulaFrenteBox">
+            <img id="cedulaFrenteImg" alt="Frente de tu cédula" hidden>
+            <div class="subir" id="subirCedulaFrente" role="button" tabindex="0">Frente de tu cédula
+              <div class="hint" style="font-weight:400;margin-top:5px">Foto o archivo</div>
+            </div>
+          </div>
+          <input type="file" id="inputCedulaFrente" accept="image/*" capture="environment" hidden>
+        </div>
+        <div>
+          <div class="camara chica" id="cedulaDorsoBox">
+            <img id="cedulaDorsoImg" alt="Dorso de tu cédula" hidden>
+            <div class="subir" id="subirCedulaDorso" role="button" tabindex="0">Dorso de tu cédula
+              <div class="hint" style="font-weight:400;margin-top:5px">Foto o archivo</div>
+            </div>
+          </div>
+          <input type="file" id="inputCedulaDorso" accept="image/*" capture="environment" hidden>
+        </div>
+      </div>
+      <canvas id="cedulaCanvas" hidden></canvas>
+      <div class="duo" style="margin-top:10px">
+        <button type="button" class="link" id="btnSimularCedula">🧪 Simular cédula (para jueces)</button>
+      </div>
+      <span class="err" id="e-cedulaDoc"></span>
     </div>
     <div class="nav"><button type="button" data-ir="2">Continuar</button></div>
   </section>
@@ -334,7 +373,7 @@
         <p><b>Segundo.</b> El poder vale <b>solo para los centros que marqué</b>. Para ningún otro.</p>
         <p><b>Tercero.</b> Los antecedentes se usan <b>únicamente</b> para consolidarlos y entregármelos a mí. No se ceden, no se publican, no se tratan con otra finalidad.</p>
         <p><b>Cuarto.</b> Las respuestas llegan a una casilla creada a mi nombre, y todo lo que llegue ahí se reenvía íntegro a mi correo personal.</p>
-        <p><b>Quinto.</b> Cumplido el encargo se <b>suprime</b> la casilla y todos mis documentos y datos. Queda solo un registro estadístico sin datos personales sobre cuánto demoró cada centro. Recibo constancia de la supresión con fecha y hora.</p>
+        <p><b>Quinto.</b> Los antecedentes se conservan hasta <b>90 días</b> contados desde el inicio del encargo, plazo durante el cual puedo acceder a mi Carpeta de Salud y descargarla mediante un enlace personal. Cumplido ese plazo, se <b>suprimen de forma automática e irreversible</b> la casilla, los documentos y los datos, quedando solo un registro estadístico sin datos personales sobre cuánto demoró cada centro. Recibo constancia de la supresión con fecha y hora.</p>
         <p><b>Sexto.</b> Puedo <b>revocarlo cuando quiera</b>, sin dar explicaciones, por correo. Desde que se recibe la revocación, se suprime todo de inmediato.</p>
         <p><b>Séptimo.</b> Se firma por sistema electrónico que garantiza su autenticidad (Ley 19.799): identidad declarada, prueba de vida fotográfica, aceptación expresa de este texto, sello de tiempo y trazas técnicas. Recibirás la constancia de firma en tu correo.</p>
       </div>
@@ -429,6 +468,15 @@
   </div>
 </section>
 
+<!-- ETAPA C: entrada a la espera. El texto y el boton para avanzar viven en el
+     globo (#narrador); esta seccion solo marca el cambio de pantalla. -->
+<section id="etapaC" class="paso">
+  <div class="card" style="text-align:center;background:var(--soft);border-color:var(--accent)">
+    <span class="kicker">◆ Fin de la parte activa</span>
+    <h2 class="h2" style="margin:0">Ahora, a esperar</h2>
+  </div>
+</section>
+
 <!-- RESULTADO -->
 <section id="salida" class="paso">
   <h2 class="h2">Listo. Tu solicitud está en marcha.</h2>
@@ -444,10 +492,10 @@
 
   <div class="card" id="cardDemoVivo" hidden>
     <h2 class="h2" style="font-size:1.1rem">▶ Míralo funcionar ahora</h2>
-    <p class="por">No es una maqueta. El botón manda las fichas clínicas de los tres centros a
-    Claude, que las lee y las unifica en una sola Carpeta de Salud a tu nombre. Con el consumo real de
-    tokens a la vista.</p>
-    <button type="button" id="btnDemo" style="width:100%">Reunir mi Carpeta de Salud con Claude</button>
+    <p class="por">No es una maqueta. Las fichas clínicas de los tres centros se están leyendo con
+    Claude, que las unifica en una sola Carpeta de Salud a tu nombre. Con el consumo real de tokens
+    a la vista.</p>
+    <button type="button" id="btnDemo" hidden>Reunir mi Carpeta de Salud con Claude</button>
     <div id="demoEstado" class="hint" style="margin-top:12px"></div>
     <div id="demoResultado"></div>
     <div id="descargas" hidden style="margin-top:18px">
@@ -476,7 +524,7 @@
     <p><b>SEGUNDO. Prestadores comprendidos.</b> Este poder se otorga exclusivamente respecto de los prestadores que el titular seleccionó al firmar. No se extiende a ningún otro.</p>
     <p><b>TERCERO. Finalidad única.</b> Los antecedentes se usarán <b>únicamente</b> para consolidarlos y entregárselos al titular. El mandatario <b>no queda facultado</b> para cederlos, comunicarlos, publicarlos ni tratarlos con ninguna finalidad distinta.</p>
     <p><b>CUARTO. Casilla designada.</b> Las respuestas se reciben en una casilla creada a nombre del titular, y se le reenvían íntegramente a su correo personal.</p>
-    <p><b>QUINTO. Supresión al término del encargo.</b> Cumplido el encargo, el mandatario <b>suprimirá</b> la casilla y la totalidad de los documentos y datos personales obtenidos, conservando únicamente un registro estadístico <b>sin datos personales</b> sobre el plazo y formato de respuesta de cada prestador. Se entrega constancia con fecha y hora.</p>
+    <p><b>QUINTO. Plazo de conservación y supresión.</b> Los antecedentes y documentos obtenidos se conservarán hasta por <b>90 días corridos</b> contados desde el inicio del encargo, plazo durante el cual el titular podrá acceder a su Carpeta de Salud y descargarla mediante un enlace personal. <b>Cumplido ese plazo</b>, el mandatario <b>suprimirá de forma automática e irreversible</b> la casilla y la totalidad de los documentos y datos personales obtenidos, conservando únicamente un registro estadístico <b>sin datos personales</b> sobre el plazo y formato de respuesta de cada prestador. Se entrega constancia con fecha y hora.</p>
     <p><b>SEXTO. Vigencia y revocación.</b> Rige por el plazo necesario para cumplir el encargo. El titular <b>puede revocarlo en cualquier momento, sin expresión de causa</b>, incluso por correo. La revocación obliga a la supresión inmediata conforme a la cláusula QUINTA.</p>
     <p><b>SÉPTIMO. Forma de otorgamiento.</b> Se firma <b>a través de un sistema electrónico que garantiza su autenticidad</b>, en los términos del art. 13 letra b) de la Ley N° 20.584 y de la Ley N° 19.799. La constancia técnica se incorpora como Anexo de Autenticidad.</p>
     <p><b>OCTAVO. Declaración.</b> Declaro que la información proporcionada es efectiva, que soy la persona cuya ficha se solicita, y que comprendo el alcance de las facultades que confiero.</p>
@@ -499,7 +547,7 @@
      el commit vivo lo pregunta a /api/version, para saber si lo que esta arriba es
      efectivamente esta version y no un despliegue anterior. -->
 <p class="sello" id="sello">
-  <span id="selloFecha">versión 2026-08-06 00:58</span><span id="selloSha"></span>
+  <span id="selloFecha">versión 2026-08-06 01:35</span><span id="selloSha"></span>
 </p>
 
 <script>
@@ -597,6 +645,8 @@ function validarPaso(n){
       /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test($("#correo").value.trim()) ? "" : "Escribe un correo válido.") && ok;
     ok = marcar("#e-cedula", null,
       haySelfie() ? "" : "Tómate una selfie, o usa “Simular foto”.") && ok;
+    ok = marcar("#e-cedulaDoc", null,
+      hayCedulaCompleta() ? "" : "Sube ambos lados de tu cédula, o usa “Simular cédula”.") && ok;
   }
   if(n === 2){
     const marcados = document.querySelectorAll("[name=prestador]:checked").length;
@@ -740,6 +790,146 @@ inputCedula.addEventListener("change", ()=>{
   lector.readAsDataURL(archivo);
 });
 
+// ---------- cédula de identidad: ambos lados, subida o simulada ----------
+// Igual que la selfie: se guarda como dataURL en memoria, nunca en un input del
+// formulario, y no viaja al servidor.
+const cedulaFrenteImg = $("#cedulaFrenteImg"), cedulaDorsoImg = $("#cedulaDorsoImg"),
+      subirCedulaFrente = $("#subirCedulaFrente"), subirCedulaDorso = $("#subirCedulaDorso"),
+      inputCedulaFrente = $("#inputCedulaFrente"), inputCedulaDorso = $("#inputCedulaDorso"),
+      cedulaCanvas = $("#cedulaCanvas"), btnSimularCedula = $("#btnSimularCedula");
+let cedulaFrenteUrl = null, cedulaDorsoUrl = null;
+const hayCedulaFrente = () => !!cedulaFrenteUrl;
+const hayCedulaDorso = () => !!cedulaDorsoUrl;
+const hayCedulaCompleta = () => hayCedulaFrente() && hayCedulaDorso();
+
+function mostrarCedulaLado(lado, dataUrl){
+  const img = lado === "frente" ? cedulaFrenteImg : cedulaDorsoImg;
+  const caja = lado === "frente" ? subirCedulaFrente : subirCedulaDorso;
+  img.src = dataUrl; img.hidden = false; caja.hidden = true;
+  $("#e-cedulaDoc").textContent = "";
+}
+
+function activarSubidaCedula(boton, input){
+  boton.addEventListener("click", ()=>input.click());
+  boton.addEventListener("keydown", e=>{
+    if(e.key === "Enter" || e.key === " "){ e.preventDefault(); input.click(); }
+  });
+}
+activarSubidaCedula(subirCedulaFrente, inputCedulaFrente);
+activarSubidaCedula(subirCedulaDorso, inputCedulaDorso);
+
+inputCedulaFrente.addEventListener("change", ()=>{
+  const archivo = inputCedulaFrente.files[0]; if(!archivo) return;
+  const lector = new FileReader();
+  lector.onload = () => { cedulaFrenteUrl = lector.result; mostrarCedulaLado("frente", cedulaFrenteUrl); };
+  lector.readAsDataURL(archivo);
+});
+inputCedulaDorso.addEventListener("change", ()=>{
+  const archivo = inputCedulaDorso.files[0]; if(!archivo) return;
+  const lector = new FileReader();
+  lector.onload = () => { cedulaDorsoUrl = lector.result; mostrarCedulaLado("dorso", cedulaDorsoUrl); };
+  lector.readAsDataURL(archivo);
+});
+
+// Silueta generica reutilizada de dibujarAvatarSintetico, a menor escala, para el
+// recuadro de foto de la cedula simulada.
+function dibujarSiluetaMini(ctx, cx, cy, r){
+  ctx.fillStyle = "#9fb3ab";
+  ctx.beginPath(); ctx.arc(cx, cy - r*0.25, r*0.42, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(cx - r*0.8, cy + r*0.95);
+  ctx.quadraticCurveTo(cx, cy + r*0.15, cx + r*0.8, cy + r*0.95); ctx.fill();
+}
+function fondoCedula(ctx, w, h){
+  ctx.fillStyle = "#f2ede1";
+  ctx.beginPath(); ctx.roundRect(0, 0, w, h, 14); ctx.fill();
+  ctx.strokeStyle = "#c7bfa8"; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect(1, 1, w-2, h-2, 13); ctx.stroke();
+}
+// Banda diagonal bien visible: que nadie, ni de lejos, la confunda con una cedula real.
+function bandaEspecimenCedula(ctx, w, h){
+  ctx.save();
+  ctx.translate(w/2, h/2); ctx.rotate(-18 * Math.PI/180);
+  ctx.fillStyle = "rgba(192,57,43,.6)";
+  ctx.fillRect(-w*0.75, -17, w*1.5, 34);
+  ctx.fillStyle = "#fff"; ctx.font = "bold 15px sans-serif";
+  ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  ctx.fillText("ESPÉCIMEN — DEMO", 0, 1);
+  ctx.restore();
+}
+// Datos sinteticos de la cedula: si el formulario ya tiene nombre y RUT validos, los usa
+// (para que la demo se vea coherente); si no, cae al espécimen por defecto.
+function datosCedulaSintetica(){
+  const nombreForm = $("#nombre").value.trim();
+  const rutForm = rutInput.value.trim();
+  const nombreCompleto = nombreForm || "PACIENTE DE DEMOSTRACIÓN";
+  const rut = rutValido(rutForm) ? rutForm : "11.111.111-1";
+  const partes = nombreCompleto.trim().split(/\s+/);
+  const apellidos = (partes.length > 1 ? partes.slice(-2) : ["DEMOSTRACIÓN"]).join(" ");
+  const nombres = (partes.length > 2 ? partes.slice(0, -2) : [partes[0]]).join(" ");
+  return { nombres: nombres.toUpperCase(), apellidos: apellidos.toUpperCase(), rut,
+           fNac: "01-ENE-1990", fVenc: "01-ENE-2031" };
+}
+function dibujarCedulaFrente(datos){
+  const w = 340, h = 214;
+  cedulaCanvas.width = w; cedulaCanvas.height = h;
+  const ctx = cedulaCanvas.getContext("2d");
+  fondoCedula(ctx, w, h);
+  ctx.fillStyle = "#0f5c46"; ctx.fillRect(0, 0, w, 34);
+  ctx.fillStyle = "#fff"; ctx.font = "bold 11px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("REPÚBLICA DE CHILE — CÉDULA DE IDENTIDAD", w/2, 21);
+
+  ctx.fillStyle = "#dfe7e3"; ctx.fillRect(14, 46, 78, 96);
+  ctx.strokeStyle = "#b9c4bf"; ctx.strokeRect(14, 46, 78, 96);
+  dibujarSiluetaMini(ctx, 53, 94, 34);
+
+  const campos = [["APELLIDOS", datos.apellidos], ["NOMBRES", datos.nombres],
+    ["NACIONALIDAD", "CHILENA"], ["RUN", datos.rut],
+    ["FECHA DE NACIMIENTO", datos.fNac], ["FECHA DE VENCIMIENTO", datos.fVenc]];
+  let y = 54;
+  ctx.textAlign = "left";
+  campos.forEach(([label, valor])=>{
+    ctx.fillStyle = "#6b7570"; ctx.font = "bold 8px sans-serif";
+    ctx.fillText(label, 102, y);
+    ctx.fillStyle = "#17201d"; ctx.font = "bold 12px sans-serif";
+    ctx.fillText(valor, 102, y + 13);
+    y += 26;
+  });
+
+  bandaEspecimenCedula(ctx, w, h);
+  return cedulaCanvas.toDataURL("image/png");
+}
+function dibujarCedulaDorso(){
+  const w = 340, h = 214;
+  cedulaCanvas.width = w; cedulaCanvas.height = h;
+  const ctx = cedulaCanvas.getContext("2d");
+  fondoCedula(ctx, w, h);
+  ctx.fillStyle = "#0f5c46"; ctx.fillRect(0, 0, w, 10);
+
+  ctx.strokeStyle = "#8a9a94"; ctx.lineWidth = 2;
+  for(let i = 0; i < 7; i++){
+    ctx.beginPath();
+    ctx.ellipse(80, 96, 10 + i*6, 14 + i*7, 0, Math.PI*0.2, Math.PI*1.5);
+    ctx.stroke();
+  }
+  ctx.fillStyle = "#6b7570"; ctx.font = "bold 8px sans-serif"; ctx.textAlign = "center";
+  ctx.fillText("HUELLA DACTILAR (ESTILIZADA)", 80, 172);
+
+  ctx.fillStyle = "#eef1ee"; ctx.fillRect(14, h-46, w-28, 32);
+  ctx.fillStyle = "#17201d"; ctx.font = "13px ui-monospace, Menlo, Consolas, monospace"; ctx.textAlign = "left";
+  ctx.fillText("IDCHL1111111111<<<<<<<<<<<<<<", 20, h-30);
+  ctx.fillText("9001010M3001010CHL<<<<<<<<<06", 20, h-14);
+
+  bandaEspecimenCedula(ctx, w, h);
+  return cedulaCanvas.toDataURL("image/png");
+}
+btnSimularCedula.addEventListener("click", ()=>{
+  const datos = datosCedulaSintetica();
+  cedulaFrenteUrl = dibujarCedulaFrente(datos);
+  mostrarCedulaLado("frente", cedulaFrenteUrl);
+  cedulaDorsoUrl = dibujarCedulaDorso();
+  mostrarCedulaLado("dorso", cedulaDorsoUrl);
+});
+
 document.querySelectorAll("[name=tiene]").forEach(r=>r.addEventListener("change",()=>{
   $("#bloqueSubir").hidden = $("[name=tiene]:checked").value !== "si";
 }));
@@ -755,8 +945,31 @@ $("#verPoder").addEventListener("click",()=>dlgPoder.showModal());
 // demo de Claude sola.
 const pausa = ms => new Promise(res=>setTimeout(res, ms));
 const narradorEl = $("#narrador");
-function narrar(msg){ narradorEl.textContent = msg; narradorEl.classList.add("on"); }
-function narrarOff(){ narradorEl.classList.remove("on"); }
+function narrar(msg){
+  narradorEl.classList.remove("etapa");
+  narradorEl.textContent = msg;
+  narradorEl.classList.add("on");
+}
+function narrarOff(){ narradorEl.classList.remove("on","etapa"); }
+
+// ---------- globo persistente de etapas (A a E): reusa #narrador, en modo tarjeta ----------
+// Desde la etapa A el ritmo lo pone el juez: el globo explica "que esta pasando" y
+// "lo que viene" y, si corresponde, trae su propio boton para avanzar. Nunca se cierra
+// solo ni bloquea la pantalla (position:fixed, pointer-events limitados al globo).
+function mostrarEtapa({quePasa, loQueViene, boton, onBoton}){
+  narradorEl.classList.add("etapa");
+  narradorEl.innerHTML =
+    `<p><b>Qué está pasando.</b> ${quePasa}</p>` +
+    `<p><b>Lo que viene.</b> ${loQueViene}</p>` +
+    (boton ? `<button type="button" id="etapaBotonActual">${boton}</button>` : "");
+  narradorEl.classList.add("on");
+  if(boton){
+    const btnEtapa = $("#etapaBotonActual");
+    // disabled de inmediato, antes de correr onBoton: un doble clic del juez no puede
+    // colar dos avances (dos revelaciones) por un solo gesto.
+    btnEtapa.addEventListener("click", () => { btnEtapa.disabled = true; onBoton(); }, {once:true});
+  }
+}
 
 function enfocarDemo(el){
   el.scrollIntoView({behavior:"smooth", block:"center"});
@@ -825,6 +1038,15 @@ $("#btnSimular").addEventListener("click", async ()=>{
     quitarFoto();
     await pausa(1100);
 
+    narrar("Y tu cédula, por ambos lados: así lo piden los centros de salud");
+    await pausa(500);
+    const cedulaBtn = $("#btnSimularCedula");
+    const quitarCedula = enfocarDemo(cedulaBtn);
+    cedulaBtn.click();
+    await pausa(900); // pausa para que se aprecien ambas miniaturas
+    quitarCedula();
+    await pausa(1100);
+
     irA(2);
     narrar("Paso 2 — Dónde te has atendido");
     await pausa(500);
@@ -849,27 +1071,13 @@ $("#btnSimular").addEventListener("click", async ()=>{
     narrarOff();
     $("#f").requestSubmit();
 
-    // Esperar a que aparezca el corte de "esto es todo lo de hoy".
+    // Esperar a que aparezca el corte de "esto es todo lo de hoy" (etapa A). De ahi en
+    // adelante el ritmo lo pone el juez: el simulador se detiene y no avanza mas por su
+    // cuenta. mostrarCierre() ya deja montado el globo de la etapa A.
     for(let i = 0; i < 40 && !$("#cierreHoy").classList.contains("activo"); i++) await pausa(250);
-    await pausa(900);
-    $("#btnACierrePaso5").click();
-
-    narrar("Paso 5 — Tu acompañamiento, opcional");
-    await pausa(600);
-    await marcarOpcion($("#chkAcompLegal"));
-    await marcarOpcion($("#chkAcompSalud"));
-    await pausa(900);
-    narrarOff();
-    $("#btnFinPaso5").click();
-
-    // Esperar a que la pantalla final este montada, no un tiempo fijo: provisionar la
-    // casilla real puede demorar varios segundos y arrancar la demo antes desordena el
-    // timeline.
-    for(let i = 0; i < 40 && !$("#salida").classList.contains("activo"); i++) await pausa(250);
-    await pausa(400);
-    $("#btnDemo")?.click();
   } finally {
-    narrarOff();
+    // No narrarOff() aca: mostrarCierre() ya dejo montado el globo persistente de la
+    // etapa A, y es justo el que tiene que quedar visible cuando el simulador se detiene.
     boton.disabled = false;
   }
 });
@@ -883,22 +1091,48 @@ let datos = null;
 function mostrarCierre(){
   document.querySelectorAll(".paso[data-paso]").forEach(s=>s.classList.remove("activo"));
   $("#paso5").classList.remove("activo");
+  $("#etapaC").classList.remove("activo");
   $("#salida").classList.remove("activo");
   $("#barra").hidden = true;
   $("#cierreHoy").classList.add("activo");
   window.scrollTo({top:0});
+  // Etapa A — de aca en adelante el ritmo lo pone el juez: cada etapa espera su clic.
+  mostrarEtapa({
+    quePasa: "Firmaste el poder y quedó registrada la constancia. Con eso ya podemos "+
+      "actuar en tu nombre ante cada centro.",
+    loQueViene: "Te vamos a ofrecer, opcionalmente, acompañamiento durante la espera.",
+  });
 }
 function mostrarPaso5(){
   $("#cierreHoy").classList.remove("activo");
   $("#paso5").classList.add("activo");
   window.scrollTo({top:0});
+  // Etapa B.
+  mostrarEtapa({
+    quePasa: "Tu ficha ya se está pidiendo, gratis, decidas lo que decidas acá. Esto es "+
+      "solo sobre si quieres compañía en el camino.",
+    loQueViene: "Vamos a simular el paso de las semanas hasta que responda cada centro.",
+  });
 }
 function finalizarAcompanamiento(seguirSinNada){
   if(seguirSinNada){ $("#chkAcompLegal").checked = false; $("#chkAcompSalud").checked = false; }
   datos.acompLegal = $("#chkAcompLegal").checked;
   datos.acompSalud = $("#chkAcompSalud").checked;
   $("#paso5").classList.remove("activo");
-  mostrarResultado();
+  mostrarEtapaC();
+}
+function mostrarEtapaC(){
+  $("#etapaC").classList.add("activo");
+  window.scrollTo({top:0});
+  // Etapa C — el boton para avanzar vive en el propio globo.
+  mostrarEtapa({
+    quePasa: "Hasta aquí llegó lo de hoy: tomó minutos. Lo que sigue, en la realidad, "+
+      "toma semanas.",
+    loQueViene: "Vas a ver llegar la respuesta de cada centro, una por una, como llegan "+
+      "de verdad: en fechas distintas y sin que tengas que hacer nada.",
+    boton: "Ver cómo llega la información",
+    onBoton: iniciarEtapaD,
+  });
 }
 $("#btnACierrePaso5").addEventListener("click", mostrarPaso5);
 $("#btnFinPaso5").addEventListener("click", ()=>finalizarAcompanamiento(false));
@@ -950,6 +1184,8 @@ async function mostrarResultado(){
       casilla = data.direccion;
       casillaEsDemo = false;
       datos.guid = data.guid;
+      // La clave del caso: sin ella el enlace no abre nada. Va en el correo final.
+      datos.clave = data.clave || null;
     }
   }catch{ /* sin conexión al servicio de casillas: seguimos con la sintética */ }
   const auto = sel.filter(p=>p.canal === "correo");
@@ -1121,50 +1357,135 @@ const CENTROS_DEMO = ["centro_a","centro_b","centro_c"];
 const esc = s => String(s ?? "").replace(/[&<>"]/g, c =>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 
-let registros = [];   // lo que devolvio Claude por cada centro
+let registros = [];   // lo que devolvio Claude por cada centro, en el orden en que se REVELA
 let originales = {};  // el HTML crudo de cada ficha, para la descarga
 
-$("#btnDemo").addEventListener("click", async ()=>{
-  const btn = $("#btnDemo"), est = $("#demoEstado"), out = $("#demoResultado");
-  btn.disabled = true; out.innerHTML = ""; $("#descargas").hidden = true;
-  registros = []; originales = {};
-  respuestasRecibidas = []; carpetaLista = false; renderTimeline();
-  let tokIn = 0, tokOut = 0;
-  try{
-    for(let i = 0; i < CENTROS_DEMO.length; i++){
-      const id = CENTROS_DEMO[i];
-      est.textContent = `Claude está leyendo la ficha ${i+1} de ${CENTROS_DEMO.length}…`;
+// ---------- etapa D: la extraccion real corre atras, el juez controla cuando se revela ----------
+// extraccionDatos[i] queda null hasta que responde /api/extraer para ese centro; el clic
+// del juez ("Continuar") solo decide cuando ese resultado -ya listo o todavia no- pasa al
+// timeline. Asi nunca se pierde tiempo real esperando, pero tampoco se le impone un
+// temporizador a quien mira.
+let extraccionDatos = [];
+let extraccionResolvers = [];
+
+async function correrExtraccionFondo(){
+  for(let i = 0; i < CENTROS_DEMO.length; i++){
+    const id = CENTROS_DEMO[i];
+    try{
       const r = await fetch("/api/extraer", {method:"POST",
         headers:{"content-type":"application/json"}, body: JSON.stringify({ficha:id})});
       const data = await r.json();
       if(!r.ok) throw new Error(data.error || "Error del servidor.");
-      registros.push(data.registro);
-      tokIn += data.uso.tokens_entrada || 0;
-      tokOut += data.uso.tokens_salida || 0;
-      // El original se guarda para que la persona se lo lleve junto al expediente.
       originales[id] = await (await fetch(`/demo/ficha-${id}.html`)).text();
-      out.innerHTML = resumen(registros);
-      // El timeline "enciende" el hito de la primera respuesta a medida que llega cada
-      // centro: efecto de que pasó el tiempo, con la fecha simulada y el nombre real.
-      respuestasRecibidas.push({centro: NOMBRES_CENTRO_DEMO[id] || id,
-        fecha: fechaSim(7*(i+1)), resumen: resumenRegistro(data.registro)});
-      renderTimeline();
-      // Pausa visible entre una respuesta y la siguiente: sin esto las 3 llegan casi
-      // seguidas y no se percibe que en la realidad son semanas de por medio.
-      if(i < CENTROS_DEMO.length - 1){
-        narrar(`Avanzando en el tiempo… semana ${i+2}`);
-        await pausa(2800);
-        narrarOff();
-      }
+      extraccionDatos[i] = {id, ok:true, registro:data.registro, uso:data.uso};
+    }catch(err){
+      extraccionDatos[i] = {id, ok:false, error: err.message};
     }
-    est.textContent = `Listo — ${registros.length} centros unificados · claude-haiku-4-5 · `+
+    if(extraccionResolvers[i]){ extraccionResolvers[i](); extraccionResolvers[i] = null; }
+  }
+}
+
+async function revelarRespuesta(i){
+  const est = $("#demoEstado"), out = $("#demoResultado");
+  if(!extraccionDatos[i]){
+    est.textContent = `Claude está leyendo la ficha ${i+1} de ${CENTROS_DEMO.length}…`;
+    mostrarEtapa({
+      quePasa: `Esperando la respuesta del centro ${i+1} de ${CENTROS_DEMO.length}…`,
+      loQueViene: "Se revela en el timeline apenas esté lista.",
+    });
+    await new Promise(res => extraccionResolvers[i] = res);
+  }
+  const d = extraccionDatos[i];
+  const restantes = CENTROS_DEMO.length - (i + 1);
+  const loQueViene = restantes > 0
+    ? `Queda${restantes>1?"n":""} ${restantes} centro${restantes>1?"s":""} por responder.`
+    : "Ya respondieron todos.";
+  if(d.ok){
+    registros.push(d.registro);
+    respuestasRecibidas.push({centro: NOMBRES_CENTRO_DEMO[d.id] || d.id,
+      fecha: fechaSim(7*(i+1)), resumen: resumenRegistro(d.registro)});
+    renderTimeline();
+    out.innerHTML = resumen(registros);
+    const tokIn = extraccionDatos.slice(0,i+1).reduce((a,x)=>a+(x?.uso?.tokens_entrada||0),0);
+    const tokOut = extraccionDatos.slice(0,i+1).reduce((a,x)=>a+(x?.uso?.tokens_salida||0),0);
+    est.textContent = `${i+1} de ${CENTROS_DEMO.length} centros leídos · claude-haiku-4-5 · `+
       `${tokIn.toLocaleString("es-CL")} tokens de entrada, ${tokOut.toLocaleString("es-CL")} de salida.`;
-    $("#descargas").hidden = false;
-    carpetaLista = true; renderTimeline();
-  }catch(err){
-    est.textContent = "⚠ " + err.message;
-  }finally{ btn.disabled = false; }
-});
+    mostrarEtapa({
+      quePasa: `Llegó la respuesta de ${NOMBRES_CENTRO_DEMO[d.id] || d.id}. Claude la está `+
+        `leyendo y ordenando al mismo vocabulario que las demás, para que se puedan comparar.`,
+      loQueViene,
+      boton: restantes > 0 ? "Continuar" : null,
+      onBoton: restantes > 0 ? () => revelarRespuesta(i+1) : null,
+    });
+  } else {
+    est.textContent = "⚠ " + d.error;
+    mostrarEtapa({
+      quePasa: `No se pudo leer la respuesta del centro ${i+1} de ${CENTROS_DEMO.length}: ${d.error}`,
+      loQueViene,
+      boton: restantes > 0 ? "Continuar" : null,
+      onBoton: restantes > 0 ? () => revelarRespuesta(i+1) : null,
+    });
+  }
+  if(restantes === 0) finalizarEtapaD();
+}
+
+function finalizarEtapaD(){
+  carpetaLista = true; renderTimeline();
+  $("#descargas").hidden = false;
+  // Etapa E — sin boton: aca terminan las etapas y quedan las descargas.
+  mostrarEtapa({
+    quePasa: "Tu Carpeta de Salud está armada, con cada dato enlazado al documento del "+
+      "que salió.",
+    loQueViene: "Puedes descargarla junto con las fichas originales. Al cerrar el caso, "+
+      "todo se borra y te llega la constancia.",
+  });
+  avisarCarpetaLista();
+}
+
+// La pagina /caso/?id=<guid> lee la Carpeta y las fichas originales desde localStorage
+// (nunca del servidor), y el correo le da a la persona el enlace para volver a esa
+// pagina desde cualquier momento dentro de los 90 dias. Todo fire-and-forget: si algo
+// de esto falla, no hay nada visible que romper, el flujo ya siguio.
+async function avisarCarpetaLista(){
+  if(!datos?.guid) return; // casilla sintetica (fallback): no hay guid, no hay pagina de caso
+  try{
+    localStorage.setItem("carpeta:"+datos.guid, construirWiki());
+    localStorage.setItem("originales:"+datos.guid, construirFichas());
+  }catch{ /* sin localStorage disponible: la pagina de caso queda sin descarga local */ }
+  let hasta = "en la fecha que consta en tu mandato";
+  try{
+    const r = await fetch("/api/casilla", {method:"POST",
+      headers:{"content-type":"application/json"},
+      body: JSON.stringify({accion:"estado", guid: datos.guid, clave: datos.clave})});
+    const est = await r.json().catch(()=>null);
+    if(r.ok && est?.expires_at){
+      hasta = "el " + new Date(est.expires_at.replace(" ", "T")).toLocaleDateString("es-CL",
+        {day:"2-digit", month:"long", year:"numeric"});
+    }
+  }catch{ /* sin respuesta: se usa el texto generico */ }
+  const enlace = `${location.origin}/caso/?id=${datos.guid}`;
+  // El enlace y la clave van en el mismo correo, pero separados: si el enlace se reenvia
+  // solo -o queda en un historial, en un log-, no alcanza para abrir el caso.
+  const texto = "Tu Carpeta de Salud ya está lista.\n\n"+
+    "Puedes verla y descargarla en este enlace: "+enlace+"\n\n"+
+    (datos.clave ? "Tu clave para abrirla: "+datos.clave+"\n\n"+
+      "El enlace por sí solo no abre el caso: al entrar te va a pedir esta clave.\n\n" : "")+
+    "Es un enlace único y personal: no lo compartas.\n\n"+
+    "Tus datos se conservan hasta "+hasta+", fecha en la que se suprimen de forma "+
+    "automática e irreversible. Recibirás constancia de esa supresión.";
+  fetch("/api/casilla", {method:"POST", headers:{"content-type":"application/json"},
+    body: JSON.stringify({accion:"enviar-acuerdo", email: datos.correo, texto})})
+    .catch(()=>{ /* fire-and-forget: sin efecto visible si falla */ });
+}
+
+async function iniciarEtapaD(){
+  $("#etapaC").classList.remove("activo");
+  await mostrarResultado();
+  registros = []; originales = {};
+  extraccionDatos = []; extraccionResolvers = [];
+  correrExtraccionFondo(); // fire-and-forget: corre atras mientras el juez lee el globo
+  revelarRespuesta(0);
+}
 
 const junta = k => registros.flatMap(r => (r[k] || []).map(x => ({...x, _centro: r.centro})));
 

@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tu caso — Wiki de salud</title>
+<style>
+  :root{
+    --bg:#faf8f4; --card:#fff; --ink:#17201d; --muted:#6b7570;
+    --line:#e4e0d7; --accent:#0f5c46; --accent-2:#c9782f; --soft:#e9f2ee;
+    --warn:#8a5a00; --warn-soft:#fdf4e3; --shadow:0 1px 2px rgba(23,32,29,.05),0 8px 24px rgba(23,32,29,.06);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#121614; --card:#1b211e; --ink:#e8ece9; --muted:#98a49e;
+           --line:#2c3531; --accent:#63c3a2; --accent-2:#e0a061; --soft:#182b24;
+           --warn:#e0b055; --warn-soft:#2b2418; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);}
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+       font:16px/1.6 ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+       -webkit-font-smoothing:antialiased}
+  .wrap{max-width:620px;margin:0 auto;padding:48px 20px 80px}
+  h1{font-size:1.6rem;line-height:1.2;margin:0 0 8px;letter-spacing:-.01em;font-weight:800}
+  .lede{color:var(--muted);margin:0 0 28px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:22px;
+    margin-bottom:14px;box-shadow:var(--shadow)}
+  .fila{display:flex;justify-content:space-between;gap:14px;padding:9px 0;
+    border-bottom:1px solid var(--line);font-size:.92rem}
+  .fila:last-child{border-bottom:0}
+  .fila span:first-child{color:var(--muted)}
+  .fila b{text-align:right}
+  code{background:var(--soft);padding:2px 7px;border-radius:6px;font-size:.88rem}
+  .plazo{background:var(--warn-soft);border-left:3px solid var(--warn);border-radius:0 10px 10px 0;
+    padding:16px 18px;font-size:.9rem;line-height:1.55;margin-top:16px}
+  .plazo b{color:var(--warn)}
+  .cuenta{font-size:1.5rem;font-weight:800;color:var(--warn);display:block;margin-bottom:2px;
+    font-variant-numeric:tabular-nums}
+  button{padding:14px 20px;border:0;border-radius:10px;background:var(--accent);color:var(--bg);
+    font:inherit;font-weight:700;font-size:1rem;cursor:pointer;width:100%;margin-top:10px}
+  button:hover:not(:disabled){filter:brightness(1.08)}
+  button:disabled{opacity:.4;cursor:not-allowed}
+  button.sec{background:transparent;color:var(--accent);border:1.5px solid var(--line)}
+  .estado{display:inline-flex;align-items:center;gap:7px;font-size:.74rem;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;color:var(--accent);background:var(--soft);
+    padding:5px 11px;border-radius:99px;margin-bottom:16px}
+  .hint{color:var(--muted);font-size:.84rem}
+  .err{background:var(--warn-soft);border-left:3px solid var(--warn);padding:16px 18px;
+    border-radius:0 10px 10px 0;font-size:.9rem}
+  .foot{color:var(--muted);font-size:.78rem;text-align:center;margin-top:34px;line-height:1.65}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="pedirClave" hidden>
+    <h1>Abre tu caso</h1>
+    <p class="lede">Este enlace no basta por sí solo. Escribe la clave que va en el mismo correo:
+    así, si el enlace se comparte por error, nadie ve tus datos.</p>
+    <div class="card">
+      <label for="clave" style="display:block;font-weight:650;font-size:.9rem;margin-bottom:6px">Clave del caso</label>
+      <input id="clave" type="text" inputmode="text" autocomplete="off" spellcheck="false"
+             placeholder="ABCD-EFGH" maxlength="9"
+             style="width:100%;padding:13px;border:1.5px solid var(--line);border-radius:9px;
+                    background:var(--bg);color:var(--ink);font:inherit;font-size:1.15rem;
+                    letter-spacing:.18em;text-align:center;text-transform:uppercase">
+      <div id="errClave" style="color:#c0392b;font-size:.84rem;min-height:1.2em;margin-top:6px"></div>
+      <button id="btnAbrir">Abrir mi caso</button>
+    </div>
+  </div>
+
+  <div id="cargando" class="card"><p class="hint" style="margin:0">Buscando tu caso…</p></div>
+
+  <div id="contenido" hidden>
+    <span class="estado" id="estadoChip">◆ <span id="estadoTxt"></span></span>
+    <h1>Tu caso está aquí</h1>
+    <p class="lede">Este enlace es tuyo y es el único que abre este caso. No lo compartas:
+    quien lo tenga puede ver esta página.</p>
+
+    <div class="card">
+      <div class="fila"><span>Identificador del caso</span><b><code id="fGuid"></code></b></div>
+      <div class="fila"><span>Casilla que gestiona tu caso</span><b><code id="fCasilla"></code></b></div>
+      <div class="fila"><span>Estado</span><b id="fEstado"></b></div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1rem;margin:0 0 4px">Tu Carpeta de Salud</h2>
+      <p class="hint" style="margin:0 0 6px">La Carpeta se arma en tu navegador: por eso solo se
+      puede descargar desde el dispositivo donde la generaste. Si abriste este enlace en otro,
+      vuelve a ese equipo.</p>
+      <button id="btnDescargar" disabled>Descargar mi Carpeta de Salud</button>
+      <button id="btnOriginales" class="sec" disabled>Descargar las fichas originales</button>
+    </div>
+
+    <div class="plazo">
+      <span class="cuenta" id="cuenta"></span>
+      <b>Hasta cuándo viven estos datos.</b> El <b id="fVence"></b> se suprimen de forma
+      automática e irreversible tu casilla, tus documentos y tus datos: son 90 días desde que
+      empezó el encargo. Queda solo un registro estadístico sin datos personales, y te llega la
+      constancia de la supresión con fecha y hora.
+      <div class="hint" style="margin-top:8px">Puedes pedir que se borre antes, cuando quieras y
+      sin dar explicaciones, respondiendo cualquiera de nuestros correos con la palabra
+      «revoco».</div>
+    </div>
+  </div>
+
+  <div id="error" class="card" hidden>
+    <div class="err" id="errorTxt"></div>
+  </div>
+
+  <p class="foot">Demo del Claude Impact Lab · Longevidad 2026 — Equipo LOS INMORTALES.<br>
+  Datos 100% sintéticos.</p>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const RE_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+const ETIQUETAS = {
+  pendiente_datos: "Falta completar tus datos",
+  en_gestion:      "En gestión con los centros",
+  correo_creado:   "Casilla activa, esperando respuestas",
+  error_correo:    "Con un problema: lo estamos revisando",
+};
+
+function fallar(msg){
+  $("#cargando").hidden = true;
+  $("#error").hidden = false;
+  $("#errorTxt").textContent = msg;
+}
+
+// Días que faltan para la supresión. El servidor entrega la fecha en hora de Chile.
+function diasHasta(fechaTexto){
+  const f = new Date(fechaTexto.replace(" ", "T"));
+  if(isNaN(f)) return null;
+  return {fecha: f, dias: Math.max(0, Math.ceil((f - new Date()) / 86400000))};
+}
+
+const params = new URLSearchParams(location.search);
+const id = params.get("id") || "";
+
+// La clave puede venir en el enlace (?c=) solo para la comodidad de la demo; si no viene,
+// se pide. En el correo van las dos cosas por separado, que es el punto del candado.
+async function abrirCaso(clave){
+  const r = await fetch("/api/casilla", {method:"POST",
+    headers:{"content-type":"application/json"},
+    body: JSON.stringify({accion:"estado", guid:id, clave})});
+  if(r.status === 401) return {error:"clave"};
+  const d = await r.json().catch(()=>null);
+  if(!r.ok || !d || !d.guid) return {error:"otro"};
+  return {datos:d};
+}
+
+function pedirClave(){
+  $("#cargando").hidden = true;
+  $("#pedirClave").hidden = false;
+  const input = $("#clave");
+  input.focus();
+  const intentar = async () => {
+    const clave = input.value.trim().toUpperCase();
+    if(clave.length < 8){ $("#errClave").textContent = "Escribe la clave completa."; return; }
+    $("#btnAbrir").disabled = true; $("#errClave").textContent = "";
+    const res = await abrirCaso(clave);
+    $("#btnAbrir").disabled = false;
+    if(res.error === "clave"){ $("#errClave").textContent = "Esa clave no corresponde a este caso."; return; }
+    if(res.error){ return fallar("No pudimos abrir este caso. Puede que ya se haya suprimido por "+
+      "cumplirse el plazo, o que el enlace no corresponda a un caso vigente."); }
+    $("#pedirClave").hidden = true;
+    mostrar(res.datos);
+  };
+  $("#btnAbrir").addEventListener("click", intentar);
+  input.addEventListener("keydown", e=>{ if(e.key === "Enter") intentar(); });
+}
+
+function mostrar(datos){
+  $("#fGuid").textContent = datos.guid.slice(0, 8) + "…";
+  $("#fCasilla").textContent = datos.direccion || "—";
+  const etiqueta = ETIQUETAS[datos.status] || datos.status || "En curso";
+  $("#fEstado").textContent = etiqueta;
+  $("#estadoTxt").textContent = etiqueta;
+
+  if(datos.expires_at){
+    const v = diasHasta(datos.expires_at);
+    if(v){
+      $("#fVence").textContent = v.fecha.toLocaleDateString("es-CL",
+        {day:"numeric", month:"long", year:"numeric"});
+      $("#cuenta").textContent = v.dias === 0 ? "Se suprime hoy"
+        : v.dias === 1 ? "Queda 1 día" : `Quedan ${v.dias} días`;
+    }
+  }else{
+    $("#fVence").textContent = "la fecha que consta en tu mandato";
+    $("#cuenta").textContent = "";
+  }
+
+  // La Carpeta nunca se guarda en el servidor: vive donde se armó, que es el navegador de
+  // la persona. Si este es ese dispositivo, la recuperamos; si no, se dice con claridad.
+  try{
+    const guardada = localStorage.getItem("carpeta:" + datos.guid);
+    const originales = localStorage.getItem("originales:" + datos.guid);
+    const abrir = html => {
+      const w = window.open("", "_blank");
+      if(w){ w.document.open(); w.document.write(html); w.document.close(); return; }
+      const url = URL.createObjectURL(new Blob([html], {type:"text/html;charset=utf-8"}));
+      const a = document.createElement("a");
+      a.href = url; a.download = "Carpeta-de-Salud.html";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url), 4000);
+    };
+    if(guardada){
+      $("#btnDescargar").disabled = false;
+      $("#btnDescargar").addEventListener("click", ()=>abrir(guardada));
+    }
+    if(originales){
+      $("#btnOriginales").disabled = false;
+      $("#btnOriginales").addEventListener("click", ()=>abrir(originales));
+    }
+  }catch{ /* sin localStorage disponible: los botones quedan deshabilitados */ }
+
+  $("#cargando").hidden = true;
+  $("#contenido").hidden = false;
+}
+
+(async () => {
+  if(!RE_UUID.test(id)){
+    return fallar("Este enlace no es válido. Revisa que lo hayas copiado completo desde el correo.");
+  }
+  // Si la clave viene en el enlace se prueba de una; si no, se pide.
+  const claveEnlace = (params.get("c") || "").trim().toUpperCase();
+  if(claveEnlace){
+    const res = await abrirCaso(claveEnlace);
+    if(res.datos) return mostrar(res.datos);
+    if(res.error !== "clave"){
+      return fallar("No pudimos abrir este caso. Puede que ya se haya suprimido por cumplirse "+
+        "el plazo, o que el enlace no corresponda a un caso vigente.");
+    }
+  }
+  pedirClave();
+})();
+</script>
+</body>
+</html>

@@ -57,6 +57,34 @@ function tokenValido(email, codigo, token) {
   return a.length === b.length && crypto.timingSafeEqual(a, b);
 }
 
+// ---------- clave del caso ----------
+//
+// El enlace por sí solo no abre el caso: hace falta además la clave que va en el mismo
+// correo. Protege contra el enlace que se reenvía sin querer, que queda en el historial
+// del navegador o en un log. (Si se filtra el correo entero se filtran los dos: es un
+// candado más, no un segundo factor.)
+//
+// La clave se DERIVA del identificador con el secreto del servidor, así que no se guarda
+// en ninguna parte y el servidor puede recalcularla cuando la necesite.
+const ALFABETO_CLAVE = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // sin I, O, 0, 1: se confunden al leer
+
+function claveCaso(guid) {
+  const secreto = secretoFirma();
+  if (!secreto) return null;
+  const h = crypto.createHmac("sha256", secreto).update("caso:" + guid.toLowerCase()).digest();
+  let clave = "";
+  for (let i = 0; i < 8; i++) clave += ALFABETO_CLAVE[h[i] % ALFABETO_CLAVE.length];
+  return clave.slice(0, 4) + "-" + clave.slice(4);   // ABCD-EFGH, más fácil de dictar
+}
+
+function claveValida(guid, clave) {
+  const esperada = claveCaso(guid);
+  if (!esperada || typeof clave !== "string") return false;
+  const a = Buffer.from(esperada);
+  const b = Buffer.from(clave.trim().toUpperCase());
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
 const RE_EMAIL = /^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/;
 const RE_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const RE_CODIGO = /^\d{6}$/;
@@ -235,9 +263,14 @@ export default async function handler(req, res) {
   }
 
   if (accion === "estado") {
-    const { guid } = req.body || {};
+    const { guid, clave } = req.body || {};
     if (typeof guid !== "string" || !RE_UUID.test(guid)) {
       return res.status(400).json({ error: "guid no válido." });
+    }
+    // El enlace por sí solo no basta: hay que traer también la clave del correo. Sin esto,
+    // cualquiera con el identificador vería el caso y la clave no protegería nada.
+    if (!claveValida(guid, clave)) {
+      return res.status(401).json({ error: "La clave no corresponde a este caso." });
     }
     const controlador = new AbortController();
     const corte = setTimeout(() => controlador.abort(), 20000);
@@ -333,5 +366,7 @@ export default async function handler(req, res) {
     return res.status(502).json({ error: "El servicio de casillas no devolvió una dirección.", fallback: true });
   }
 
-  return res.status(200).json({ guid, direccion, status });
+  // La clave viaja al navegador de la propia persona para que pueda incluirla en el correo
+  // que se manda a sí misma. No se guarda en ningún lado: se deriva del guid cuando hace falta.
+  return res.status(200).json({ guid, direccion, status, clave: claveCaso(guid) });
 }
