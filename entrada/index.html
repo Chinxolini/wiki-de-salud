@@ -139,6 +139,9 @@
     text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
   td{padding:8px 6px;border-bottom:1px solid var(--line)}
   .foot{color:var(--muted);font-size:.78rem;text-align:center;margin-top:22px;line-height:1.65}
+  .sello{color:var(--muted);font-size:.72rem;text-align:center;opacity:.55;margin:34px 0 18px;
+    font-variant-numeric:tabular-nums;letter-spacing:.02em}
+  .sello .viejo{color:#c2703a;opacity:1}
 
   dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);
     max-width:640px;width:calc(100% - 32px);padding:0;box-shadow:0 24px 70px rgba(0,0,0,.3)}
@@ -467,6 +470,13 @@
     custodiar y borrar sin razón.</p>
   </div>
 </dialog>
+
+<!-- Sello de version. El texto fijo lo escribe tools/sellar_version.py al desplegar;
+     el commit vivo lo pregunta a /api/version, para saber si lo que esta arriba es
+     efectivamente esta version y no un despliegue anterior. -->
+<p class="sello" id="sello">
+  <span id="selloFecha">versión 2026-08-05 22:44</span><span id="selloSha"></span>
+</p>
 
 <script>
 // Catalogo de prestadores. El canal (formulario web / presencial) vive en
@@ -966,6 +976,27 @@ proviene de uno de estos documentos: siempre puedes contrastarlo.</p>
 demostración. Generado el ${new Date().toLocaleDateString("es-CL")}.</p>
 </body></html>`), Object.keys(originales).length * 400 + 200);
 });
+
+// ---------- sello de version ----------
+// El sello fijo dice cuando se desplego esta version; /api/version dice que commit
+// esta sirviendo el despliegue vivo. Si el navegador tiene cacheada una copia vieja,
+// el commit no calza con el sellado, y eso se avisa en vez de disimularlo.
+(async () => {
+  const SHA_SELLADO = "PENDIENTE";
+  try{
+    const r = await fetch("/api/version", {cache:"no-store"});
+    if(!r.ok) return;
+    const v = await r.json();
+    const el = $("#selloSha");
+    if(v.entorno === "local"){ el.textContent = " · local"; return; }
+    if(!v.sha_corto) return;
+    el.textContent = " · " + v.sha_corto;
+    if(SHA_SELLADO !== "PENDIENTE" && !v.sha.startsWith(SHA_SELLADO)){
+      el.insertAdjacentHTML("beforeend",
+        ' <span class="viejo">(esta página quedó cacheada: recarga con Ctrl+F5)</span>');
+    }
+  }catch{ /* sin red: el sello fijo basta */ }
+})();
 </script>
 </body>
 </html>
